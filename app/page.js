@@ -415,13 +415,13 @@ export default function Home() {
           </div>
 
           {/* LEGENDA CATEGORIE CON SOLI ACCENTI DI COLORE */}
-          <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2 max-w-4xl mx-auto">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar sm:flex-wrap sm:justify-center max-w-4xl mx-auto pb-1 px-1">
             {Object.entries(CATEGORIES).map(([key, cat]) => (
               <div
                 key={key}
-                className={`flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded text-[10px] sm:text-[11px] font-medium border bg-[#0e111a] border-[#1e2638] ${cat.text}`}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] sm:text-[11px] font-medium border bg-[#0e111a] border-[#1e2638] whitespace-nowrap shrink-0 ${cat.text}`}
               >
-                <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${cat.dot}`}></span>
+                <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${cat.dot} shrink-0`}></span>
                 <span>{cat.label}</span>
               </div>
             ))}

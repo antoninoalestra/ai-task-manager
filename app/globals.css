@@ -252,3 +252,12 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3) !important;
 }
+
+/* Utility No-Scrollbar per Selettori Orizzontali Touch */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
