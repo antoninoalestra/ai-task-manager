@@ -527,7 +527,6 @@ export default function Home() {
           setSelectedTaskToEdit(null);
           setIsMainModalOpen(true);
         }}
-        onFocusVoiceInput={handleFocusVoiceInput}
         todoCount={todos.length}
       />
 

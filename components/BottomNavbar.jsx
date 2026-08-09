@@ -5,13 +5,12 @@ export default function BottomNavbar({
   activeTab,
   setActiveTab,
   onOpenNewTaskModal,
-  onFocusVoiceInput,
   todoCount = 0,
 }) {
   return (
     <nav className="fixed bottom-0 inset-x-0 z-40 bg-[#0d1017]/95 border-t border-[#1e2638] backdrop-blur-lg sm:hidden pb-safe">
-      <div className="flex items-center justify-around h-16 px-2">
-        {/* Tab Calendario */}
+      <div className="flex items-center justify-around h-16 px-4">
+        {/* Tab Calendario (Sinistra) */}
         <button
           type="button"
           onClick={() => setActiveTab('calendar')}
@@ -28,7 +27,22 @@ export default function BottomNavbar({
           <span className="text-[10px]">Calendario</span>
         </button>
 
-        {/* Tab Lista To-Do */}
+        {/* Tab + Nuovo Evento (CENTRO - In Risalto) */}
+        <button
+          type="button"
+          onClick={onOpenNewTaskModal}
+          className="flex flex-col items-center justify-center flex-1 h-full gap-1 text-white font-bold transition-all -mt-3"
+        >
+          <div className="w-11 h-11 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform border-2 border-[#0d1017]">
+            <svg className="w-6 h-6 stroke-current" viewBox="0 0 24 24" fill="none">
+              <line x1="12" y1="5" x2="12" y2="19" strokeWidth="2.5" strokeLinecap="round"/>
+              <line x1="5" y1="12" x2="19" y2="12" strokeWidth="2.5" strokeLinecap="round"/>
+            </svg>
+          </div>
+          <span className="text-[9px] text-slate-300 font-semibold">Nuovo</span>
+        </button>
+
+        {/* Tab Lista To-Do (Destra) */}
         <button
           type="button"
           onClick={() => setActiveTab('todos')}
@@ -46,40 +60,10 @@ export default function BottomNavbar({
           </svg>
           <span className="text-[10px]">To-Do</span>
           {todoCount > 0 && (
-            <span className="absolute top-2 right-5 px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-white text-slate-950">
+            <span className="absolute top-2 right-4 px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-white text-slate-950">
               {todoCount}
             </span>
           )}
-        </button>
-
-        {/* Tab Assistente Vocale */}
-        <button
-          type="button"
-          onClick={onFocusVoiceInput}
-          className="flex flex-col items-center justify-center flex-1 h-full gap-1 text-slate-400 hover:text-white transition-all"
-        >
-          <svg className="w-5 h-5 stroke-current" viewBox="0 0 24 24" fill="none">
-            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" strokeWidth="2"/>
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2" strokeWidth="2"/>
-            <line x1="12" y1="19" x2="12" y2="23" strokeWidth="2"/>
-            <line x1="8" y1="23" x2="16" y2="23" strokeWidth="2"/>
-          </svg>
-          <span className="text-[10px]">Voce AI</span>
-        </button>
-
-        {/* Tab + Nuovo Evento */}
-        <button
-          type="button"
-          onClick={onOpenNewTaskModal}
-          className="flex flex-col items-center justify-center flex-1 h-full gap-1 text-white font-bold transition-all"
-        >
-          <div className="w-8 h-8 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-md">
-            <svg className="w-5 h-5 stroke-current" viewBox="0 0 24 24" fill="none">
-              <line x1="12" y1="5" x2="12" y2="19" strokeWidth="2.5" strokeLinecap="round"/>
-              <line x1="5" y1="12" x2="19" y2="12" strokeWidth="2.5" strokeLinecap="round"/>
-            </svg>
-          </div>
-          <span className="text-[9px] text-slate-300">Nuovo</span>
         </button>
       </div>
     </nav>
