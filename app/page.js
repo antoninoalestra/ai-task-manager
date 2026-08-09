@@ -302,38 +302,22 @@ export default function Home() {
     <main className="min-h-screen bg-[#0b0d14] text-slate-100 p-2.5 sm:p-6 pb-20 sm:pb-6 font-sans selection:bg-slate-800">
       {/* PROFESSIONAL MINIMAL CONTAINER */}
       <div className="max-w-7xl mx-auto bg-[#111520] rounded-2xl border border-[#1e2638] shadow-2xl overflow-hidden min-h-[90vh]">
-        {/* BARRA SUPERIORE MINIMALE */}
-        <header className="px-4 sm:px-6 py-3.5 border-b border-[#1e2638] bg-[#0b0d14] flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center justify-between w-full sm:w-auto gap-3">
-            <div className="flex items-center gap-2">
-              <h1 className="text-xs sm:text-base font-bold text-white tracking-wider uppercase flex items-center gap-2">
-                <span>Calendario AI & Task</span>
-              </h1>
-              <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded bg-[#181e2b] text-slate-400 border border-[#273146] font-medium capitalize">
-                {currentDateFormatted}
-              </span>
+        {/* BARRA SUPERIORE MINIMALE ED ELEGANTE */}
+        <header className="px-4 sm:px-6 py-3 border-b border-[#1e2638] bg-[#0b0d14] flex items-center justify-between gap-3">
+          {/* LOGO MINIMAL & SELETTORE VISTE (DESKTOP) */}
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-white text-slate-950 flex items-center justify-center font-bold text-xs shadow-sm shrink-0">
+              <svg className="w-4.5 h-4.5 stroke-current" viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="4" width="18" height="18" rx="2" strokeWidth="2"/>
+                <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2"/>
+                <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2"/>
+                <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2"/>
+              </svg>
             </div>
 
-            {/* SEZIONE PROFILO MOBILE */}
-            <div className="sm:hidden flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#181e2b] border border-[#273146] text-[10px] text-slate-300 hover:text-white"
-              >
-                <span className="w-4 h-4 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-[9px] uppercase">
-                  {currentUser.username?.[0] || 'U'}
-                </span>
-                <span className="truncate max-w-[80px] font-medium">{currentUser.username}</span>
-                <span className="text-[9px] text-slate-400">Esci</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-            {/* SELETTORE VISTE DESKTOP MONOCHROME */}
             <div className="hidden sm:flex items-center p-1 rounded-lg bg-[#0e111a] border border-[#1e2638]">
               <button
+                type="button"
                 onClick={() => setActiveTab('calendar')}
                 className={`px-3 py-1.5 rounded text-xs font-medium transition-all flex items-center gap-1.5 ${
                   activeTab === 'calendar'
@@ -350,6 +334,7 @@ export default function Home() {
                 <span>Calendario & Eventi</span>
               </button>
               <button
+                type="button"
                 onClick={() => setActiveTab('todos')}
                 className={`px-3 py-1.5 rounded text-xs font-medium transition-all flex items-center gap-1.5 ${
                   activeTab === 'todos'
@@ -368,42 +353,46 @@ export default function Home() {
                 <span>Lista To-Do ({todos.length})</span>
               </button>
             </div>
+          </div>
 
-            {/* SEZIONE PROFILO UTENTE DESKTOP */}
-            <div className="hidden sm:flex items-center gap-3">
-              <div className="flex items-center gap-2 pl-3 border-l border-[#1e2638]">
-                <div className="w-7 h-7 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs uppercase shadow-sm shrink-0">
+          {/* SEZIONE ACCOUNT SEMPLIFICATA (MOBILE & DESKTOP) */}
+          <div className="flex items-center gap-2.5">
+            {currentUser && (
+              <div className="flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-xl bg-[#0e111a] border border-[#1e2638]">
+                <div className="w-6 h-6 rounded-lg bg-blue-600 text-white font-bold flex items-center justify-center text-xs uppercase shadow-xs shrink-0">
                   {currentUser.username?.[0] || 'U'}
-                </div>
-                <div className="flex flex-col text-left">
-                  <span className="text-xs font-semibold text-white leading-tight">{currentUser.username}</span>
-                  <span className="text-[9px] text-slate-400 font-mono truncate max-w-[120px]">{currentUser.email}</span>
                 </div>
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="ml-2 px-3 py-1.5 rounded-lg bg-[#181e2b] hover:bg-red-950/40 text-slate-300 hover:text-red-300 border border-[#273146] hover:border-red-800 text-xs font-medium transition-all inline-flex items-center justify-center whitespace-nowrap shrink-0"
+                  className="text-xs text-slate-300 hover:text-red-400 font-medium transition-colors flex items-center gap-1.5 px-1"
+                  title="Esci dal profilo"
                 >
-                  Esci
+                  <span>Esci</span>
+                  <svg className="w-3.5 h-3.5 stroke-current text-slate-400 hover:text-red-400" viewBox="0 0 24 24" fill="none">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" strokeWidth="2" strokeLinecap="round"/>
+                    <polyline points="16 17 21 12 16 7" strokeWidth="2" strokeLinecap="round"/>
+                    <line x1="21" y1="12" x2="9" y2="12" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
                 </button>
               </div>
+            )}
 
-              {/* PULSANTE CREAZIONE MANUALE DESKTOP */}
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedTaskToEdit(null);
-                  setIsMainModalOpen(true);
-                }}
-                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-white text-slate-950 font-semibold hover:bg-slate-200 text-xs whitespace-nowrap transition-all shadow-sm shrink-0"
-              >
-                <svg className="w-4 h-4 stroke-current shrink-0" viewBox="0 0 24 24" fill="none">
-                  <line x1="12" y1="5" x2="12" y2="19" strokeWidth="2" strokeLinecap="round"/>
-                  <line x1="5" y1="12" x2="19" y2="12" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-                <span>Nuovo Evento</span>
-              </button>
-            </div>
+            {/* PULSANTE CREAZIONE MANUALE DESKTOP */}
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedTaskToEdit(null);
+                setIsMainModalOpen(true);
+              }}
+              className="hidden sm:inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-white text-slate-950 font-semibold hover:bg-slate-200 text-xs whitespace-nowrap transition-all shadow-sm shrink-0"
+            >
+              <svg className="w-4 h-4 stroke-current shrink-0" viewBox="0 0 24 24" fill="none">
+                <line x1="12" y1="5" x2="12" y2="19" strokeWidth="2" strokeLinecap="round"/>
+                <line x1="5" y1="12" x2="19" y2="12" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              <span>Nuovo Evento</span>
+            </button>
           </div>
         </header>
 
