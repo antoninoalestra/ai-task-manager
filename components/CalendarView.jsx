@@ -484,14 +484,14 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
 
             {/* BARRA EVENTI DEL GIORNO (TUTTO IL GIORNO) APPLE STYLE */}
             {showAllDayBar && (
-              <div className="mb-4 p-3.5 bg-[#0e121b] border border-white/10 rounded-xl space-y-2.5">
-                <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                  <div className="flex items-center gap-2">
+              <div className="mb-4 p-3.5 bg-[#0e121b] border border-[#1e2638] rounded-xl space-y-3 shadow-md">
+                <div className="flex items-center justify-between border-b border-[#1e2638] pb-2.5">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wider">
                       Eventi Tutto il Giorno
                     </span>
-                    <span className="px-2 py-0.5 rounded text-[10px] bg-[#161c28] text-slate-400 border border-white/10 font-medium">
-                      {completedDayTasksCount}/{dayTasks.length} completati
+                    <span className="px-2 py-0.5 rounded-full text-[10px] bg-[#161c28] text-slate-300 border border-[#273146] font-semibold">
+                      {dayTasks.length} impegni {completedDayTasksCount > 0 ? `(${completedDayTasksCount} completati)` : ''}
                     </span>
                   </div>
 
@@ -499,20 +499,27 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
                     <button
                       type="button"
                       onClick={() => handleAddNewItem(new Date().toISOString().split('T')[0])}
-                      className="text-[10px] text-slate-300 hover:text-white bg-[#161c28] hover:bg-[#202838] px-2.5 py-1 rounded-md border border-white/10 transition-all flex items-center gap-1 font-medium"
+                      className="text-xs text-white bg-[#181e2b] hover:bg-[#222a3c] px-3 py-1.5 rounded-lg border border-[#273146] transition-all flex items-center gap-1.5 font-medium shadow-xs"
                     >
-                      <svg className="w-3 h-3 stroke-current" viewBox="0 0 24 24" fill="none">
+                      <svg className="w-3.5 h-3.5 stroke-current text-slate-300" viewBox="0 0 24 24" fill="none">
                         <line x1="12" y1="5" x2="12" y2="19" strokeWidth="2" strokeLinecap="round"/>
                         <line x1="5" y1="12" x2="19" y2="12" strokeWidth="2" strokeLinecap="round"/>
                       </svg>
-                      <span>+ Aggiungi</span>
+                      <span>Aggiungi Evento</span>
                     </button>
                   </div>
                 </div>
 
                 {dayTasks.length === 0 ? (
-                  <div className="py-3 text-center text-slate-500 text-xs italic">
-                    Nessun evento senza orario programmato. Clicca "+ Aggiungi" per crearne uno.
+                  <div className="py-2.5 px-3.5 text-slate-400 text-xs flex items-center justify-between bg-[#111520] border border-[#1e2638] rounded-lg">
+                    <span>Nessun evento tutto il giorno in programma.</span>
+                    <button
+                      type="button"
+                      onClick={() => handleAddNewItem(new Date().toISOString().split('T')[0])}
+                      className="text-[11px] text-slate-300 hover:text-white font-medium underline underline-offset-2"
+                    >
+                      + Crea Evento
+                    </button>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-[140px] overflow-y-auto pr-1">
