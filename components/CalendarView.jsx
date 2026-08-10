@@ -381,8 +381,24 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
 
   const allCalendarEvents = useMemo(() => {
     return items
-      .filter((i) => i && i.type === 'event' && i.start_time)
+      .filter((i) => i && (i.type === 'event' || i.type === 'day_task') && i.start_time)
       .map((item) => {
+        const catKey = item.category || 'generico';
+
+        // Gli eventi tutto il giorno (day_task) usano il formato data YYYY-MM-DD per apparire sotto il numero del giorno
+        if (item.type === 'day_task') {
+          const dateStr = getLocalDateString(item.start_time);
+          if (!dateStr) return null;
+          return {
+            id: String(item.id),
+            title: item.title,
+            start: dateStr,
+            end: dateStr,
+            calendarId: catKey,
+          };
+        }
+
+        // Gli eventi orari usano la data/ora precisa
         const startTemporal = toScheduleXDate(item.start_time);
         if (!startTemporal) return null;
 
@@ -398,8 +414,6 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
         if (!endTemporal) {
           endTemporal = startTemporal;
         }
-
-        const catKey = item.category || 'generico';
 
         return {
           id: String(item.id),
