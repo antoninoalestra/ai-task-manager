@@ -9,6 +9,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
   const [description, setDescription] = useState('');
   const [type, setType] = useState('day_task'); // 'event' | 'day_task' | 'todo'
   const [category, setCategory] = useState('generico');
+  const [urgencyBand, setUrgencyBand] = useState('oggi'); // 'oggi' | 'settimana' | 'piu_avanti'
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('09:00');
   const [endTime, setEndTime] = useState('10:00');
@@ -21,6 +22,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
       setDescription(taskToEdit.description || '');
       setType(taskToEdit.type || 'day_task');
       setCategory(taskToEdit.category || 'generico');
+      setUrgencyBand(taskToEdit.urgency_band || 'oggi');
       
       if (taskToEdit.start_time) {
         const d = new Date(taskToEdit.start_time);
@@ -51,6 +53,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
       setDescription('');
       setType('day_task');
       setCategory('generico');
+      setUrgencyBand('oggi');
       setDate(initialDate || new Date().toISOString().split('T')[0]);
       setStartTime('09:00');
       setEndTime('10:00');
@@ -95,6 +98,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
         description: description.trim() || null,
         type,
         category,
+        urgency_band: urgencyBand,
         start_time: finalStartTime,
         end_time: finalEndTime,
       };
@@ -279,6 +283,48 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
                 </div>
               </>
             )}
+          </div>
+
+          {/* PRIORITÀ / URGENZA */}
+          <div>
+            <label className="block mb-1 font-medium text-slate-300 uppercase tracking-wider text-[10px]">
+              Priorità / Urgenza
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => setUrgencyBand('oggi')}
+                className={`py-2 px-3 rounded-lg border font-medium text-[11px] transition-all flex items-center justify-center gap-1.5 ${
+                  urgencyBand === 'oggi'
+                    ? 'bg-amber-950/80 text-amber-300 border-amber-600 font-semibold shadow-sm'
+                    : 'bg-[#0e111a] text-slate-400 border-[#1e2638] hover:border-slate-500'
+                }`}
+              >
+                <span>⚡ Oggi</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setUrgencyBand('settimana')}
+                className={`py-2 px-3 rounded-lg border font-medium text-[11px] transition-all flex items-center justify-center gap-1.5 ${
+                  urgencyBand === 'settimana'
+                    ? 'bg-blue-950/80 text-blue-300 border-blue-600 font-semibold shadow-sm'
+                    : 'bg-[#0e111a] text-slate-400 border-[#1e2638] hover:border-slate-500'
+                }`}
+              >
+                <span>📅 Settimana</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setUrgencyBand('piu_avanti')}
+                className={`py-2 px-3 rounded-lg border font-medium text-[11px] transition-all flex items-center justify-center gap-1.5 ${
+                  urgencyBand === 'piu_avanti'
+                    ? 'bg-slate-800 text-slate-200 border-slate-600 font-semibold shadow-sm'
+                    : 'bg-[#0e111a] text-slate-400 border-[#1e2638] hover:border-slate-500'
+                }`}
+              >
+                <span>⏳ Futuro</span>
+              </button>
+            </div>
           </div>
 
           {/* Date & Orari */}
