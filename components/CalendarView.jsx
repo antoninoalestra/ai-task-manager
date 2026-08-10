@@ -392,7 +392,7 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
 
   const allCalendarEvents = useMemo(() => {
     return items
-      .filter((i) => i && (i.type === 'event' || i.type === 'day_task') && i.start_time)
+      .filter((i) => i && i.type === 'event' && i.start_time)
       .map((item) => {
         const startTemporal = toScheduleXDate(item.start_time);
         if (!startTemporal) return null;
