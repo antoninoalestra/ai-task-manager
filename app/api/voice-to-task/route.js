@@ -1,15 +1,14 @@
 // app/api/voice-to-task/route.js
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { saveTaskOrEvent, saveMemoryLog } from '@/lib/store';
-import { getAuthenticatedUser } from '@/lib/auth';
+import { saveTaskOrEvent, saveMemoryLog, getEventsAndTasks } from '@/lib/store';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const DEFAULT_USER_ID = 'default';
 
 export async function POST(request) {
   try {
-    const user = await getAuthenticatedUser(request);
-    const userId = user?.id || 'default_user';
+    const userId = DEFAULT_USER_ID;
     const { text } = await request.json();
 
     if (!text || text.trim() === '') {

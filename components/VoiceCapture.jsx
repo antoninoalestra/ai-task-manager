@@ -58,15 +58,9 @@ export default function VoiceCapture({ onTaskCreated }) {
     if (!text || !text.trim()) return;
     setIsProcessing(true);
     try {
-      const savedSessionId = typeof window !== 'undefined' ? localStorage.getItem('app_session_id') : null;
-      const headers = { 'Content-Type': 'application/json' };
-      if (savedSessionId) {
-        headers['x-session-id'] = savedSessionId;
-      }
-
       const response = await fetch('/api/voice-to-task', {
         method: 'POST',
-        headers,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text }),
       });
 
