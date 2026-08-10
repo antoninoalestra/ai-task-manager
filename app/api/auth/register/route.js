@@ -46,9 +46,8 @@ export async function POST(request) {
       email: newUser.email,
     };
 
-    await setSessionCookie(userPayload);
-
-    return NextResponse.json({ user: userPayload }, { status: 201 });
+    const sessionId = await setSessionCookie(userPayload);
+    return NextResponse.json({ user: userPayload, sessionId }, { status: 201 });
   } catch (error) {
     console.error('Errore registrazione:', error);
     return NextResponse.json({ error: error.message || 'Errore durante la registrazione' }, { status: 500 });

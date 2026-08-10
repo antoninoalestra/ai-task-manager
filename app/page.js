@@ -25,9 +25,22 @@ export default function Home() {
   const [authError, setAuthError] = useState('');
   const [isSubmittingAuth, setIsSubmittingAuth] = useState(false);
 
+  const getAuthHeaders = (extraHeaders = {}) => {
+    const headers = { ...extraHeaders };
+    if (typeof window !== 'undefined') {
+      const savedSessionId = localStorage.getItem('app_session_id');
+      if (savedSessionId) {
+        headers['x-session-id'] = savedSessionId;
+      }
+    }
+    return headers;
+  };
+
   const checkUser = async () => {
     try {
-      const res = await fetch('/api/auth/me');
+      const res = await fetch('/api/auth/me', {
+        headers: getAuthHeaders(),
+      });
       if (res.ok) {
         const data = await res.json();
         setCurrentUser(data.user || null);
@@ -41,7 +54,9 @@ export default function Home() {
 
   const fetchItems = async () => {
     try {
-      const res = await fetch('/api/tasks');
+      const res = await fetch('/api/tasks', {
+        headers: getAuthHeaders(),
+      });
       if (res.ok) {
         const data = await res.json();
         setItems(data);
@@ -78,6 +93,10 @@ export default function Home() {
         throw new Error(data.error || 'Autenticazione fallita');
       }
 
+      if (data.sessionId && typeof window !== 'undefined') {
+        localStorage.setItem('app_session_id', data.sessionId);
+      }
+
       if (data.user) {
         setCurrentUser(data.user);
         fetchItems();
@@ -91,7 +110,13 @@ export default function Home() {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('app_session_id');
+      }
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+      });
       setCurrentUser(null);
       setItems([]);
     } catch (err) {
@@ -107,7 +132,7 @@ export default function Home() {
     try {
       await fetch('/api/tasks', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ id, is_completed: !currentStatus }),
       });
     } catch (err) {
@@ -123,7 +148,7 @@ export default function Home() {
     try {
       const res = await fetch('/api/tasks', {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(taskPayload),
       });
 
@@ -142,6 +167,7 @@ export default function Home() {
     try {
       const res = await fetch(`/api/tasks?id=${id}`, {
         method: 'DELETE',
+        headers: getAuthHeaders(),
       });
 
       if (res.ok) {

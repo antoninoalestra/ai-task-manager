@@ -12,8 +12,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Calendario AI - Apple Calendar Style",
+  title: "AI Task Manager",
   description: "Gestione intelligente di impegni, eventi e task vocali in stile Apple Calendar",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "AI Task Manager",
+  },
 };
 
 export default function RootLayout({ children }) {
