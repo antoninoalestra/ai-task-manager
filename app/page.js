@@ -10,6 +10,7 @@ import { CATEGORIES, getCategoryConfig } from '@/lib/categories';
 
 export default function Home() {
   const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('calendar'); // 'calendar' | 'todos'
   const [isMainModalOpen, setIsMainModalOpen] = useState(false);
   const [selectedTaskToEdit, setSelectedTaskToEdit] = useState(null);
@@ -24,6 +25,8 @@ export default function Home() {
       }
     } catch (err) {
       console.error('Errore caricamento:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -31,26 +34,43 @@ export default function Home() {
     fetchItems();
   }, []);
 
+  // Aggiornamento Ottimistico ISTANTANEO (0ms) per la spunta dei task
   const toggleComplete = async (id, currentStatus) => {
+    const nextStatus = !currentStatus;
     setItems((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, is_completed: !currentStatus } : t))
+      prev.map((t) => (t.id === id ? { ...t, is_completed: nextStatus } : t))
     );
 
     try {
       await fetch('/api/tasks', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, is_completed: !currentStatus }),
+        body: JSON.stringify({ id, is_completed: nextStatus }),
       });
     } catch (err) {
       console.error('Errore aggiornamento:', err);
-      fetchItems();
+      fetchItems(); // Ripristina dati originali in caso di errore di rete
     }
   };
 
+  // Aggiornamento Ottimistico ISTANTANEO (0ms) per creazione e modifica
   const handleSaveTask = async (taskPayload) => {
     const isEdit = !!taskPayload.id;
     const method = isEdit ? 'PUT' : 'POST';
+
+    // Aggiornamento istantaneo UI locale
+    if (isEdit) {
+      setItems((prev) => prev.map((t) => (t.id === taskPayload.id ? { ...t, ...taskPayload } : t)));
+    } else {
+      const tempId = `temp-${Date.now()}`;
+      const tempTask = {
+        id: tempId,
+        is_completed: false,
+        created_at: new Date().toISOString(),
+        ...taskPayload,
+      };
+      setItems((prev) => [tempTask, ...prev]);
+    }
 
     try {
       const res = await fetch('/api/tasks', {
@@ -64,26 +84,31 @@ export default function Home() {
       } else {
         const errorData = await res.json();
         alert(`Errore: ${errorData.error || 'Operazione fallita'}`);
+        fetchItems();
       }
     } catch (err) {
       console.error('Errore salvataggio:', err);
+      fetchItems();
     }
   };
 
+  // Aggiornamento Ottimistico ISTANTANEO (0ms) per eliminazione
   const handleDeleteTask = async (id) => {
+    setItems((prev) => prev.filter((t) => t.id !== id));
+
     try {
       const res = await fetch(`/api/tasks?id=${id}`, {
         method: 'DELETE',
       });
 
-      if (res.ok) {
-        await fetchItems();
-      } else {
+      if (!res.ok) {
         const errorData = await res.json();
         alert(`Errore: ${errorData.error || 'Eliminazione fallita'}`);
+        fetchItems();
       }
     } catch (err) {
       console.error('Errore eliminazione:', err);
+      fetchItems();
     }
   };
 

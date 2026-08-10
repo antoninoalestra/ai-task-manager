@@ -226,11 +226,19 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
               }
             }
 
+            const urgencyBadge = item.urgency_band === 'in_ritardo'
+              ? { label: '🔥 Scaduto', bg: 'bg-red-950/80 text-red-300 border-red-800' }
+              : item.urgency_band === 'oggi'
+              ? { label: '⚡ Oggi', bg: 'bg-amber-950/80 text-amber-300 border-amber-800' }
+              : item.urgency_band === 'settimana'
+              ? { label: '📅 Settimana', bg: 'bg-blue-950/80 text-blue-300 border-blue-800' }
+              : { label: '⏳ Futuro', bg: 'bg-slate-900 text-slate-400 border-slate-700' };
+
             return (
               <div
                 key={item.id}
                 className={`p-3.5 rounded-xl border transition-all ${cat.bg} ${cat.border} ${
-                  item.is_completed ? 'opacity-40' : 'shadow-md hover:border-slate-400'
+                  item.is_completed ? 'opacity-40' : 'shadow-md hover:border-slate-400 hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]'
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -260,6 +268,9 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
                           isEvent ? 'bg-blue-950 text-blue-300 border border-blue-800' : 'bg-slate-900 text-slate-300 border border-slate-700'
                         }`}>
                           {timeString}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-semibold border ${urgencyBadge.bg}`}>
+                          {urgencyBadge.label}
                         </span>
                         <div className="flex items-center gap-1">
                           <span className={`w-2 h-2 rounded-full ${cat.dot}`}></span>

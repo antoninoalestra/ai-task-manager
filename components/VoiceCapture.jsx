@@ -101,7 +101,7 @@ export default function VoiceCapture({ onTaskCreated }) {
           type="button"
           className={`w-11 h-11 shrink-0 rounded-lg flex items-center justify-center transition-all ${
             isListening
-              ? 'bg-red-600 text-white animate-pulse'
+              ? 'bg-red-600 text-white animate-pulse shadow-[0_0_25px_rgba(239,68,68,0.6)] border border-red-400 scale-105'
               : isProcessing
               ? 'bg-[#181e2b] text-slate-500 border border-[#273146] cursor-not-allowed'
               : 'bg-[#181e2b] hover:bg-[#273146] border border-[#273146] text-white'
