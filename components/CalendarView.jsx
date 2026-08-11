@@ -44,6 +44,21 @@ function getLocalDateString(input) {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+function toScheduleXPlainDate(input) {
+  const d = parseToDateObject(input);
+  if (!d) return null;
+
+  try {
+    const yyyy = String(d.getFullYear()).padStart(4, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+
+    return Temporal.PlainDate.from(`${yyyy}-${mm}-${dd}`);
+  } catch {
+    return null;
+  }
+}
+
 function toScheduleXDate(input) {
   const d = parseToDateObject(input);
   if (!d) return null;
@@ -385,15 +400,15 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
       .map((item) => {
         const catKey = item.category || 'generico';
 
-        // Gli eventi tutto il giorno (day_task) usano il formato data YYYY-MM-DD per apparire sotto il numero del giorno
+        // Gli eventi tutto il giorno (day_task) usano Temporal.PlainDate per apparire sotto il numero del giorno
         if (item.type === 'day_task') {
-          const dateStr = getLocalDateString(item.start_time);
-          if (!dateStr) return null;
+          const plainDate = toScheduleXPlainDate(item.start_time);
+          if (!plainDate) return null;
           return {
             id: String(item.id),
             title: item.title,
-            start: dateStr,
-            end: dateStr,
+            start: plainDate,
+            end: plainDate,
             calendarId: catKey,
           };
         }
