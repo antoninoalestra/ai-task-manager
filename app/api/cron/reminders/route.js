@@ -1,63 +1,69 @@
 // app/api/cron/reminders/route.js
 import { NextResponse } from 'next/server';
 import { getEventsAndTasks } from '@/lib/store';
-import { sendEmailReminder, build30MinEventEmail, buildDailyDigestEmail } from '@/lib/email';
+import { sendEmailReminder, buildDailyDigestEmail } from '@/lib/email';
 
-export async function GET() {
+export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const forceTrigger = searchParams.get('force') === 'true';
+
     const allItems = await getEventsAndTasks();
     const now = new Date();
-    const nowMs = now.getTime();
 
-    const dispatchedReminders = [];
-
-    // 1. CONTROLLO PROMEMORIA 30 MINUTI PRIMA DEGLI EVENTI
-    // Filtra eventi con start_time compreso tra 20 minuti e 40 minuti da adesso
-    const minTimeWindow = nowMs + 20 * 60 * 1000;
-    const maxTimeWindow = nowMs + 40 * 60 * 1000;
-
-    const upcoming30MinEvents = allItems.filter((item) => {
-      if (item.type !== 'event' || !item.start_time || item.is_completed) return false;
-      const startTime = new Date(item.start_time).getTime();
-      return startTime >= minTimeWindow && startTime <= maxTimeWindow;
+    const romeTimeString = now.toLocaleTimeString('it-IT', {
+      timeZone: 'Europe/Rome',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
     });
-
-    for (const event of upcoming30MinEvents) {
-      const emailPayload = build30MinEventEmail(event);
-      await sendEmailReminder(emailPayload);
-      dispatchedReminders.push({ type: '30min_event', title: event.title });
-    }
-
-    // 2. CONTROLLO RIEPILOGO MATTUTINO (ORE 08:00 EUROPE/ROME)
-    const romeTimeString = now.toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit', hour12: false });
     const [romeHour, romeMin] = romeTimeString.split(':').map(Number);
 
-    let sentMorningDigest = false;
+    // Esegui se è la finestra delle 08:00 AM (08:00 - 08:59) oppure se la chiamata ha ?force=true
+    const isMorningWindow = forceTrigger || (romeHour === 8);
 
-    // Se siamo nella finestra di controllo delle 08:00 (es. tra le 08:00 e le 08:15)
-    if (romeHour === 8 && romeMin < 15) {
-      const todayLocalDateString = now.toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' }); // YYYY-MM-DD
-      const todayTasks = allItems.filter((item) => {
-        if (!item.start_time || item.is_completed) return false;
-        const itemDateStr = new Date(item.start_time).toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' });
-        return itemDateStr === todayLocalDateString;
+    if (!isMorningWindow) {
+      return NextResponse.json({
+        success: true,
+        executed: false,
+        message: `La rotta cron viene eseguita alle 08:00. Ora locale Roma: ${romeTimeString}. Usa ?force=true per testare.`,
+        romeTime: romeTimeString,
       });
-
-      const emailPayload = buildDailyDigestEmail(todayTasks);
-      await sendEmailReminder(emailPayload);
-      sentMorningDigest = true;
     }
 
+    // 1. Data odierna nel fuso orario di Roma (YYYY-MM-DD)
+    const todayLocalDateString = now.toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' });
+
+    // 2. Impegni programmati per oggi e non completati
+    const todayTasks = allItems.filter((item) => {
+      if (item.is_completed || !item.start_time) return false;
+      const itemDateStr = new Date(item.start_time).toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' });
+      return itemDateStr === todayLocalDateString;
+    });
+
+    // 3. Cose da fare generali senza orario specifico (senza start_time o con type 'todo' e start_time nullo) non completate
+    const unscheduledTasks = allItems.filter((item) => {
+      if (item.is_completed) return false;
+      return !item.start_time;
+    });
+
+    // 4. Costruzione ed invio email
+    const emailPayload = buildDailyDigestEmail({ todayTasks, unscheduledTasks });
+    const sendResult = await sendEmailReminder(emailPayload);
+
     return NextResponse.json({
-      success: true,
+      success: sendResult.success,
+      executed: true,
       timestamp: now.toISOString(),
       romeTime: romeTimeString,
-      dispatchedRemindersCount: dispatchedReminders.length,
-      dispatchedReminders,
-      sentMorningDigest,
+      todayTasksCount: todayTasks.length,
+      unscheduledTasksCount: unscheduledTasks.length,
+      totalCount: todayTasks.length + unscheduledTasks.length,
+      sendResult,
     });
   } catch (error) {
     console.error('Errore esecuzione Cron Reminders:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
