@@ -3,12 +3,8 @@ import { NextResponse } from 'next/server';
 import { getEventsAndTasks } from '@/lib/store';
 import { sendEmailReminder, buildDailyDigestEmail } from '@/lib/email';
 
-export async function GET(request) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    const forceTrigger = searchParams.get('force') === 'true';
-
-    const allItems = await getEventsAndTasks();
     const now = new Date();
 
     const romeTimeString = now.toLocaleTimeString('it-IT', {
@@ -17,16 +13,14 @@ export async function GET(request) {
       minute: '2-digit',
       hour12: false,
     });
-    const [romeHour, romeMin] = romeTimeString.split(':').map(Number);
+    const [romeHour] = romeTimeString.split(':').map(Number);
 
-    // Esegui se è la finestra delle 08:00 AM (08:00 - 08:59) oppure se la chiamata ha ?force=true
-    const isMorningWindow = forceTrigger || (romeHour === 8);
-
-    if (!isMorningWindow) {
+    // Esegui SOLO se ci troviamo nella finestra delle 08:00 AM (08:00 - 08:59 Europe/Rome)
+    if (romeHour !== 8) {
       return NextResponse.json({
         success: true,
         executed: false,
-        message: `La rotta cron viene eseguita alle 08:00. Ora locale Roma: ${romeTimeString}. Usa ?force=true per testare.`,
+        message: `La rotta cron è attiva esclusivamente alle ore 08:00 AM. Ora locale Roma: ${romeTimeString}.`,
         romeTime: romeTimeString,
       });
     }
@@ -35,13 +29,14 @@ export async function GET(request) {
     const todayLocalDateString = now.toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' });
 
     // 2. Impegni programmati per oggi e non completati
+    const allItems = await getEventsAndTasks();
     const todayTasks = allItems.filter((item) => {
       if (item.is_completed || !item.start_time) return false;
       const itemDateStr = new Date(item.start_time).toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' });
       return itemDateStr === todayLocalDateString;
     });
 
-    // 3. Cose da fare generali senza orario specifico (senza start_time o con type 'todo' e start_time nullo) non completate
+    // 3. Cose da fare generali senza orario specifico non completate
     const unscheduledTasks = allItems.filter((item) => {
       if (item.is_completed) return false;
       return !item.start_time;
@@ -66,4 +61,5 @@ export async function GET(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
 
