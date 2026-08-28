@@ -391,7 +391,32 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
   }, []);
 
   const dayTasks = useMemo(() => {
-    return items.filter((i) => i && i.type === 'day_task');
+    const todayStr = getLocalDateString(new Date());
+
+    // 1. Gruppo A: Tutti gli eventi "tutto il giorno" di OGGI (sia completati che non)
+    const todayTasks = items.filter((i) => {
+      if (!i || i.type !== 'day_task' || !i.start_time) return false;
+      return getLocalDateString(i.start_time) === todayStr;
+    });
+
+    // Ordinamento di oggi: prima i non completati, poi i completati
+    todayTasks.sort((a, b) => Number(a.is_completed) - Number(b.is_completed));
+
+    // 2. Gruppo B: Eventi "tutto il giorno" di ALTRI GIORNI che sono GIA COMPLETATI
+    const pastCompletedTasks = items
+      .filter((i) => {
+        if (!i || i.type !== 'day_task' || !i.start_time) return false;
+        const itemDate = getLocalDateString(i.start_time);
+        return itemDate !== todayStr && i.is_completed;
+      })
+      .sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
+
+    // 3. Quota: se oggi ce ne sono meno di 4, integra con i completati passati fino a 4 totali
+    const remainingQuota = Math.max(0, 4 - todayTasks.length);
+    const pastFillers = pastCompletedTasks.slice(0, remainingQuota);
+
+    // Unione: tutti quelli di oggi + eventuali completati passati fino a 4 totali
+    return [...todayTasks, ...pastFillers];
   }, [items]);
 
   const allCalendarEvents = useMemo(() => {
