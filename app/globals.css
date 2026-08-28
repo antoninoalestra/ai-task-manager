@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --canvas: #16181d;
-  --surface-subtle: #1d2026;
-  --surface: #232730;
-  --surface-elevated: #2a2f3a;
-  --input-bg: #191c22;
-  --border-default: rgba(255, 255, 255, 0.08);
-  --border-subtle: rgba(255, 255, 255, 0.04);
-  --accent-indigo: #6366f1;
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
+  --canvas: #f1f3f7;
+  --surface-subtle: #f8fafc;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --input-bg: #f1f5f9;
+  --border-default: #e2e8f0;
+  --border-subtle: #f1f5f9;
+  --accent-indigo: #4f46e5;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
   --text-tertiary: #64748b;
-  --text-muted: #475569;
+  --text-muted: #94a3b8;
 }
 
 @theme inline {
@@ -26,8 +26,8 @@
 }
 
 body {
-  background-color: #16181d;
-  color: #f1f5f9;
+  background-color: #f1f3f7;
+  color: #0f172a;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", var(--font-geist-sans), system-ui, sans-serif;
   letter-spacing: -0.015em;
   -webkit-font-smoothing: antialiased;
@@ -72,11 +72,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.12);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.22);
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -87,49 +87,50 @@ body {
   scrollbar-width: none !important;
 }
 
-/* Schedule-X Soft Dark Theme (Notion / Raycast Style) */
+/* Schedule-X Light Soft Theme (Fix per il blocco scuro nello screenshot) */
 .sx-react-calendar-wrapper {
   font-family: inherit !important;
   width: 100%;
 }
 
 .sx__calendar {
-  --sx-color-background: #1d2026 !important;
-  --sx-color-on-background: #f1f5f9 !important;
-  --sx-color-surface: #232730 !important;
-  --sx-color-on-surface: #94a3b8 !important;
-  --sx-color-primary: #6366f1 !important;
-  --sx-color-primary-container: rgba(99, 102, 241, 0.15) !important;
-  --sx-color-on-primary-container: #a5b4fc !important;
-  --sx-color-neutral-variant: #262a34 !important;
-  --sx-color-border: rgba(255, 255, 255, 0.08) !important;
+  --sx-color-background: #ffffff !important;
+  --sx-color-on-background: #0f172a !important;
+  --sx-color-surface: #ffffff !important;
+  --sx-color-on-surface: #475569 !important;
+  --sx-color-primary: #4f46e5 !important;
+  --sx-color-primary-container: #eef2ff !important;
+  --sx-color-on-primary-container: #4338ca !important;
+  --sx-color-neutral-variant: #f8fafc !important;
+  --sx-color-border: #e2e8f0 !important;
   --sx-font-family: inherit !important;
   border-radius: 1rem !important;
   overflow: hidden !important;
-  background-color: #1d2026 !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  color: #f1f5f9 !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05) !important;
 }
 
 .sx__header {
-  background: #16181d !important;
+  background: #f8fafc !important;
   padding: 0.85rem !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-bottom: 1px solid #e2e8f0 !important;
 }
 
 .sx__range-heading {
-  font-weight: 600 !important;
+  font-weight: 700 !important;
   font-size: 0.95rem !important;
-  color: #f1f5f9 !important;
+  color: #0f172a !important;
   letter-spacing: -0.01em !important;
 }
 
 .sx__today-button, .sx__forward-back-button {
-  background: #232730 !important;
-  color: #94a3b8 !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: #ffffff !important;
+  color: #475569 !important;
+  border: 1px solid #e2e8f0 !important;
   border-radius: 0.5rem !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
   font-size: 0.8rem !important;
   transition: all 0.15s ease !important;
   display: inline-flex !important;
@@ -138,12 +139,13 @@ body {
   min-width: 2.2rem !important;
   min-height: 2.2rem !important;
   outline: none !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
 }
 
 .sx__today-button:hover, .sx__forward-back-button:hover {
-  background: #2a2f3a !important;
-  border-color: rgba(255, 255, 255, 0.18) !important;
-  color: #f1f5f9 !important;
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
 }
 
 .sx__chevron-wrapper,
@@ -153,9 +155,9 @@ body {
   background-color: transparent !important;
   background: none !important;
   box-shadow: none !important;
-  fill: #94a3b8 !important;
-  stroke: #94a3b8 !important;
-  color: #94a3b8 !important;
+  fill: #475569 !important;
+  stroke: #475569 !important;
+  color: #475569 !important;
   opacity: 1 !important;
   width: 1.05rem !important;
   height: 1.05rem !important;
@@ -166,42 +168,43 @@ body {
 .sx__view-selection-select,
 .sx__date-picker-input {
   border-radius: 0.5rem !important;
-  font-weight: 500 !important;
-  color: #94a3b8 !important;
-  background-color: #191c22 !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  font-weight: 600 !important;
+  color: #475569 !important;
+  background-color: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
   font-size: 0.8rem !important;
 }
 
 .sx__view-selection-item--active {
   background: #4f46e5 !important;
   color: #ffffff !important;
-  font-weight: 600 !important;
-  border-color: #6366f1 !important;
+  font-weight: 700 !important;
+  border-color: #4f46e5 !important;
+  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.25) !important;
 }
 
-/* Griglia Oraria Sub-Pixel Soft Dark */
+/* Griglia Oraria Sub-Pixel Light Soft */
 .sx__week-grid, .sx__month-grid, .sx__time-grid {
-  background-color: #1d2026 !important;
+  background-color: #ffffff !important;
 }
 
 .sx__week-grid *, .sx__time-grid *, .sx__month-grid * {
-  border-color: rgba(255, 255, 255, 0.04) !important;
+  border-color: #f1f5f9 !important;
 }
 
 .sx__header-day-name, .sx__header-date {
-  color: #94a3b8 !important;
-  font-weight: 500 !important;
+  color: #64748b !important;
+  font-weight: 600 !important;
 }
 
 /* Colonna del giorno corrente evidenziata soft */
 .sx__header-day.sx__is-today {
-  background-color: rgba(99, 102, 241, 0.12) !important;
+  background-color: rgba(238, 242, 255, 0.7) !important;
 }
 
 .sx__header-day.sx__is-today .sx__header-day-name {
-  color: #818cf8 !important;
-  font-weight: 600 !important;
+  color: #4f46e5 !important;
+  font-weight: 700 !important;
 }
 
 .sx__header-day.sx__is-today .sx__header-date {
@@ -215,31 +218,31 @@ body {
   align-items: center !important;
   justify-content: center !important;
   margin: 0 auto !important;
-  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.3) !important;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3) !important;
 }
 
 /* Indicatore Orario Corrente (Current Time Line) */
 .sx__current-time-indicator {
-  background-color: #6366f1 !important;
+  background-color: #4f46e5 !important;
   height: 1px !important;
 }
 .sx__current-time-indicator::before {
-  background-color: #6366f1 !important;
+  background-color: #4f46e5 !important;
   width: 6px !important;
   height: 6px !important;
   border-radius: 9999px !important;
   box-shadow: none !important;
 }
 
-/* FIX LAYOUT ED AUTO-HEIGHT PER GLI EVENTI ALL-DAY (DATE GRID) */
+/* FIX DEFINITIVO PER LA SEZIONE ALL-DAY (DATE GRID): ELIMINATO IL BLOCCO SCURO */
 .sx__week-grid-all-day,
 .sx__all-day-events-wrapper,
 .sx__week-grid-all-day-days,
 .sx__date-grid,
 .sx__date-grid-cell,
 .sx__date-grid-events {
-  background-color: #16181d !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background-color: #f8fafc !important;
+  border-bottom: 1px solid #e2e8f0 !important;
   height: auto !important;
   min-height: 48px !important;
   max-height: none !important;
@@ -252,6 +255,8 @@ body {
 .sx__week-grid-all-day-event,
 .sx__event.sx__all-day-event,
 .sx__date-grid-event {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
   border-radius: 6px !important;
   padding: 4px 8px !important;
   font-size: 0.78rem !important;
@@ -260,8 +265,8 @@ body {
   margin-bottom: 2px !important;
   display: flex !important;
   align-items: center !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
   white-space: nowrap !important;
   text-overflow: ellipsis !important;
   overflow: hidden !important;
@@ -271,6 +276,6 @@ body {
   border-radius: 6px !important;
   font-weight: 600 !important;
   padding: 4px 8px !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
 }
