@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import VoiceCapture from '@/components/VoiceCapture';
 import CalendarView from '@/components/CalendarView';
+import BacklogSection from '@/components/BacklogSection';
 import TaskModal from '@/components/TaskModal';
 import BottomNavbar from '@/components/BottomNavbar';
 import { CATEGORIES, getCategoryConfig } from '@/lib/categories';
@@ -19,6 +20,7 @@ import {
   CheckCircle2,
   AlertCircle,
   X,
+  Inbox,
 } from 'lucide-react';
 
 export default function Home() {
@@ -251,22 +253,22 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Lista To-Do Generici nella Sidebar */}
+          {/* Riepilogo Backlog Sidebar */}
           <div className="flex-1 flex flex-col min-h-0 pt-2 border-t border-slate-300">
             <div className="flex items-center justify-between pb-2">
               <h2 className="text-[10px] font-bold text-slate-600 uppercase tracking-widest flex items-center gap-1.5">
-                <CheckSquare className="w-3.5 h-3.5 text-slate-500" />
-                <span>To-Do / Backlog ({todos.length})</span>
+                <Inbox className="w-3.5 h-3.5 text-slate-500" />
+                <span>Backlog ({todos.length})</span>
               </h2>
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-2 pr-1 pt-1">
               {todos.length === 0 ? (
                 <div className="py-8 text-center text-slate-500 text-xs italic font-medium">
-                  Nessuna attività da fare.
+                  Nessuna attività nel backlog.
                 </div>
               ) : (
-                todos.map((todo) => {
+                todos.slice(0, 5).map((todo) => {
                   const cat = getCategoryConfig(todo.category);
                   return (
                     <div
@@ -297,23 +299,8 @@ export default function Home() {
                           >
                             {todo.title}
                           </p>
-                          <div className="flex items-center gap-1 mt-0.5">
-                            <span className={`w-1.5 h-1.5 rounded-full ${cat.dot}`}></span>
-                            <span className={`text-[9px] capitalize font-bold ${cat.text}`}>
-                              {cat.label}
-                            </span>
-                          </div>
                         </div>
                       </div>
-
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteTask(todo.id)}
-                        className="text-slate-500 hover:text-rose-700 p-1 transition-colors opacity-0 group-hover:opacity-100"
-                        title="Elimina"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
                     </div>
                   );
                 })
@@ -322,7 +309,7 @@ export default function Home() {
           </div>
         </aside>
 
-        {/* AREA CENTRALE MAIN (CALENDARIO, SPOTLIGHT COMMAND BAR, MOBILE VIEWS) */}
+        {/* AREA CENTRALE MAIN (CALENDARIO, BACKLOG DEDICATO DESKTOP, INPUT VOCALE) */}
         <section className="lg:col-span-9 flex flex-col space-y-5">
           
           {/* HEADER MOBILE (< 1024px) */}
@@ -358,7 +345,7 @@ export default function Home() {
                 }`}
               >
                 <CheckSquare className="w-3.5 h-3.5" />
-                <span>To-Do ({todos.length})</span>
+                <span>Backlog ({todos.length})</span>
               </button>
             </div>
           </header>
@@ -400,96 +387,45 @@ export default function Home() {
 
           {/* VISTE PRINCIPALI */}
           {activeTab === 'calendar' ? (
-            <section className="flex-1">
+            <section className="flex-1 space-y-5">
+              {/* VISTA CALENDARIO TIMELINE */}
               <CalendarView
                 items={filteredItems}
                 onToggleComplete={toggleComplete}
                 onSaveTask={handleSaveTask}
                 onDeleteTask={handleDeleteTask}
               />
+
+              {/* SEZIONE DEDICATA AL BACKLOG & ATTIVITÀ IN SOSPESO (DESKTOP) */}
+              <BacklogSection
+                items={items}
+                onToggleComplete={toggleComplete}
+                onEditTask={(task) => {
+                  setSelectedTaskToEdit(task);
+                  setIsMainModalOpen(true);
+                }}
+                onDeleteTask={handleDeleteTask}
+                onAddNewBacklogTask={() => {
+                  setSelectedTaskToEdit(null);
+                  setIsMainModalOpen(true);
+                }}
+              />
             </section>
           ) : (
-            <section className="bg-[#f4f6f8] border border-slate-300 rounded-2xl p-4 sm:p-6 shadow-xs space-y-4 max-w-4xl mx-auto flex-1 w-full">
-              <div className="flex items-center justify-between border-b border-slate-300 pb-3">
-                <div className="flex items-center gap-2">
-                  <CheckSquare className="w-4 h-4 text-indigo-700" />
-                  <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                    Attività Generiche / To-Do ({todos.length})
-                  </h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedTaskToEdit(null);
-                    setIsMainModalOpen(true);
-                  }}
-                  className="px-3 py-1.5 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold transition-all flex items-center gap-1 shadow-md shadow-indigo-700/20 active:scale-95 touch-manipulation"
-                >
-                  <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-                  <span>Nuova Attività</span>
-                </button>
-              </div>
-
-              {todos.length === 0 ? (
-                <div className="py-16 text-center text-slate-500 text-xs italic space-y-2 font-medium">
-                  <CheckSquare className="w-8 h-8 mx-auto text-slate-400 stroke-[1.5]" />
-                  <p>Nessuna attività to-do in sospeso.</p>
-                </div>
-              ) : (
-                <div className="space-y-2.5">
-                  {todos.map((todo) => {
-                    const cat = getCategoryConfig(todo.category);
-                    return (
-                      <div
-                        key={todo.id}
-                        className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all ${cat.bg} ${cat.border} ${
-                          todo.is_completed ? 'opacity-40' : 'hover:shadow-xs'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <button
-                            type="button"
-                            onClick={() => toggleComplete(todo.id, todo.is_completed)}
-                            aria-label="Segna completato"
-                            className={`min-w-[36px] min-h-[36px] w-9 h-9 rounded-xl border flex items-center justify-center transition-all shrink-0 active:scale-95 touch-manipulation ${
-                              todo.is_completed
-                                ? 'bg-indigo-700 border-indigo-700 text-white'
-                                : 'border-slate-400 hover:border-slate-600 bg-white'
-                            }`}
-                          >
-                            {todo.is_completed && <Check className="w-4 h-4 stroke-[3]" />}
-                          </button>
-
-                          <div className="min-w-0 flex-1">
-                            <p
-                              className={`font-bold text-xs truncate ${
-                                todo.is_completed ? 'line-through text-slate-500' : 'text-slate-900'
-                              }`}
-                            >
-                              {todo.title}
-                            </p>
-                            <div className="flex items-center gap-1.5 mt-0.5">
-                              <span className={`w-1.5 h-1.5 rounded-full ${cat.dot}`}></span>
-                              <span className={`text-[9px] capitalize font-bold ${cat.text}`}>
-                                {cat.label}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteTask(todo.id)}
-                          className="min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-500 hover:text-rose-700 transition-colors active:scale-95 touch-manipulation"
-                          title="Elimina attività"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+            <section className="flex-1">
+              <BacklogSection
+                items={items}
+                onToggleComplete={toggleComplete}
+                onEditTask={(task) => {
+                  setSelectedTaskToEdit(task);
+                  setIsMainModalOpen(true);
+                }}
+                onDeleteTask={handleDeleteTask}
+                onAddNewBacklogTask={() => {
+                  setSelectedTaskToEdit(null);
+                  setIsMainModalOpen(true);
+                }}
+              />
             </section>
           )}
         </section>
