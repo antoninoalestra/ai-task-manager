@@ -7,6 +7,19 @@ import CalendarView from '@/components/CalendarView';
 import TaskModal from '@/components/TaskModal';
 import BottomNavbar from '@/components/BottomNavbar';
 import { CATEGORIES, getCategoryConfig } from '@/lib/categories';
+import {
+  CalendarCheck2,
+  Calendar,
+  CheckSquare,
+  Plus,
+  Trash2,
+  Check,
+  Sparkles,
+  Layers,
+  CheckCircle2,
+  AlertCircle,
+  X,
+} from 'lucide-react';
 
 export default function Home() {
   const [items, setItems] = useState([]);
@@ -14,7 +27,14 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState('calendar'); // 'calendar' | 'todos'
   const [isMainModalOpen, setIsMainModalOpen] = useState(false);
   const [selectedTaskToEdit, setSelectedTaskToEdit] = useState(null);
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('all');
+  const [toast, setToast] = useState(null); // { message, type: 'success'|'error'|'info' }
   const voiceCaptureRef = useRef(null);
+
+  const showToast = (message, type = 'info') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  };
 
   const fetchItems = async () => {
     try {
@@ -25,6 +45,7 @@ export default function Home() {
       }
     } catch (err) {
       console.error('Errore caricamento:', err);
+      showToast('Errore durante il caricamento dei dati', 'error');
     } finally {
       setLoading(false);
     }
@@ -49,7 +70,8 @@ export default function Home() {
       });
     } catch (err) {
       console.error('Errore aggiornamento:', err);
-      fetchItems(); // Ripristina dati originali in caso di errore di rete
+      showToast('Errore di rete nell\'aggiornamento', 'error');
+      fetchItems(); // Ripristina stato server
     }
   };
 
@@ -60,7 +82,9 @@ export default function Home() {
 
     // Aggiornamento istantaneo UI locale
     if (isEdit) {
-      setItems((prev) => prev.map((t) => (t.id === taskPayload.id ? { ...t, ...taskPayload } : t)));
+      setItems((prev) =>
+        prev.map((t) => (t.id === taskPayload.id ? { ...t, ...taskPayload } : t))
+      );
     } else {
       const tempId = `temp-${Date.now()}`;
       const tempTask = {
@@ -80,14 +104,16 @@ export default function Home() {
       });
 
       if (res.ok) {
+        showToast(isEdit ? 'Impegno aggiornato' : 'Impegno creato', 'success');
         await fetchItems();
       } else {
         const errorData = await res.json();
-        alert(`Errore: ${errorData.error || 'Operazione fallita'}`);
+        showToast(`Errore: ${errorData.error || 'Operazione fallita'}`, 'error');
         fetchItems();
       }
     } catch (err) {
       console.error('Errore salvataggio:', err);
+      showToast('Errore durante il salvataggio', 'error');
       fetchItems();
     }
   };
@@ -101,136 +127,143 @@ export default function Home() {
         method: 'DELETE',
       });
 
-      if (!res.ok) {
+      if (res.ok) {
+        showToast('Elemento eliminato', 'info');
+      } else {
         const errorData = await res.json();
-        alert(`Errore: ${errorData.error || 'Eliminazione fallita'}`);
+        showToast(`Errore: ${errorData.error || 'Eliminazione fallita'}`, 'error');
         fetchItems();
       }
     } catch (err) {
       console.error('Errore eliminazione:', err);
+      showToast('Errore durante l\'eliminazione', 'error');
       fetchItems();
     }
   };
 
-  const todos = items.filter((i) => i && (i.type === 'todo' || (!i.type && !i.start_time)));
+  // Filtraggio to-do senza orario
+  const todos = items.filter(
+    (i) =>
+      i &&
+      (i.type === 'todo' || (!i.type && !i.start_time)) &&
+      (selectedCategoryFilter === 'all' || i.category === selectedCategoryFilter)
+  );
+
+  const filteredItems = items.filter(
+    (i) => i && (selectedCategoryFilter === 'all' || i.category === selectedCategoryFilter)
+  );
 
   return (
-    <main className="min-h-screen bg-[#0b0d14] text-slate-100 p-2.5 sm:p-6 pb-20 sm:pb-6 font-sans selection:bg-slate-800">
-      {/* PROFESSIONAL MINIMAL CONTAINER */}
-      <div className="max-w-7xl mx-auto bg-[#111520] rounded-2xl border border-[#1e2638] shadow-2xl overflow-hidden min-h-[90vh]">
-        {/* BARRA SUPERIORE MINIMALE ED ELEGANTE */}
-        <header className="px-4 sm:px-6 py-3 border-b border-[#1e2638] bg-[#0b0d14] flex items-center justify-between gap-3">
-          {/* LOGO MINIMAL & SELETTORE VISTE (DESKTOP) */}
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-white text-slate-950 flex items-center justify-center font-bold text-xs shadow-sm shrink-0">
-              <svg className="w-4.5 h-4.5 stroke-current" viewBox="0 0 24 24" fill="none">
-                <rect x="3" y="4" width="18" height="18" rx="2" strokeWidth="2"/>
-                <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2"/>
-                <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2"/>
-                <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2"/>
-              </svg>
-            </div>
+    <main className="min-h-screen bg-[#090a0f] text-slate-100 p-2 sm:p-4 lg:p-6 pb-24 lg:pb-6 font-sans selection:bg-indigo-900 selection:text-white">
+      {/* TOAST SYSTEM NON-BLOCCANTE */}
+      {toast && (
+        <div className="fixed top-4 right-4 z-[10000] flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-[#131722] border border-white/15 shadow-2xl text-xs font-semibold animate-slide-up-sheet text-white">
+          {toast.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
+          {toast.type === 'error' && <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />}
+          {toast.type === 'info' && <Sparkles className="w-4 h-4 text-indigo-400 shrink-0" />}
+          <span>{toast.message}</span>
+          <button
+            onClick={() => setToast(null)}
+            className="ml-2 text-slate-400 hover:text-white"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
-            <div className="hidden sm:flex items-center p-1 rounded-lg bg-[#0e111a] border border-[#1e2638]">
-              <button
-                type="button"
-                onClick={() => setActiveTab('calendar')}
-                className={`px-3 py-1.5 rounded text-xs font-medium transition-all flex items-center gap-1.5 ${
-                  activeTab === 'calendar'
-                    ? 'bg-white text-slate-950 shadow-sm font-semibold'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <svg className="w-3.5 h-3.5 stroke-current" viewBox="0 0 24 24" fill="none">
-                  <rect x="3" y="4" width="18" height="18" rx="2" strokeWidth="2"/>
-                  <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2"/>
-                  <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2"/>
-                  <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2"/>
-                </svg>
-                <span>Calendario & Eventi</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('todos')}
-                className={`px-3 py-1.5 rounded text-xs font-medium transition-all flex items-center gap-1.5 ${
-                  activeTab === 'todos'
-                    ? 'bg-white text-slate-950 shadow-sm font-semibold'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                <svg className="w-3.5 h-3.5 stroke-current" viewBox="0 0 24 24" fill="none">
-                  <line x1="8" y1="6" x2="21" y2="6" strokeWidth="2"/>
-                  <line x1="8" y1="12" x2="21" y2="12" strokeWidth="2"/>
-                  <line x1="8" y1="18" x2="21" y2="18" strokeWidth="2"/>
-                  <line x1="3" y1="6" x2="3.01" y2="6" strokeWidth="3"/>
-                  <line x1="3" y1="12" x2="3.01" y2="12" strokeWidth="3"/>
-                  <line x1="3" y1="18" x2="3.01" y2="18" strokeWidth="3"/>
-                </svg>
-                <span>Lista To-Do ({todos.length})</span>
-              </button>
+      {/* WORKSPACE PRINCIPALE CON SPLIT-PANE DESKTOP */}
+      <div className="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 min-h-[92vh]">
+        
+        {/* SIDEBAR SINISTRA DESKTOP (PANNELLO INBOX / TO-DO & CATEGORIE) */}
+        <aside className="hidden lg:flex lg:col-span-3 flex-col bg-[#131722] border border-white/10 rounded-2xl p-5 shadow-2xl space-y-6">
+          {/* Header Brand */}
+          <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-lg shadow-indigo-600/30">
+                <CalendarCheck2 className="w-5 h-5 stroke-[2]" />
+              </div>
+              <div>
+                <h1 className="text-sm font-bold tracking-tight text-white">AI Task Manager</h1>
+                <p className="text-[10px] text-slate-400 font-mono">Personal Workspace</p>
+              </div>
             </div>
           </div>
 
-          {/* PULSANTE CREAZIONE MANUALE DESKTOP */}
-          <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedTaskToEdit(null);
-                setIsMainModalOpen(true);
-              }}
-              className="hidden sm:inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-white text-slate-950 font-semibold hover:bg-slate-200 text-xs whitespace-nowrap transition-all shadow-sm shrink-0"
-            >
-              <svg className="w-4 h-4 stroke-current shrink-0" viewBox="0 0 24 24" fill="none">
-                <line x1="12" y1="5" x2="12" y2="19" strokeWidth="2" strokeLinecap="round"/>
-                <line x1="5" y1="12" x2="19" y2="12" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-              <span>Nuovo Evento</span>
-            </button>
-          </div>
-        </header>
+          {/* Quick CTA */}
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedTaskToEdit(null);
+              setIsMainModalOpen(true);
+            }}
+            className="w-full min-h-[44px] px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 active:scale-95 touch-manipulation"
+          >
+            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <span>Nuovo Impegno</span>
+          </button>
 
-        {/* CORPO APPLICAZIONE */}
-        <div className="p-3 sm:p-6 space-y-5">
-          {/* BARRA ASCOLTO E DIGITAZIONE VOCALE MINIMALE */}
-          <div ref={voiceCaptureRef}>
-            <VoiceCapture onTaskCreated={fetchItems} />
-          </div>
-
-          {/* LEGENDA CATEGORIE CON SOLI ACCENTI DI COLORE */}
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar sm:flex-wrap sm:justify-center max-w-4xl mx-auto pb-1 px-1">
-            {Object.entries(CATEGORIES).map(([key, cat]) => (
-              <div
-                key={key}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] sm:text-[11px] font-medium border bg-[#0e111a] border-[#1e2638] whitespace-nowrap shrink-0 ${cat.text}`}
+          {/* Filtro Categorie */}
+          <div className="space-y-2">
+            <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-slate-500" />
+              <span>Categorie</span>
+            </h2>
+            <div className="space-y-1">
+              <button
+                type="button"
+                onClick={() => setSelectedCategoryFilter('all')}
+                className={`w-full px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-all ${
+                  selectedCategoryFilter === 'all'
+                    ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/40'
+                    : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                }`}
               >
-                <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${cat.dot} shrink-0`}></span>
-                <span>{cat.label}</span>
-              </div>
-            ))}
+                <span>Tutte le Categorie</span>
+                <span className="text-[10px] font-mono bg-white/10 px-2 py-0.5 rounded-full">
+                  {items.length}
+                </span>
+              </button>
+
+              {Object.entries(CATEGORIES).map(([key, cat]) => {
+                const count = items.filter((i) => i && i.category === key).length;
+                const isSelected = selectedCategoryFilter === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setSelectedCategoryFilter(key)}
+                    className={`w-full px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-all ${
+                      isSelected
+                        ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/40'
+                        : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${cat.dot}`}></span>
+                      <span>{cat.label}</span>
+                    </div>
+                    <span className="text-[10px] font-mono bg-white/5 px-2 py-0.5 rounded-full">
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* VISTE PRINCIPALI */}
-          {activeTab === 'calendar' ? (
-            <section>
-              <CalendarView
-                items={items}
-                onToggleComplete={toggleComplete}
-                onSaveTask={handleSaveTask}
-                onDeleteTask={handleDeleteTask}
-              />
-            </section>
-          ) : (
-            <section className="bg-[#111520] border border-[#1e2638] rounded-xl p-4 sm:p-6 shadow-lg max-w-4xl mx-auto space-y-3">
-              <div className="flex items-center justify-between border-b border-[#1e2638] pb-3">
-                <h3 className="text-xs font-semibold text-white uppercase tracking-widest flex items-center gap-2">
-                  <span>Attività Generiche / To-Do ({todos.length})</span>
-                </h3>
-              </div>
+          {/* Lista To-Do Generici nella Sidebar */}
+          <div className="flex-1 flex flex-col min-h-0 pt-2 border-t border-white/10">
+            <div className="flex items-center justify-between pb-2">
+              <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                <CheckSquare className="w-3.5 h-3.5 text-slate-500" />
+                <span>To-Do / Backlog ({todos.length})</span>
+              </h2>
+            </div>
 
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1 pt-1">
               {todos.length === 0 ? (
-                <div className="py-12 text-center text-slate-500 text-xs italic">
-                  Nessuna attività to-do in sospeso. Usa l'input vocale in alto per crearne una.
+                <div className="py-8 text-center text-slate-500 text-xs italic">
+                  Nessuna attività da fare.
                 </div>
               ) : (
                 todos.map((todo) => {
@@ -238,25 +271,22 @@ export default function Home() {
                   return (
                     <div
                       key={todo.id}
-                      className={`flex items-center justify-between p-3 rounded-lg border transition-all ${cat.bg} ${cat.border} ${
-                        todo.is_completed ? 'opacity-40' : 'hover:border-slate-300'
+                      className={`group flex items-center justify-between p-2.5 rounded-xl border transition-all ${cat.bg} ${cat.border} ${
+                        todo.is_completed ? 'opacity-40' : 'hover:border-slate-400 shadow-sm'
                       }`}
                     >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         <button
                           type="button"
                           onClick={() => toggleComplete(todo.id, todo.is_completed)}
-                          className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${
+                          aria-label="Segna completato"
+                          className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all shrink-0 ${
                             todo.is_completed
-                              ? 'bg-white border-white text-slate-950'
-                              : 'border-slate-400 hover:border-white bg-slate-950'
+                              ? 'bg-indigo-600 border-indigo-500 text-white'
+                              : 'border-slate-400 hover:border-white bg-slate-950/60'
                           }`}
                         >
-                          {todo.is_completed && (
-                            <svg className="w-3 h-3 stroke-current" viewBox="0 0 12 10" fill="none">
-                              <path d="M1.5 5L4.5 8L10.5 1.5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                          )}
+                          {todo.is_completed && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                         </button>
 
                         <div className="min-w-0 flex-1">
@@ -267,9 +297,11 @@ export default function Home() {
                           >
                             {todo.title}
                           </p>
-                          <div className="flex items-center gap-2 mt-0.5">
+                          <div className="flex items-center gap-1 mt-0.5">
                             <span className={`w-1.5 h-1.5 rounded-full ${cat.dot}`}></span>
-                            <span className={`text-[9px] capitalize font-medium ${cat.text}`}>{cat.label}</span>
+                            <span className={`text-[9px] capitalize font-medium ${cat.text}`}>
+                              {cat.label}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -277,24 +309,193 @@ export default function Home() {
                       <button
                         type="button"
                         onClick={() => handleDeleteTask(todo.id)}
-                        className="text-slate-500 hover:text-red-400 text-xs px-2 py-1 transition-colors"
-                        title="Elimina attività"
+                        className="text-slate-500 hover:text-red-400 p-1 transition-colors opacity-0 group-hover:opacity-100"
+                        title="Elimina"
                       >
-                        <svg className="w-3.5 h-3.5 stroke-current" viewBox="0 0 24 24" fill="none">
-                          <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" strokeLinecap="round"/>
-                          <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" strokeLinecap="round"/>
-                        </svg>
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   );
                 })
               )}
+            </div>
+          </div>
+        </aside>
+
+        {/* AREA CENTRALE MAIN (CALENDARIO, SPOTLIGHT COMMAND BAR, MOBILE VIEWS) */}
+        <section className="lg:col-span-9 flex flex-col space-y-5">
+          
+          {/* HEADER MOBILE (< 1024px) */}
+          <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-[#131722] border border-white/10 rounded-2xl shadow-xl">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-600/30">
+                <CalendarCheck2 className="w-4 h-4 stroke-[2]" />
+              </div>
+              <span className="text-xs font-bold text-white tracking-tight">AI Task Manager</span>
+            </div>
+
+            {/* Selector Viste Mobile (Agenda / To-Do) */}
+            <div className="flex items-center p-1 rounded-xl bg-[#090a0f] border border-white/10">
+              <button
+                type="button"
+                onClick={() => setActiveTab('calendar')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  activeTab === 'calendar'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                <span>Agenda</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('todos')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  activeTab === 'todos'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <CheckSquare className="w-3.5 h-3.5" />
+                <span>To-Do ({todos.length})</span>
+              </button>
+            </div>
+          </header>
+
+          {/* COMMAND PALETTE / INPUT VOCALE SPOTLIGHT BAR */}
+          <div ref={voiceCaptureRef}>
+            <VoiceCapture onTaskCreated={fetchItems} />
+          </div>
+
+          {/* LEGENDA CATEGORIE MOBILE */}
+          <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 px-1">
+            <button
+              type="button"
+              onClick={() => setSelectedCategoryFilter('all')}
+              className={`px-2.5 py-1 rounded-xl text-[10px] font-bold border whitespace-nowrap shrink-0 transition-all ${
+                selectedCategoryFilter === 'all'
+                  ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm'
+                  : 'bg-[#131722] border-white/10 text-slate-400'
+              }`}
+            >
+              Tutte ({items.length})
+            </button>
+            {Object.entries(CATEGORIES).map(([key, cat]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setSelectedCategoryFilter(key)}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-medium border whitespace-nowrap shrink-0 transition-all ${
+                  selectedCategoryFilter === key
+                    ? 'bg-indigo-600 text-white border-indigo-500 font-bold shadow-sm'
+                    : `bg-[#131722] border-white/10 ${cat.text}`
+                }`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${cat.dot} shrink-0`}></span>
+                <span>{cat.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* VISTE PRINCIPALI */}
+          {activeTab === 'calendar' ? (
+            <section className="flex-1">
+              <CalendarView
+                items={filteredItems}
+                onToggleComplete={toggleComplete}
+                onSaveTask={handleSaveTask}
+                onDeleteTask={handleDeleteTask}
+              />
+            </section>
+          ) : (
+            <section className="bg-[#131722] border border-white/10 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4 max-w-4xl mx-auto flex-1 w-full">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <div className="flex items-center gap-2">
+                  <CheckSquare className="w-4 h-4 text-indigo-400" />
+                  <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                    Attività Generiche / To-Do ({todos.length})
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedTaskToEdit(null);
+                    setIsMainModalOpen(true);
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all flex items-center gap-1 shadow-md shadow-indigo-600/30 active:scale-95 touch-manipulation"
+                >
+                  <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                  <span>Nuova Attività</span>
+                </button>
+              </div>
+
+              {todos.length === 0 ? (
+                <div className="py-16 text-center text-slate-500 text-xs italic space-y-2">
+                  <CheckSquare className="w-8 h-8 mx-auto text-slate-600 stroke-[1.5]" />
+                  <p>Nessuna attività to-do in sospeso.</p>
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  {todos.map((todo) => {
+                    const cat = getCategoryConfig(todo.category);
+                    return (
+                      <div
+                        key={todo.id}
+                        className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all ${cat.bg} ${cat.border} ${
+                          todo.is_completed ? 'opacity-40' : 'hover:border-slate-300 shadow-md'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <button
+                            type="button"
+                            onClick={() => toggleComplete(todo.id, todo.is_completed)}
+                            aria-label="Segna completato"
+                            className={`min-w-[36px] min-h-[36px] w-9 h-9 rounded-xl border flex items-center justify-center transition-all shrink-0 active:scale-95 touch-manipulation ${
+                              todo.is_completed
+                                ? 'bg-indigo-600 border-indigo-500 text-white'
+                                : 'border-slate-400 hover:border-white bg-slate-950/60'
+                            }`}
+                          >
+                            {todo.is_completed && <Check className="w-4 h-4 stroke-[3]" />}
+                          </button>
+
+                          <div className="min-w-0 flex-1">
+                            <p
+                              className={`font-bold text-xs truncate ${
+                                todo.is_completed ? 'line-through text-slate-400' : 'text-white'
+                              }`}
+                            >
+                              {todo.title}
+                            </p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className={`w-1.5 h-1.5 rounded-full ${cat.dot}`}></span>
+                              <span className={`text-[9px] capitalize font-semibold ${cat.text}`}>
+                                {cat.label}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteTask(todo.id)}
+                          className="min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-red-400 transition-colors active:scale-95 touch-manipulation"
+                          title="Elimina attività"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </section>
           )}
-        </div>
+        </section>
       </div>
 
-      {/* BOTTOM NAVBAR FISSA MOBILE */}
+      {/* FLOATING DOCK BAR PER MOBILE (< 1024px) */}
       <BottomNavbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -305,7 +506,7 @@ export default function Home() {
         todoCount={todos.length}
       />
 
-      {/* Modal Principale per Pulsante "+ Nuovo Evento" */}
+      {/* MODAL / BOTTOM SHEET PRINCIPALE */}
       <TaskModal
         isOpen={isMainModalOpen}
         onClose={() => setIsMainModalOpen(false)}

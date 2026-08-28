@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { Mic, MicOff, Send, Sparkles, Loader2 } from 'lucide-react';
 
 export default function VoiceCapture({ onTaskCreated }) {
   const [isListening, setIsListening] = useState(false);
@@ -9,6 +10,7 @@ export default function VoiceCapture({ onTaskCreated }) {
   const [manualText, setManualText] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
   const recognitionRef = useRef(null);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -37,8 +39,20 @@ export default function VoiceCapture({ onTaskCreated }) {
 
       recognitionRef.current = recognition;
     } else {
-      setStatusMessage('Il browser non supporta il riconoscimento vocale diretto.');
+      setStatusMessage('Riconoscimento vocale non supportato da questo browser.');
     }
+  }, []);
+
+  // Shortcut tastiera Cmd+K o Ctrl+K per fare focus immediato sull'input
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const toggleListening = () => {
@@ -92,60 +106,64 @@ export default function VoiceCapture({ onTaskCreated }) {
   };
 
   return (
-    <div className="w-full bg-[#111520] border border-[#1e2638] rounded-xl p-4 shadow-md max-w-2xl mx-auto my-4 text-white">
-      <div className="flex flex-col sm:flex-row items-center gap-3">
-        {/* Pulsante Microfono Minimal Monochrome SVG */}
+    <div className="w-full bg-[#131722] border border-white/10 rounded-2xl p-2.5 sm:p-3 shadow-xl max-w-3xl mx-auto backdrop-blur-md">
+      <form onSubmit={handleManualSubmit} className="flex items-center gap-2">
+        {/* Pulsante Microfono */}
         <button
           onClick={toggleListening}
           disabled={isProcessing}
           type="button"
-          className={`w-11 h-11 shrink-0 rounded-lg flex items-center justify-center transition-all ${
+          aria-label={isListening ? 'Ferma ascolto' : 'Avvia ascolto vocale AI'}
+          className={`flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 shrink-0 rounded-xl transition-all touch-manipulation active:scale-95 ${
             isListening
-              ? 'bg-red-600 text-white animate-pulse shadow-[0_0_25px_rgba(239,68,68,0.6)] border border-red-400 scale-105'
+              ? 'bg-red-600 text-white animate-pulse shadow-lg shadow-red-600/40 border border-red-400'
               : isProcessing
-              ? 'bg-[#181e2b] text-slate-500 border border-[#273146] cursor-not-allowed'
-              : 'bg-[#181e2b] hover:bg-[#273146] border border-[#273146] text-white'
+              ? 'bg-[#1b2130] text-slate-500 border border-white/10 cursor-not-allowed'
+              : 'bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30'
           }`}
           title={isListening ? 'Ferma ascolto' : 'Parla con l\'AI'}
         >
           {isListening ? (
-            <span className="w-3 h-3 bg-white rounded-sm"></span>
+            <MicOff className="w-5 h-5" />
           ) : isProcessing ? (
-            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+            <Loader2 className="w-5 h-5 animate-spin text-indigo-400" />
           ) : (
-            <svg className="w-5 h-5 fill-none stroke-current text-slate-200" viewBox="0 0 24 24">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" strokeWidth="2"/>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2" strokeWidth="2"/>
-              <line x1="12" y1="19" x2="12" y2="23" strokeWidth="2"/>
-              <line x1="8" y1="23" x2="16" y2="23" strokeWidth="2"/>
-            </svg>
+            <Mic className="w-5 h-5" />
           )}
         </button>
 
-        {/* Input Tastiera Integrato Minimalist */}
-        <form onSubmit={handleManualSubmit} className="flex-1 flex items-center gap-2 w-full">
+        {/* Input Testo / Command Bar */}
+        <div className="flex-1 flex items-center bg-[#1b2130] border border-white/10 focus-within:border-indigo-500/80 rounded-xl px-3 min-h-[44px] transition-all">
+          <Sparkles className="w-4 h-4 text-indigo-400 mr-2 shrink-0" />
           <input
+            ref={inputRef}
             type="text"
             value={manualText}
             onChange={(e) => setManualText(e.target.value)}
-            placeholder="Aggiungi impegno a voce o scrivi qui..."
+            placeholder="Chiedi all'AI (es. 'Call alle 15:00', 'Spesa giovedì')..."
             disabled={isProcessing || isListening}
-            className="flex-1 px-3.5 py-2.5 rounded-lg bg-[#0e111a] border border-[#1e2638] text-xs text-white placeholder-slate-500 focus:outline-none focus:border-slate-400 transition-all"
+            className="flex-1 bg-transparent py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none font-sans"
           />
-          <button
-            type="submit"
-            disabled={!manualText.trim() || isProcessing}
-            className="px-4 py-2.5 rounded-lg bg-white text-slate-950 font-semibold disabled:opacity-40 text-xs transition-all hover:bg-slate-200"
-          >
-            Aggiungi
-          </button>
-        </form>
-      </div>
+          <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-white/5 border border-white/10 rounded">
+            ⌘K
+          </kbd>
+        </div>
 
-      {/* Messaggio di Stato */}
+        {/* Pulsante Invio */}
+        <button
+          type="submit"
+          disabled={!manualText.trim() || isProcessing}
+          aria-label="Invia comando AI"
+          className="flex items-center justify-center min-w-[44px] min-h-[44px] px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold disabled:opacity-40 text-xs transition-all shadow-md shadow-indigo-600/30 shrink-0 touch-manipulation active:scale-95"
+        >
+          <Send className="w-4 h-4" />
+        </button>
+      </form>
+
+      {/* Status Badge Line */}
       {statusMessage && (
-        <div className="mt-3 text-[11px] text-slate-300 bg-[#0e111a] border border-[#1e2638] px-3 py-1.5 rounded-md flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+        <div className="mt-2.5 text-[11px] text-slate-300 bg-[#090a0f]/80 border border-white/10 px-3 py-1.5 rounded-lg flex items-center gap-2 animate-fade-in font-mono">
+          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping"></span>
           <span>{statusMessage}</span>
         </div>
       )}
