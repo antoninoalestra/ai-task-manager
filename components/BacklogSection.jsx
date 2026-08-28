@@ -62,11 +62,15 @@ export default function BacklogSection({
   }, [items]);
 
   const handleMouseEnterCard = (e, task) => {
-    setHoveredTask(task);
-    setHoverPos({
-      x: e.clientX,
-      y: e.clientY,
-    });
+    // Il Tooltip di Hover deve attivarsi ESCLUSIVAMENTE su desktop con cursore mouse (pointer: fine)
+    const isDesktopMouse = typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches;
+    if (isDesktopMouse) {
+      setHoveredTask(task);
+      setHoverPos({
+        x: e.clientX,
+        y: e.clientY,
+      });
+    }
   };
 
   return (
@@ -187,7 +191,10 @@ export default function BacklogSection({
                 key={task.id}
                 onMouseEnter={(e) => handleMouseEnterCard(e, task)}
                 onMouseLeave={() => setHoveredTask(null)}
-                onClick={() => onEditTask && onEditTask(task)}
+                onClick={() => {
+                  setHoveredTask(null);
+                  onEditTask && onEditTask(task);
+                }}
                 className={`p-4 rounded-2xl border transition-all flex flex-col justify-between space-y-3 bg-white border-slate-300 shadow-xs hover:shadow-lg hover:border-indigo-500 cursor-pointer group active:scale-[0.99] ${
                   task.is_completed ? 'opacity-50 bg-slate-50' : ''
                 }`}
@@ -220,6 +227,7 @@ export default function BacklogSection({
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
+                          setHoveredTask(null);
                           onEditTask && onEditTask(task);
                         }}
                         className="px-2 py-1 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold text-[11px] transition-colors flex items-center gap-1 cursor-pointer"
@@ -233,6 +241,7 @@ export default function BacklogSection({
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
+                          setHoveredTask(null);
                           onDeleteTask && onDeleteTask(task.id);
                         }}
                         className="p-1 rounded-lg text-slate-400 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
@@ -266,6 +275,7 @@ export default function BacklogSection({
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
+                      setHoveredTask(null);
                       onEditTask && onEditTask(task);
                     }}
                     className="text-[11px] text-indigo-700 hover:text-indigo-900 font-bold transition-all flex items-center gap-1 hover:underline cursor-pointer"
@@ -280,14 +290,14 @@ export default function BacklogSection({
         </div>
       )}
 
-      {/* FLOATING HOVER TOOLTIP CARD ("RESOCONTO EVENTO") */}
+      {/* FLOATING HOVER TOOLTIP CARD ("RESOCONTO EVENTO") - SOLO DESKTOP MOUSE */}
       {hoveredTask && (
         <div
           style={{
             top: Math.min(hoverPos.y + 14, typeof window !== 'undefined' ? window.innerHeight - 240 : hoverPos.y),
             left: Math.min(hoverPos.x + 14, typeof window !== 'undefined' ? window.innerWidth - 340 : hoverPos.x),
           }}
-          className="fixed z-[999999] w-80 bg-white border border-slate-300 rounded-2xl shadow-2xl p-4 space-y-2.5 text-slate-900 animate-fade-in pointer-events-none select-none"
+          className="hidden sm:block fixed z-[999999] w-80 bg-white border border-slate-300 rounded-2xl shadow-2xl p-4 space-y-2.5 text-slate-900 animate-fade-in pointer-events-none select-none"
         >
           {(() => {
             const cat = getCategoryConfig(hoveredTask.category);

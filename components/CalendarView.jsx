@@ -460,6 +460,10 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
   };
 
   const handleCalendarMouseOver = (e) => {
+    // Il Tooltip di Hover deve attivarsi ESCLUSIVAMENTE su desktop con cursore mouse (pointer: fine)
+    const isDesktopMouse = typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches;
+    if (!isDesktopMouse) return;
+
     const eventElem = e.target.closest('.sx__event, .sx__all-day-event, .sx__date-grid-event, .sx__time-grid-event');
     if (eventElem) {
       const textContent = eventElem.textContent || '';
@@ -472,6 +476,9 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
   };
 
   const handleCalendarMouseOut = (e) => {
+    const isDesktopMouse = typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches;
+    if (!isDesktopMouse) return;
+
     const eventElem = e.target.closest('.sx__event, .sx__all-day-event, .sx__date-grid-event, .sx__time-grid-event');
     if (eventElem && !e.relatedTarget?.closest('.sx__event, .sx__all-day-event, .sx__date-grid-event, .sx__time-grid-event')) {
       setHoveredItem(null);
@@ -541,14 +548,14 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
         )}
       </div>
 
-      {/* FLOATING HOVER TOOLTIP CARD PER EVENTI DEL CALENDARIO */}
+      {/* FLOATING HOVER TOOLTIP CARD PER EVENTI DEL CALENDARIO - SOLO DESKTOP MOUSE */}
       {hoveredItem && (
         <div
           style={{
             top: Math.min(hoverPos.y + 14, typeof window !== 'undefined' ? window.innerHeight - 240 : hoverPos.y),
             left: Math.min(hoverPos.x + 14, typeof window !== 'undefined' ? window.innerWidth - 340 : hoverPos.x),
           }}
-          className="fixed z-[99999] w-80 bg-white border border-slate-300 rounded-2xl shadow-2xl p-4 space-y-2.5 text-slate-900 animate-fade-in pointer-events-none"
+          className="hidden sm:block fixed z-[99999] w-80 bg-white border border-slate-300 rounded-2xl shadow-2xl p-4 space-y-2.5 text-slate-900 animate-fade-in pointer-events-none select-none"
         >
           {(() => {
             const cat = getCategoryConfig(hoveredItem.category);
@@ -562,37 +569,37 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
 
             return (
               <>
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                  <div className="flex items-center gap-1.5">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2 pointer-events-none">
+                  <div className="flex items-center gap-1.5 pointer-events-none">
                     <span className={`w-2 h-2 rounded-full ${cat.dot}`}></span>
                     <span className={`text-[10px] font-bold uppercase tracking-wider ${cat.text}`}>
                       {cat.label}
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                  <span className="text-[10px] font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 pointer-events-none">
                     {dateFormatted} · {timeFormatted}
                   </span>
                 </div>
 
-                <div>
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">
+                <div className="pointer-events-none">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5 pointer-events-none">
                     Titolo Impegno
                   </span>
-                  <h4 className="text-xs font-bold leading-snug text-slate-900">{hoveredItem.title}</h4>
+                  <h4 className="text-xs font-bold leading-snug text-slate-900 pointer-events-none">{hoveredItem.title}</h4>
                 </div>
 
-                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1">
-                  <div className="flex items-center gap-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1 pointer-events-none">
+                  <div className="flex items-center gap-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider pointer-events-none">
                     <Info className="w-3 h-3 text-indigo-600" />
                     <span>Resoconto & Dettagli</span>
                   </div>
-                  <p className="text-[11px] text-slate-700 leading-relaxed whitespace-pre-wrap max-h-36 overflow-y-auto">
+                  <p className="text-[11px] text-slate-700 leading-relaxed whitespace-pre-wrap max-h-36 overflow-y-auto pointer-events-none">
                     {hoveredItem.description || 'Nessuna descrizione o resoconto aggiuntivo per questo evento.'}
                   </p>
                 </div>
 
-                <div className="text-[10px] text-indigo-700 font-bold flex items-center justify-between pt-1 border-t border-slate-100">
-                  <span className="flex items-center gap-1">
+                <div className="text-[10px] text-indigo-700 font-bold flex items-center justify-between pt-1 border-t border-slate-100 pointer-events-none">
+                  <span className="flex items-center gap-1 pointer-events-none">
                     <Sparkles className="w-3 h-3 text-indigo-600" />
                     <span>Clicca sull'evento per modificarne i dettagli</span>
                   </span>
