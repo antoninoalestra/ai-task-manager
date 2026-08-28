@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --canvas: #f1f3f7;
-  --surface-subtle: #f8fafc;
-  --surface: #ffffff;
+  --canvas: #e8ecef;
+  --surface-subtle: #e1e6eb;
+  --surface: #f4f6f8;
   --surface-elevated: #ffffff;
-  --input-bg: #f1f5f9;
-  --border-default: #e2e8f0;
-  --border-subtle: #f1f5f9;
-  --accent-indigo: #4f46e5;
+  --input-bg: #e5e9ee;
+  --border-default: #cbd5e1;
+  --border-subtle: #e2e8f0;
+  --accent-indigo: #4338ca;
   --text-primary: #0f172a;
-  --text-secondary: #475569;
+  --text-secondary: #334155;
   --text-tertiary: #64748b;
   --text-muted: #94a3b8;
 }
@@ -26,7 +26,7 @@
 }
 
 body {
-  background-color: #f1f3f7;
+  background-color: #e8ecef;
   color: #0f172a;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", var(--font-geist-sans), system-ui, sans-serif;
   letter-spacing: -0.015em;
@@ -72,11 +72,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.12);
+  background: rgba(0, 0, 0, 0.15);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.22);
+  background: rgba(0, 0, 0, 0.25);
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -87,35 +87,35 @@ body {
   scrollbar-width: none !important;
 }
 
-/* Schedule-X Light Soft Theme (Fix per il blocco scuro nello screenshot) */
+/* Schedule-X Soft Slate-Sand Theme */
 .sx-react-calendar-wrapper {
   font-family: inherit !important;
   width: 100%;
 }
 
 .sx__calendar {
-  --sx-color-background: #ffffff !important;
+  --sx-color-background: #f4f6f8 !important;
   --sx-color-on-background: #0f172a !important;
   --sx-color-surface: #ffffff !important;
-  --sx-color-on-surface: #475569 !important;
-  --sx-color-primary: #4f46e5 !important;
-  --sx-color-primary-container: #eef2ff !important;
-  --sx-color-on-primary-container: #4338ca !important;
-  --sx-color-neutral-variant: #f8fafc !important;
-  --sx-color-border: #e2e8f0 !important;
+  --sx-color-on-surface: #334155 !important;
+  --sx-color-primary: #4338ca !important;
+  --sx-color-primary-container: #e0e7ff !important;
+  --sx-color-on-primary-container: #3730a3 !important;
+  --sx-color-neutral-variant: #e2e8f0 !important;
+  --sx-color-border: #cbd5e1 !important;
   --sx-font-family: inherit !important;
   border-radius: 1rem !important;
   overflow: hidden !important;
-  background-color: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
+  background-color: #f4f6f8 !important;
+  border: 1px solid #cbd5e1 !important;
   color: #0f172a !important;
-  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05) !important;
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.06) !important;
 }
 
 .sx__header {
-  background: #f8fafc !important;
+  background: #eaf0f4 !important;
   padding: 0.85rem !important;
-  border-bottom: 1px solid #e2e8f0 !important;
+  border-bottom: 1px solid #cbd5e1 !important;
 }
 
 .sx__range-heading {
@@ -127,8 +127,8 @@ body {
 
 .sx__today-button, .sx__forward-back-button {
   background: #ffffff !important;
-  color: #475569 !important;
-  border: 1px solid #e2e8f0 !important;
+  color: #334155 !important;
+  border: 1px solid #cbd5e1 !important;
   border-radius: 0.5rem !important;
   font-weight: 600 !important;
   font-size: 0.8rem !important;
@@ -143,8 +143,8 @@ body {
 }
 
 .sx__today-button:hover, .sx__forward-back-button:hover {
-  background: #f1f5f9 !important;
-  border-color: #cbd5e1 !important;
+  background: #e2e8f0 !important;
+  border-color: #94a3b8 !important;
   color: #0f172a !important;
 }
 
@@ -155,9 +155,9 @@ body {
   background-color: transparent !important;
   background: none !important;
   box-shadow: none !important;
-  fill: #475569 !important;
-  stroke: #475569 !important;
-  color: #475569 !important;
+  fill: #334155 !important;
+  stroke: #334155 !important;
+  color: #334155 !important;
   opacity: 1 !important;
   width: 1.05rem !important;
   height: 1.05rem !important;
@@ -169,46 +169,46 @@ body {
 .sx__date-picker-input {
   border-radius: 0.5rem !important;
   font-weight: 600 !important;
-  color: #475569 !important;
-  background-color: #f1f5f9 !important;
-  border: 1px solid #e2e8f0 !important;
+  color: #334155 !important;
+  background-color: #e5e9ee !important;
+  border: 1px solid #cbd5e1 !important;
   font-size: 0.8rem !important;
 }
 
 .sx__view-selection-item--active {
-  background: #4f46e5 !important;
+  background: #4338ca !important;
   color: #ffffff !important;
   font-weight: 700 !important;
-  border-color: #4f46e5 !important;
-  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.25) !important;
+  border-color: #4338ca !important;
+  box-shadow: 0 2px 4px rgba(67, 56, 202, 0.25) !important;
 }
 
 /* Griglia Oraria Sub-Pixel Light Soft */
 .sx__week-grid, .sx__month-grid, .sx__time-grid {
-  background-color: #ffffff !important;
+  background-color: #f4f6f8 !important;
 }
 
 .sx__week-grid *, .sx__time-grid *, .sx__month-grid * {
-  border-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
 }
 
 .sx__header-day-name, .sx__header-date {
-  color: #64748b !important;
+  color: #475569 !important;
   font-weight: 600 !important;
 }
 
 /* Colonna del giorno corrente evidenziata soft */
 .sx__header-day.sx__is-today {
-  background-color: rgba(238, 242, 255, 0.7) !important;
+  background-color: rgba(224, 231, 255, 0.8) !important;
 }
 
 .sx__header-day.sx__is-today .sx__header-day-name {
-  color: #4f46e5 !important;
+  color: #4338ca !important;
   font-weight: 700 !important;
 }
 
 .sx__header-day.sx__is-today .sx__header-date {
-  background-color: #4f46e5 !important;
+  background-color: #4338ca !important;
   color: #ffffff !important;
   border-radius: 9999px !important;
   font-weight: 700 !important;
@@ -218,58 +218,36 @@ body {
   align-items: center !important;
   justify-content: center !important;
   margin: 0 auto !important;
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3) !important;
+  box-shadow: 0 2px 8px rgba(67, 56, 202, 0.3) !important;
 }
 
 /* Indicatore Orario Corrente (Current Time Line) */
 .sx__current-time-indicator {
-  background-color: #4f46e5 !important;
+  background-color: #4338ca !important;
   height: 1px !important;
 }
 .sx__current-time-indicator::before {
-  background-color: #4f46e5 !important;
+  background-color: #4338ca !important;
   width: 6px !important;
   height: 6px !important;
   border-radius: 9999px !important;
   box-shadow: none !important;
 }
 
-/* FIX DEFINITIVO PER LA SEZIONE ALL-DAY (DATE GRID): ELIMINATO IL BLOCCO SCURO */
+/* RIMOZIONE TOTALE DELLA STRISCIA ALL-DAY INTERNA DA SCHEDULE-X (RISOLVE IL PROBLEMA DELLO SCREENSHOT) */
 .sx__week-grid-all-day,
 .sx__all-day-events-wrapper,
 .sx__week-grid-all-day-days,
 .sx__date-grid,
 .sx__date-grid-cell,
 .sx__date-grid-events {
-  background-color: #f8fafc !important;
-  border-bottom: 1px solid #e2e8f0 !important;
-  height: auto !important;
-  min-height: 48px !important;
-  max-height: none !important;
-  overflow: visible !important;
-  padding: 4px !important;
-  gap: 4px !important;
-}
-
-.sx__all-day-event,
-.sx__week-grid-all-day-event,
-.sx__event.sx__all-day-event,
-.sx__date-grid-event {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  border-radius: 6px !important;
-  padding: 4px 8px !important;
-  font-size: 0.78rem !important;
-  font-weight: 600 !important;
-  min-height: 28px !important;
-  margin-bottom: 2px !important;
-  display: flex !important;
-  align-items: center !important;
-  border: 1px solid #cbd5e1 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
-  white-space: nowrap !important;
-  text-overflow: ellipsis !important;
-  overflow: hidden !important;
+  display: none !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  visibility: hidden !important;
 }
 
 .sx__time-grid-event, .sx__event {
@@ -277,5 +255,5 @@ body {
   font-weight: 600 !important;
   padding: 4px 8px !important;
   border: 1px solid #cbd5e1 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
 }
