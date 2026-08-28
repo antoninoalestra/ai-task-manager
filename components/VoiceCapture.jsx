@@ -106,7 +106,7 @@ export default function VoiceCapture({ onTaskCreated }) {
   };
 
   return (
-    <div className="w-full bg-white border border-slate-200 rounded-2xl p-2.5 sm:p-3 shadow-sm max-w-3xl mx-auto">
+    <div className="w-full bg-[#232730] border border-white/[0.08] rounded-2xl p-2.5 sm:p-3 shadow-xl max-w-3xl mx-auto backdrop-blur-md">
       <form onSubmit={handleManualSubmit} className="flex items-center gap-2">
         {/* Pulsante Microfono */}
         <button
@@ -116,25 +116,25 @@ export default function VoiceCapture({ onTaskCreated }) {
           aria-label={isListening ? 'Ferma ascolto' : 'Avvia ascolto vocale AI'}
           className={`flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 shrink-0 rounded-xl transition-all touch-manipulation active:scale-95 ${
             isListening
-              ? 'bg-rose-600 text-white animate-pulse shadow-lg shadow-rose-600/30 border border-rose-400'
+              ? 'bg-rose-600 text-white animate-pulse shadow-lg shadow-rose-600/40 border border-rose-400'
               : isProcessing
-              ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
-              : 'bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 font-bold'
+              ? 'bg-[#191c22] text-slate-500 border border-white/[0.06] cursor-not-allowed'
+              : 'bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30'
           }`}
           title={isListening ? 'Ferma ascolto' : 'Parla con l\'AI'}
         >
           {isListening ? (
             <MicOff className="w-5 h-5" />
           ) : isProcessing ? (
-            <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+            <Loader2 className="w-5 h-5 animate-spin text-indigo-400" />
           ) : (
             <Mic className="w-5 h-5" />
           )}
         </button>
 
         {/* Input Testo / Command Bar */}
-        <div className="flex-1 flex items-center bg-slate-100/80 border border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 rounded-xl px-3 min-h-[44px] transition-all">
-          <Sparkles className="w-4 h-4 text-blue-600 mr-2 shrink-0" />
+        <div className="flex-1 flex items-center bg-[#191c22] border border-white/[0.08] focus-within:border-indigo-500/80 rounded-xl px-3 min-h-[44px] transition-all">
+          <Sparkles className="w-4 h-4 text-indigo-400 mr-2 shrink-0" />
           <input
             ref={inputRef}
             type="text"
@@ -142,9 +142,9 @@ export default function VoiceCapture({ onTaskCreated }) {
             onChange={(e) => setManualText(e.target.value)}
             placeholder="Chiedi all'AI (es. 'Call alle 15:00', 'Spesa giovedì')..."
             disabled={isProcessing || isListening}
-            className="flex-1 bg-transparent py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none font-sans font-medium"
+            className="flex-1 bg-transparent py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none font-sans"
           />
-          <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono text-slate-500 bg-white border border-slate-200 rounded shadow-xs">
+          <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-white/5 border border-white/10 rounded">
             ⌘K
           </kbd>
         </div>
@@ -154,7 +154,7 @@ export default function VoiceCapture({ onTaskCreated }) {
           type="submit"
           disabled={!manualText.trim() || isProcessing}
           aria-label="Invia comando AI"
-          className="flex items-center justify-center min-w-[44px] min-h-[44px] px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold disabled:opacity-40 text-xs transition-all shadow-md shadow-blue-600/20 shrink-0 touch-manipulation active:scale-95"
+          className="flex items-center justify-center min-w-[44px] min-h-[44px] px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold disabled:opacity-40 text-xs transition-all shadow-md shadow-indigo-600/25 shrink-0 touch-manipulation active:scale-95"
         >
           <Send className="w-4 h-4" />
         </button>
@@ -162,8 +162,8 @@ export default function VoiceCapture({ onTaskCreated }) {
 
       {/* Status Badge Line */}
       {statusMessage && (
-        <div className="mt-2.5 text-[11px] text-slate-700 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg flex items-center gap-2 animate-fade-in font-mono">
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-ping"></span>
+        <div className="mt-2.5 text-[11px] text-slate-300 bg-[#191c22] border border-white/[0.06] px-3 py-1.5 rounded-lg flex items-center gap-2 animate-fade-in font-mono">
+          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping"></span>
           <span>{statusMessage}</span>
         </div>
       )}

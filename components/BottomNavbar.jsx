@@ -11,7 +11,7 @@ export default function BottomNavbar({
 }) {
   return (
     <nav className="fixed bottom-3 inset-x-3 z-40 max-w-md mx-auto lg:hidden pointer-events-none pb-safe">
-      <div className="pointer-events-auto flex items-center justify-around h-14 px-3 rounded-full bg-white/90 backdrop-blur-xl border border-slate-200 shadow-xl shadow-slate-900/10">
+      <div className="pointer-events-auto flex items-center justify-around h-14 px-3 rounded-full bg-[#232730]/90 backdrop-blur-xl border border-white/[0.08] shadow-2xl shadow-black/50">
         {/* Tab Calendario */}
         <button
           type="button"
@@ -19,12 +19,12 @@ export default function BottomNavbar({
           aria-label="Agenda ed Eventi"
           className={`flex items-center justify-center min-w-[44px] min-h-[44px] px-3.5 py-1.5 rounded-full gap-2 transition-all active:scale-95 touch-manipulation ${
             activeTab === 'calendar'
-              ? 'bg-blue-600 text-white font-bold shadow-md shadow-blue-600/20'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-indigo-600 text-white font-semibold shadow-md shadow-indigo-600/25'
+              : 'text-slate-400 hover:text-slate-200'
           }`}
         >
           <Calendar className="w-4 h-4 stroke-[2]" />
-          <span className="text-xs font-semibold">Agenda</span>
+          <span className="text-xs font-medium">Agenda</span>
         </button>
 
         {/* Pulsante Centrale Nuovo Evento */}
@@ -32,7 +32,7 @@ export default function BottomNavbar({
           type="button"
           onClick={onOpenNewTaskModal}
           aria-label="Nuovo Evento o Task"
-          className="flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-600/30 active:scale-95 transition-all touch-manipulation border border-white/20"
+          className="flex items-center justify-center min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow-lg shadow-indigo-600/35 active:scale-95 transition-all touch-manipulation border border-white/10"
         >
           <Plus className="w-5 h-5 stroke-[2.5]" />
         </button>
@@ -44,14 +44,14 @@ export default function BottomNavbar({
           aria-label="Lista To-Do"
           className={`relative flex items-center justify-center min-w-[44px] min-h-[44px] px-3.5 py-1.5 rounded-full gap-2 transition-all active:scale-95 touch-manipulation ${
             activeTab === 'todos'
-              ? 'bg-blue-600 text-white font-bold shadow-md shadow-blue-600/20'
-              : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-indigo-600 text-white font-semibold shadow-md shadow-indigo-600/25'
+              : 'text-slate-400 hover:text-slate-200'
           }`}
         >
           <CheckSquare className="w-4 h-4 stroke-[2]" />
-          <span className="text-xs font-semibold">To-Do</span>
+          <span className="text-xs font-medium">To-Do</span>
           {todoCount > 0 && (
-            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200 tabular-nums">
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-950/90 text-indigo-300 border border-indigo-700/50 tabular-nums">
               {todoCount}
             </span>
           )}
