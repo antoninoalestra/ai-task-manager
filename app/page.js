@@ -144,7 +144,7 @@ export default function Home() {
     }
   };
 
-  // Filtraggio to-do senza orario
+  // Filtraggio to-do senza orario per Backlog
   const todos = items.filter(
     (i) =>
       i &&
@@ -321,10 +321,10 @@ export default function Home() {
           </div>
         </aside>
 
-        {/* AREA CENTRALE MAIN (CALENDARIO, BACKLOG DEDICATO DESKTOP, INPUT VOCALE) */}
+        {/* AREA CENTRALE MAIN (CALENDARIO, BACKLOG DEDICATO DESKTOP, INPUT VOCALE HERO) */}
         <section className="lg:col-span-9 flex flex-col space-y-5">
           
-          {/* HEADER MOBILE (< 1024px) */}
+          {/* HEADER MOBILE (< 1024px) CON NAVIGAZIONE SCHEDE PULITA */}
           <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-[#f4f6f8] border border-slate-300 rounded-2xl shadow-xs">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-indigo-700 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-700/20">
@@ -333,7 +333,7 @@ export default function Home() {
               <span className="text-xs font-bold text-slate-950 tracking-tight">AI Task Manager</span>
             </div>
 
-            {/* Selector Viste Mobile (Agenda / To-Do) */}
+            {/* Selector Viste Mobile (Agenda / Backlog) */}
             <div className="flex items-center p-1 rounded-xl bg-[#e5e9ee] border border-slate-300">
               <button
                 type="button"
@@ -356,16 +356,18 @@ export default function Home() {
                     : 'text-slate-700 hover:text-slate-950'
                 }`}
               >
-                <CheckSquare className="w-3.5 h-3.5" />
+                <Inbox className="w-3.5 h-3.5" />
                 <span>Backlog ({todos.length})</span>
               </button>
             </div>
           </header>
 
-          {/* COMMAND PALETTE / INPUT VOCALE SPOTLIGHT BAR */}
-          <div ref={voiceCaptureRef}>
-            <VoiceCapture onTaskCreated={fetchItems} />
-          </div>
+          {/* INPUT VOCALE PROTAGONISTA ENFATIZZATO (VISIBILE IN AGENDA) */}
+          {activeTab === 'calendar' && (
+            <div ref={voiceCaptureRef}>
+              <VoiceCapture onTaskCreated={fetchItems} />
+            </div>
+          )}
 
           {/* LEGENDA CATEGORIE MOBILE */}
           <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 px-1">
@@ -397,7 +399,7 @@ export default function Home() {
             ))}
           </div>
 
-          {/* VISTE PRINCIPALI */}
+          {/* VISTE PRINCIPALI SEPARATE NETTAMENTE PER MOBILE */}
           {activeTab === 'calendar' ? (
             <section className="flex-1 space-y-5">
               {/* VISTA CALENDARIO TIMELINE */}
@@ -408,17 +410,19 @@ export default function Home() {
                 onDeleteTask={handleDeleteTask}
               />
 
-              {/* SEZIONE DEDICATA AL BACKLOG & ATTIVITÀ IN SOSPESO (DESKTOP) */}
-              <BacklogSection
-                items={items}
-                onToggleComplete={toggleComplete}
-                onEditTask={handleOpenEditModal}
-                onDeleteTask={handleDeleteTask}
-                onAddNewBacklogTask={() => {
-                  setSelectedTaskToEdit(null);
-                  setIsMainModalOpen(true);
-                }}
-              />
+              {/* SEZIONE DEDICATA AL BACKLOG VISIBILE SOLO SU DESKTOP QUANDO IN TAB CALENDARIO */}
+              <div className="hidden lg:block">
+                <BacklogSection
+                  items={items}
+                  onToggleComplete={toggleComplete}
+                  onEditTask={handleOpenEditModal}
+                  onDeleteTask={handleDeleteTask}
+                  onAddNewBacklogTask={() => {
+                    setSelectedTaskToEdit(null);
+                    setIsMainModalOpen(true);
+                  }}
+                />
+              </div>
             </section>
           ) : (
             <section className="flex-1">

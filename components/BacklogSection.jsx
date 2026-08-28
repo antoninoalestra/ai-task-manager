@@ -30,7 +30,7 @@ export default function BacklogSection({
   const [hoveredTask, setHoveredTask] = useState(null);
   const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 });
 
-  // Filtriamo gli impegni del backlog: attività senza data (start_time === null) o di tipo task/backlog
+  // Filtriamo gli impegni del backlog: attività senza data (start_time === null) o di tipo task/backlog/todo
   const backlogTasks = useMemo(() => {
     return items.filter((item) => {
       if (!item) return false;
@@ -70,46 +70,41 @@ export default function BacklogSection({
   };
 
   return (
-    <div className="bg-[#f4f6f8] border border-slate-300 rounded-2xl p-4 sm:p-5 shadow-sm space-y-4 font-sans relative">
-      {/* HEADER DELLA SEZIONE BACKLOG */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-300/80">
+    <div className="bg-[#f4f6f8] border border-slate-300 rounded-3xl p-4 sm:p-5 shadow-sm space-y-4 font-sans relative">
+      {/* HEADER DELLA SEZIONE BACKLOG SEMPLIFICATO ED ARMONIOSO */}
+      <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-300/80">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl bg-indigo-100 border border-indigo-200 text-indigo-700">
-            <Layers className="w-5 h-5" />
+            <Layers className="w-5 h-5 stroke-[2]" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                Backlog & Attività in Sospeso
-              </h3>
-              <span className="px-2.5 py-0.5 rounded-full text-xs bg-indigo-100 text-indigo-900 border border-indigo-300 font-bold">
-                {activeBacklogCount} da pianificare
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 font-medium">
-              Attività raccolte senza orario specifico · Clicca su qualsiasi scheda per modificarla subito
-            </p>
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-extrabold text-slate-950 tracking-tight">
+              Backlog
+            </h3>
+            <span className="px-2.5 py-0.5 rounded-full text-xs bg-indigo-100 text-indigo-900 border border-indigo-300 font-bold">
+              {activeBacklogCount} da pianificare
+            </span>
           </div>
         </div>
 
         <button
           type="button"
           onClick={onAddNewBacklogTask}
-          className="text-xs text-white bg-indigo-700 hover:bg-indigo-800 px-3.5 py-2 rounded-xl border border-indigo-700 transition-all flex items-center justify-center gap-1.5 font-bold shadow-md shadow-indigo-700/20 active:scale-95 touch-manipulation cursor-pointer"
+          className="text-xs text-white bg-indigo-700 hover:bg-indigo-800 px-3.5 py-2 rounded-xl border border-indigo-700 transition-all flex items-center justify-center gap-1.5 font-bold shadow-md shadow-indigo-700/20 active:scale-95 touch-manipulation cursor-pointer shrink-0"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
-          <span>Nuovo nel Backlog</span>
+          <span>Nuovo</span>
         </button>
       </div>
 
-      {/* STRISCIA FILTRI PER CATEGORIA E STATO */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+      {/* STRISCIA FILTRI ARMONIOSA PER CATEGORIA E STATO */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
         {/* Filtri Categoria Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
           <button
             type="button"
             onClick={() => setSelectedCategory('all')}
-            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
               selectedCategory === 'all'
                 ? 'bg-slate-900 text-white shadow-xs'
                 : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-100'
@@ -123,7 +118,7 @@ export default function BacklogSection({
               key={key}
               type="button"
               onClick={() => setSelectedCategory(key)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
                 selectedCategory === key
                   ? 'bg-indigo-700 text-white shadow-xs'
                   : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-100'
@@ -135,12 +130,12 @@ export default function BacklogSection({
           ))}
         </div>
 
-        {/* Filter per Stato (Attivi / Completati) */}
-        <div className="flex items-center gap-1 bg-[#e1e6eb] p-1 rounded-xl border border-slate-300 shrink-0 self-start md:self-auto">
+        {/* Filter per Stato (Da Fare / Completati / Tutti) */}
+        <div className="flex items-center gap-1 bg-[#e1e6eb] p-1 rounded-xl border border-slate-300 shrink-0 self-start sm:self-auto">
           <button
             type="button"
             onClick={() => setStatusFilter('active')}
-            className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               statusFilter === 'active'
                 ? 'bg-white text-slate-900 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
@@ -151,7 +146,7 @@ export default function BacklogSection({
           <button
             type="button"
             onClick={() => setStatusFilter('completed')}
-            className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               statusFilter === 'completed'
                 ? 'bg-white text-slate-900 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
@@ -162,7 +157,7 @@ export default function BacklogSection({
           <button
             type="button"
             onClick={() => setStatusFilter('all')}
-            className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               statusFilter === 'all'
                 ? 'bg-white text-slate-900 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
@@ -177,9 +172,9 @@ export default function BacklogSection({
       {backlogTasks.length === 0 ? (
         <div className="bg-[#e1e6eb]/60 border border-slate-300 rounded-2xl p-10 text-center text-slate-600 space-y-2">
           <Inbox className="w-9 h-9 mx-auto text-slate-400 stroke-[1.5]" />
-          <p className="font-bold text-slate-900 text-sm">Nessuna attività presente in questo filtro.</p>
+          <p className="font-bold text-slate-900 text-sm">Nessuna attività presente nel Backlog.</p>
           <p className="text-xs text-slate-500">
-            Aggiungi nuove idee ed attività senza scadenza fissa per organizzarle quando vuoi.
+            Aggiungi nuove idee ed attività per organizzarle quando vuoi.
           </p>
         </div>
       ) : (
@@ -193,7 +188,7 @@ export default function BacklogSection({
                 onMouseEnter={(e) => handleMouseEnterCard(e, task)}
                 onMouseLeave={() => setHoveredTask(null)}
                 onClick={() => onEditTask && onEditTask(task)}
-                className={`p-4 rounded-xl border transition-all flex flex-col justify-between space-y-3 bg-white border-slate-300 shadow-xs hover:shadow-lg hover:border-indigo-500 cursor-pointer group active:scale-[0.99] ${
+                className={`p-4 rounded-2xl border transition-all flex flex-col justify-between space-y-3 bg-white border-slate-300 shadow-xs hover:shadow-lg hover:border-indigo-500 cursor-pointer group active:scale-[0.99] ${
                   task.is_completed ? 'opacity-50 bg-slate-50' : ''
                 }`}
               >
@@ -285,7 +280,7 @@ export default function BacklogSection({
         </div>
       )}
 
-      {/* FLOATING HOVER TOOLTIP CARD ("RESOCONTO EVENTO") WITH POINTER-EVENTS-NONE ABSOLUTE ISOLATION */}
+      {/* FLOATING HOVER TOOLTIP CARD ("RESOCONTO EVENTO") */}
       {hoveredTask && (
         <div
           style={{
