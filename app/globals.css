@@ -234,7 +234,7 @@ body {
   box-shadow: none !important;
 }
 
-/* SEZIONE ALL-DAY NATIVA RIGOROSAMENTE INSERITA SOTTO L'HEADER IN SCHEDULE-X */
+/* SEZIONE ALL-DAY NATIVA CON EVENTI DIRETTI RIGOROSAMENTE ALLINEATI A 3.5rem */
 .sx__week-grid-all-day,
 .sx__all-day-events-wrapper,
 .sx__week-grid-all-day-days,
@@ -243,16 +243,20 @@ body {
   background-color: #eaf0f4 !important;
   border-bottom: 2px solid #cbd5e1 !important;
   height: auto !important;
-  min-height: 38px !important;
+  min-height: 44px !important;
   max-height: none !important;
   overflow: visible !important;
-  padding: 3px 0 !important;
+  padding: 4px 0 !important;
+  margin-left: var(--sx-time-axis-width, 3.5rem) !important;
+  margin-right: 0 !important;
+  width: calc(100% - var(--sx-time-axis-width, 3.5rem)) !important;
+  box-sizing: border-box !important;
   visibility: visible !important;
 }
 
 .sx__date-grid-cell {
   border-right: 1px solid #cbd5e1 !important;
-  padding: 2px 4px !important;
+  padding: 4px !important;
   box-sizing: border-box !important;
 }
 
@@ -260,12 +264,28 @@ body {
 .sx__week-grid-all-day-event,
 .sx__event.sx__all-day-event,
 .sx__date-grid-event {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  width: 100% !important;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-radius: 6px !important;
+  padding: 3px 8px !important;
+  font-size: 0.76rem !important;
+  font-weight: 700 !important;
+  min-height: 26px !important;
+  margin-bottom: 3px !important;
+  display: flex !important;
+  align-items: center !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  overflow: hidden !important;
+  transition: all 0.15s ease !important;
+}
+
+.sx__all-day-event:hover,
+.sx__week-grid-all-day-event:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1) !important;
 }
 
 .sx__time-grid-event, .sx__event {

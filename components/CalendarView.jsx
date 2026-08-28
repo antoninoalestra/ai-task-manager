@@ -25,8 +25,6 @@ import {
   Eye,
   EyeOff,
   Sparkles,
-  ChevronDown,
-  X,
 } from 'lucide-react';
 
 const TIMEZONE = 'Europe/Rome';
@@ -91,29 +89,6 @@ function toScheduleXDate(input) {
   } catch {
     return null;
   }
-}
-
-/**
- * Ritorna i 7 giorni della settimana (da Lunedì a Domenica) a partire da una data
- */
-function getWeekDays(baseInput = new Date()) {
-  const d = parseToDateObject(baseInput) || new Date();
-  const day = d.getDay();
-  const diffToMonday = day === 0 ? -6 : 1 - day; // Lunedì primo giorno
-  const monday = new Date(d);
-  monday.setDate(d.getDate() + diffToMonday);
-
-  const week = [];
-  for (let i = 0; i < 7; i++) {
-    const current = new Date(monday);
-    current.setDate(monday.getDate() + i);
-    week.push({
-      dateStr: getLocalDateString(current),
-      dayName: current.toLocaleDateString('it-IT', { weekday: 'short' }).toUpperCase().replace('.', ''),
-      dayNum: current.getDate(),
-    });
-  }
-  return week;
 }
 
 /**
@@ -338,7 +313,7 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
   );
 }
 
-function InnerCalendar({ events, onEventClick, customDateGridPill }) {
+function InnerCalendar({ events, onEventClick }) {
   const calendar = useCalendarApp({
     views: [createViewDay(), createViewWeek(), createViewMonthGrid()],
     defaultView: createViewWeek().name,
@@ -390,14 +365,7 @@ function InnerCalendar({ events, onEventClick, customDateGridPill }) {
     },
   });
 
-  return (
-    <ScheduleXCalendar
-      calendarApp={calendar}
-      customComponents={{
-        dateGridEvent: customDateGridPill,
-      }}
-    />
-  );
+  return <ScheduleXCalendar calendarApp={calendar} />;
 }
 
 export default function CalendarView({ items = [], onToggleComplete, onSaveTask, onDeleteTask }) {
@@ -406,7 +374,6 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
   const [taskToEdit, setTaskToEdit] = useState(null);
   const [initialDate, setInitialDate] = useState('');
   const [isMobile, setIsMobile] = useState(false);
-  const [activePopoverDate, setActivePopoverDate] = useState(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -418,30 +385,24 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const currentWeekDays = useMemo(() => {
-    return getWeekDays(new Date());
-  }, []);
-
-  const todayStr = getLocalDateString(new Date());
-
-  const allDayTasksByDate = useMemo(() => {
-    const map = {};
-    items.forEach((item) => {
-      if (item && item.type === 'day_task' && item.start_time) {
-        const dStr = getLocalDateString(item.start_time);
-        if (!map[dStr]) map[dStr] = [];
-        map[dStr].push(item);
-      }
-    });
-    return map;
-  }, [items]);
-
-  // Eventi per Schedule-X: sia eventi orari (type === 'event') sia eventi riassuntivi All-Day per ciascun giorno della settimana
+  // Passiamo a Schedule-X SIA gli eventi All-Day (PlainDate YYYY-MM-DD) SIA gli eventi orari
   const allCalendarEvents = useMemo(() => {
-    const timedEvents = items
-      .filter((i) => i && i.type === 'event' && i.start_time)
+    return items
+      .filter((i) => i && (i.type === 'event' || i.type === 'day_task') && i.start_time)
       .map((item) => {
         const catKey = item.category || 'generico';
+
+        if (item.type === 'day_task') {
+          const plainDate = toScheduleXPlainDate(item.start_time);
+          if (!plainDate) return null;
+          return {
+            id: String(item.id),
+            title: item.title,
+            start: plainDate,
+            end: plainDate,
+            calendarId: catKey,
+          };
+        }
 
         const startTemporal = toScheduleXDate(item.start_time);
         if (!startTemporal) return null;
@@ -470,26 +431,7 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
         };
       })
       .filter(Boolean);
-
-    // Generiamo 1 evento di riepilogo all-day per ciascun giorno della settimana corrente
-    const allDaySummaryEvents = currentWeekDays.map((day) => {
-      const dayTasks = allDayTasksByDate[day.dateStr] || [];
-      const plainDate = toScheduleXPlainDate(day.dateStr);
-      if (!plainDate) return null;
-
-      return {
-        id: `allday-summary-${day.dateStr}`,
-        title: `${dayTasks.length} impegni`,
-        start: plainDate,
-        end: plainDate,
-        calendarId: 'generico',
-        _taskCount: dayTasks.length,
-        _dateStr: day.dateStr,
-      };
-    }).filter(Boolean);
-
-    return [...timedEvents, ...allDaySummaryEvents];
-  }, [items, currentWeekDays, allDayTasksByDate]);
+  }, [items]);
 
   const calendarKey = useMemo(() => {
     return allCalendarEvents.map((e) => `${e.id}-${e.title}`).join('|');
@@ -514,69 +456,6 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
     setModalOpen(true);
   };
 
-  const activePopoverTasks = useMemo(() => {
-    if (!activePopoverDate) return [];
-    return allDayTasksByDate[activePopoverDate] || [];
-  }, [activePopoverDate, allDayTasksByDate]);
-
-  const activePopoverFormattedDate = useMemo(() => {
-    if (!activePopoverDate) return '';
-    const d = parseToDateObject(activePopoverDate) || new Date();
-    return d.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
-  }, [activePopoverDate]);
-
-  // Componente Nativo React passato a Schedule-X per ciascuna cella All-Day
-  const customDateGridPill = ({ calendarEvent }) => {
-    const dateStr = calendarEvent._dateStr || (calendarEvent.start ? String(calendarEvent.start) : '');
-    if (!dateStr) return null;
-
-    const count = calendarEvent._taskCount !== undefined ? calendarEvent._taskCount : (allDayTasksByDate[dateStr] || []).length;
-    const isToday = dateStr === todayStr;
-    const isOpen = activePopoverDate === dateStr;
-
-    if (count === 0) {
-      return (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleAddNewItem(dateStr);
-          }}
-          title={`Aggiungi evento tutto il giorno`}
-          className="w-full min-h-[28px] py-0.5 px-1 rounded-lg text-[10px] text-slate-400 hover:text-slate-700 hover:bg-white/60 transition-all flex items-center justify-center gap-1 border border-transparent hover:border-slate-300 active:scale-95 cursor-pointer"
-        >
-          <Plus className="w-3 h-3 text-slate-400 opacity-60" />
-          <span className="hidden xl:inline text-[9px] font-medium">Aggiungi</span>
-        </button>
-      );
-    }
-
-    return (
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          setActivePopoverDate(isOpen ? null : dateStr);
-        }}
-        className={`w-full min-h-[28px] py-0.5 px-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-between gap-1 shadow-xs active:scale-95 touch-manipulation cursor-pointer ${
-          isToday
-            ? 'bg-indigo-700 text-white shadow-md shadow-indigo-700/25 ring-2 ring-indigo-500/30'
-            : isOpen
-            ? 'bg-indigo-100 text-indigo-900 border border-indigo-300'
-            : 'bg-white text-slate-800 border border-slate-300 hover:border-slate-400 hover:bg-slate-50'
-        }`}
-      >
-        <div className="flex items-center gap-1 min-w-0 truncate">
-          <Sparkles className={`w-3 h-3 shrink-0 ${isToday ? 'text-amber-300' : 'text-indigo-700'}`} />
-          <span className="truncate text-[10px]">
-            {count} {count === 1 ? 'evento' : 'eventi'}
-          </span>
-        </div>
-        <ChevronDown className={`w-3 h-3 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-    );
-  };
-
   return (
     <div className="w-full space-y-4 font-sans">
       {/* CONTENITORE UNIFICATO CALENDARIO VISIVO SOFT SLATE-SAND */}
@@ -592,7 +471,7 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
             onAddNewItem={handleAddNewItem}
           />
         ) : (
-          /* VISTA DESKTOP (GRIGLIA INTERATTIVA SCHEDULE-X CON POPOVER DROPDOWNS NATIVAMENTE INSERITI NELLE CELLE DEL GIORNO) */
+          /* VISTA DESKTOP (GRIGLIA INTERATTIVA SCHEDULE-X CON EVENTI ALL-DAY DIRETTI ED ALLINEATI A 3.5rem) */
           <>
             {/* Header Desktop con info Timezone e Pulsante aggiunta rapida */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 pb-3 border-b border-slate-300/80">
@@ -618,127 +497,13 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
               </div>
             </div>
 
-            {/* POPOVER DROPDOWN MENU A TENDINA FLUTTUANTE ANCORATO AL GIORNO */}
-            {activePopoverDate && (
-              <>
-                {/* Backdrop di chiusura su click esterno */}
-                <div
-                  className="fixed inset-0 z-30"
-                  onClick={() => setActivePopoverDate(null)}
-                />
-
-                {/* Card Popover Fluttuante Premium */}
-                <div className="absolute top-28 left-1/2 -translate-x-1/2 z-40 w-full max-w-md bg-white border border-slate-300 rounded-2xl shadow-2xl p-4 text-slate-900 space-y-3 animate-fade-in">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
-                    <div>
-                      <h4 className="text-xs font-bold text-slate-900 capitalize">
-                        {activePopoverFormattedDate}
-                      </h4>
-                      <p className="text-[10px] text-slate-500 font-medium">
-                        {activePopoverTasks.length} {activePopoverTasks.length === 1 ? 'evento tutto il giorno' : 'eventi tutto il giorno'}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const dateStr = activePopoverDate;
-                          setActivePopoverDate(null);
-                          handleAddNewItem(dateStr);
-                        }}
-                        className="px-2.5 py-1 rounded-lg bg-indigo-700 hover:bg-indigo-800 text-white text-[11px] font-bold transition-all flex items-center gap-1 shadow-sm active:scale-95"
-                      >
-                        <Plus className="w-3 h-3 stroke-[2.5]" />
-                        <span>Aggiungi</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setActivePopoverDate(null)}
-                        className="p-1 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Lista Eventi All-Day del Giorno Selezionato */}
-                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                    {activePopoverTasks.length === 0 ? (
-                      <p className="text-xs text-slate-500 italic text-center py-4">
-                        Nessun evento tutto il giorno per questa data.
-                      </p>
-                    ) : (
-                      activePopoverTasks.map((task) => {
-                        const cat = getCategoryConfig(task.category);
-                        return (
-                          <div
-                            key={task.id}
-                            className={`flex items-center justify-between p-2.5 rounded-xl border transition-all ${cat.bg} ${cat.border} ${
-                              task.is_completed ? 'opacity-40' : 'hover:shadow-xs'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                              <button
-                                type="button"
-                                onClick={() => onToggleComplete && onToggleComplete(task.id, task.is_completed)}
-                                aria-label="Segna completato"
-                                className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0 active:scale-95 ${
-                                  task.is_completed
-                                    ? 'bg-indigo-700 border-indigo-700 text-white'
-                                    : 'border-slate-400 hover:border-slate-600 bg-white'
-                                }`}
-                              >
-                                {task.is_completed && <Check className="w-3 h-3 stroke-[3]" />}
-                              </button>
-
-                              <div
-                                onClick={() => {
-                                  setActivePopoverDate(null);
-                                  handleEditItem(task);
-                                }}
-                                className="cursor-pointer min-w-0 flex-1"
-                              >
-                                <p
-                                  className={`font-bold text-xs truncate ${
-                                    task.is_completed ? 'line-through text-slate-500' : 'text-slate-900'
-                                  }`}
-                                >
-                                  {task.title}
-                                </p>
-                                <div className="flex items-center gap-1 mt-0.5">
-                                  <span className={`w-1.5 h-1.5 rounded-full ${cat.dot}`}></span>
-                                  <span className={`text-[9px] capitalize font-bold ${cat.text}`}>{cat.label}</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <button
-                              type="button"
-                              onClick={() => onDeleteTask && onDeleteTask(task.id)}
-                              className="text-slate-400 hover:text-rose-700 p-1 transition-colors active:scale-95"
-                              title="Elimina"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* SCHEDULE-X VISUAL CALENDAR DESKTOP CON DATE-GRID CUSTOM COMPONENT */}
+            {/* SCHEDULE-X VISUAL CALENDAR DESKTOP */}
             {isClient ? (
               <div className="sx-react-calendar-wrapper min-h-[580px]">
                 <InnerCalendar
                   key={calendarKey}
                   events={allCalendarEvents}
                   onEventClick={handleScheduleXEventClick}
-                  customDateGridPill={customDateGridPill}
                 />
               </div>
             ) : (
