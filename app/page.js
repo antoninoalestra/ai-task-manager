@@ -152,7 +152,7 @@ export default function Home() {
       (selectedCategoryFilter === 'all' || i.category === selectedCategoryFilter)
   );
 
-  // Conteggio del numero di impegni ancora DA COMPLETARE nel Backlog (!is_completed)
+  // Conteggio del numero di impegni ancora DA COMPLETARE nel Backlog (!is_completed) per l'header in alto a destra
   const activeTodosCount = todos.filter((t) => !t.is_completed).length;
 
   const filteredItems = items.filter(
@@ -327,7 +327,7 @@ export default function Home() {
         {/* AREA CENTRALE MAIN (CALENDARIO, BACKLOG DEDICATO DESKTOP, INPUT VOCALE HERO) */}
         <section className="lg:col-span-9 flex flex-col space-y-5">
           
-          {/* HEADER MOBILE (< 1024px) CON NAVIGAZIONE SCHEDE PULITA ED INDICATORE IMPEGNI DA COMPLETARE */}
+          {/* HEADER MOBILE (< 1024px) CON CONTEGGIO BACKLOG IN ALTO A DESTRA */}
           <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-[#f4f6f8] border border-slate-300 rounded-2xl shadow-xs">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-indigo-700 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-700/20">
@@ -336,7 +336,7 @@ export default function Home() {
               <span className="text-xs font-bold text-slate-950 tracking-tight">AI Task Manager</span>
             </div>
 
-            {/* Selector Viste Mobile (Agenda / Backlog) */}
+            {/* Selector Viste Mobile (Agenda / Backlog con Conteggio in Alto a Destra) */}
             <div className="flex items-center p-1 rounded-xl bg-[#e5e9ee] border border-slate-300">
               <button
                 type="button"
@@ -446,7 +446,7 @@ export default function Home() {
         </section>
       </div>
 
-      {/* FLOATING DOCK BAR PER MOBILE (< 1024px) */}
+      {/* FLOATING DOCK BAR MINIMAL SOLO ICONE PER MOBILE (< 1024px) */}
       <BottomNavbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -454,7 +454,6 @@ export default function Home() {
           setSelectedTaskToEdit(null);
           setIsMainModalOpen(true);
         }}
-        todoCount={activeTodosCount}
       />
 
       {/* MODAL / BOTTOM SHEET PRINCIPALE */}
