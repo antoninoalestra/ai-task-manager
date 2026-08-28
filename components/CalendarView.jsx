@@ -25,6 +25,8 @@ import {
   Eye,
   EyeOff,
   Sparkles,
+  ChevronDown,
+  X,
 } from 'lucide-react';
 
 const TIMEZONE = 'Europe/Rome';
@@ -56,21 +58,6 @@ function getLocalDateString(input) {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-function toScheduleXPlainDate(input) {
-  const d = parseToDateObject(input);
-  if (!d) return null;
-
-  try {
-    const yyyy = String(d.getFullYear()).padStart(4, '0');
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-
-    return Temporal.PlainDate.from(`${yyyy}-${mm}-${dd}`);
-  } catch {
-    return null;
-  }
-}
-
 function toScheduleXDate(input) {
   const d = parseToDateObject(input);
   if (!d) return null;
@@ -92,24 +79,34 @@ function toScheduleXDate(input) {
 }
 
 /**
- * Determina lo stato temporale di un evento: 'today' | 'past' | 'future'
+ * Ritorna i 7 giorni della settimana (da Lunedì a Domenica) a partire da una data
  */
-function getTemporalStatus(startInput) {
-  const todayStr = getLocalDateString(new Date());
-  const itemDateStr = getLocalDateString(startInput);
+function getWeekDays(baseInput = new Date()) {
+  const d = parseToDateObject(baseInput) || new Date();
+  const day = d.getDay();
+  const diffToMonday = day === 0 ? -6 : 1 - day; // Lunedì primo giorno
+  const monday = new Date(d);
+  monday.setDate(d.getDate() + diffToMonday);
 
-  if (itemDateStr === todayStr) return 'today';
-  if (itemDateStr < todayStr) return 'past';
-  return 'future';
+  const week = [];
+  for (let i = 0; i < 7; i++) {
+    const current = new Date(monday);
+    current.setDate(monday.getDate() + i);
+    week.push({
+      dateStr: getLocalDateString(current),
+      dayName: current.toLocaleDateString('it-IT', { weekday: 'short' }).toUpperCase().replace('.', ''),
+      dayNum: current.getDate(),
+    });
+  }
+  return week;
 }
 
 /**
- * Componente Agenda Timeline Ad-Hoc per Smartphone (< 640px) Soft Slate-Sand Theme
+ * Componente Agenda Timeline Ad-Hoc per Smartphone (< 640px)
  */
 function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, onAddNewItem }) {
   const [selectedDate, setSelectedDate] = useState(() => getLocalDateString(new Date()));
 
-  // Genera la striscia dei 7 giorni della settimana
   const daysStrip = useMemo(() => {
     const base = parseToDateObject(selectedDate) || new Date();
     const result = [];
@@ -132,7 +129,6 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
     return result;
   }, [selectedDate, items]);
 
-  // Filtra impegni per il giorno selezionato
   const dayItems = useMemo(() => {
     return items.filter(item => {
       if (!item) return false;
@@ -245,7 +241,6 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
           {dayItems.map((item) => {
             const cat = getCategoryConfig(item.category);
             const isEvent = item.type === 'event' && item.start_time;
-            const temporalStatus = getTemporalStatus(item.start_time);
 
             let timeString = 'Tutto il Giorno';
             if (isEvent) {
@@ -258,18 +253,10 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
               }
             }
 
-            // Gerarchia visiva temporale
-            let containerClasses = `${cat.bg} ${cat.border}`;
-            if (temporalStatus === 'today') {
-              containerClasses = `bg-indigo-100/90 border-indigo-400 ring-1 ring-indigo-500/30 shadow-md`;
-            } else if (temporalStatus === 'past') {
-              containerClasses = `bg-slate-200/60 border-slate-300 opacity-60`;
-            }
-
             return (
               <div
                 key={item.id}
-                className={`p-3.5 rounded-xl border transition-all ${containerClasses} ${
+                className={`p-3.5 rounded-xl border transition-all ${cat.bg} ${cat.border} ${
                   item.is_completed ? 'opacity-40' : 'hover:shadow-sm'
                 }`}
               >
@@ -293,11 +280,6 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
                       className="cursor-pointer min-w-0 flex-1"
                     >
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        {temporalStatus === 'today' && (
-                          <span className="px-1.5 py-0.5 rounded bg-indigo-700 text-white text-[9px] font-bold uppercase tracking-wider">
-                            OGGI
-                          </span>
-                        )}
                         <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider ${
                           isEvent ? 'bg-indigo-200/80 text-indigo-950 border border-indigo-300' : 'bg-slate-200 text-slate-800 border border-slate-300'
                         }`}>
@@ -398,11 +380,11 @@ function InnerCalendar({ events, onEventClick }) {
 
 export default function CalendarView({ items = [], onToggleComplete, onSaveTask, onDeleteTask }) {
   const [isClient, setIsClient] = useState(false);
-  const [showAllDayBar, setShowAllDayBar] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [taskToEdit, setTaskToEdit] = useState(null);
   const [initialDate, setInitialDate] = useState('');
   const [isMobile, setIsMobile] = useState(false);
+  const [activePopoverDate, setActivePopoverDate] = useState(null); // Data del giorno con popover aperto
 
   useEffect(() => {
     setIsClient(true);
@@ -414,53 +396,33 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const dayTasks = useMemo(() => {
-    const todayStr = getLocalDateString(new Date());
+  // I 7 giorni della settimana corrente (Lunedì-Domenica)
+  const currentWeekDays = useMemo(() => {
+    return getWeekDays(new Date());
+  }, []);
 
-    // 1. Gruppo A: Tutti gli eventi "tutto il giorno" di OGGI (sia completati che non)
-    const todayTasks = items.filter((i) => {
-      if (!i || i.type !== 'day_task' || !i.start_time) return false;
-      return getLocalDateString(i.start_time) === todayStr;
+  const todayStr = getLocalDateString(new Date());
+
+  // Raggruppamento impegni day_task per data YYYY-MM-DD
+  const allDayTasksByDate = useMemo(() => {
+    const map = {};
+    items.forEach((item) => {
+      if (item && item.type === 'day_task' && item.start_time) {
+        const dStr = getLocalDateString(item.start_time);
+        if (!map[dStr]) map[dStr] = [];
+        map[dStr].push(item);
+      }
     });
-
-    // Ordinamento di oggi: prima i non completati, poi i completati
-    todayTasks.sort((a, b) => Number(a.is_completed) - Number(b.is_completed));
-
-    // 2. Gruppo B: Eventi "tutto il giorno" di ALTRI GIORNI che sono GIA COMPLETATI
-    const pastCompletedTasks = items
-      .filter((i) => {
-        if (!i || i.type !== 'day_task' || !i.start_time) return false;
-        const itemDate = getLocalDateString(i.start_time);
-        return itemDate !== todayStr && i.is_completed;
-      })
-      .sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
-
-    // 3. Quota: se oggi ce ne sono meno di 4, integra con i completati passati fino a 4 totali
-    const remainingQuota = Math.max(0, 4 - todayTasks.length);
-    const pastFillers = pastCompletedTasks.slice(0, remainingQuota);
-
-    // Unione: tutti quelli di oggi + eventuali completati passati fino a 4 totali
-    return [...todayTasks, ...pastFillers];
+    return map;
   }, [items]);
 
-  // SCHEDULE-X RICEVE SIA EVENTI ALL-DAY CHE ORARI PER RENDERING NATIVO PERFETTAMENTE ALINEATO COL MARGINE 56px!
+  // Inviamo a Schedule-X SOLTANTO gli eventi ad orario specifico (type === 'event')
+  // lasciando la griglia oraria fluida e pulita
   const allCalendarEvents = useMemo(() => {
     return items
-      .filter((i) => i && (i.type === 'event' || i.type === 'day_task') && i.start_time)
+      .filter((i) => i && i.type === 'event' && i.start_time)
       .map((item) => {
         const catKey = item.category || 'generico';
-
-        if (item.type === 'day_task') {
-          const plainDate = toScheduleXPlainDate(item.start_time);
-          if (!plainDate) return null;
-          return {
-            id: String(item.id),
-            title: item.title,
-            start: plainDate,
-            end: plainDate,
-            calendarId: catKey,
-          };
-        }
 
         const startTemporal = toScheduleXDate(item.start_time);
         if (!startTemporal) return null;
@@ -512,12 +474,21 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
     setModalOpen(true);
   };
 
-  const completedDayTasksCount = dayTasks.filter((t) => t.is_completed).length;
+  const activePopoverTasks = useMemo(() => {
+    if (!activePopoverDate) return [];
+    return allDayTasksByDate[activePopoverDate] || [];
+  }, [activePopoverDate, allDayTasksByDate]);
+
+  const activePopoverFormattedDate = useMemo(() => {
+    if (!activePopoverDate) return '';
+    const d = parseToDateObject(activePopoverDate) || new Date();
+    return d.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
+  }, [activePopoverDate]);
 
   return (
     <div className="w-full space-y-4 font-sans">
       {/* CONTENITORE UNIFICATO CALENDARIO VISIVO SOFT SLATE-SAND */}
-      <div className="bg-[#f4f6f8] border border-slate-300 rounded-2xl p-3.5 sm:p-5 shadow-sm overflow-hidden min-h-[520px]">
+      <div className="bg-[#f4f6f8] border border-slate-300 rounded-2xl p-3.5 sm:p-5 shadow-sm overflow-hidden min-h-[520px] relative">
         
         {/* VISTA MOBILE AD-HOC PER SMARTPHONE (< 640px) */}
         {isMobile ? (
@@ -529,10 +500,10 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
             onAddNewItem={handleAddNewItem}
           />
         ) : (
-          /* VISTA DESKTOP (GRIGLIA INTERATTIVA SCHEDULE-X CON SEZIONE ALL-DAY NATIVA RIGOROSAMENTE ALLINEATA) */
+          /* VISTA DESKTOP (GRIGLIA INTERATTIVA SCHEDULE-X + POPOVER DROPDOWNS PER CIASCUN GIORNO) */
           <>
-            {/* Header Desktop con toggle per Quick-Bar Task del Giorno */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-300/80">
+            {/* Header Desktop con info Timezone e Pulsante aggiunta rapida */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 pb-3 border-b border-slate-300/80">
               <div className="flex items-center gap-2">
                 <CalendarIcon className="w-4.5 h-4.5 text-indigo-700" />
                 <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
@@ -541,103 +512,150 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
               </div>
 
               <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowAllDayBar(!showAllDayBar)}
-                  className="text-xs text-slate-800 bg-[#e1e6eb] hover:bg-slate-300 px-3 py-1.5 rounded-xl border border-slate-300 transition-all flex items-center gap-1.5 font-bold active:scale-95"
-                >
-                  {showAllDayBar ? <EyeOff className="w-3.5 h-3.5 text-slate-600" /> : <Eye className="w-3.5 h-3.5 text-slate-600" />}
-                  <span>{showAllDayBar ? 'Nascondi' : 'Mostra'} All-Day Quick Bar ({dayTasks.length})</span>
-                </button>
                 <span className="text-[10px] text-slate-600 bg-[#e1e6eb] px-2.5 py-1 rounded-lg border border-slate-300 font-mono font-bold">
                   Europe/Rome
                 </span>
+                <button
+                  type="button"
+                  onClick={() => handleAddNewItem(new Date().toISOString().split('T')[0])}
+                  className="text-xs text-white bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-xl border border-indigo-700 transition-all flex items-center gap-1.5 font-bold shadow-md shadow-indigo-700/20 active:scale-95"
+                >
+                  <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                  <span>Nuovo Impegno</span>
+                </button>
               </div>
             </div>
 
-            {/* BARRA EVENTI ALL-DAY SUPERIORE (RICCA, PULITA, CON SPUNTA DIRETTA) */}
-            {showAllDayBar && (
-              <div className="mb-4 p-3.5 bg-[#e1e6eb] border border-slate-300 rounded-2xl space-y-3 shadow-xs">
-                <div className="flex items-center justify-between border-b border-slate-300 pb-2.5">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[11px] font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-indigo-700" />
-                      Eventi Tutto il Giorno
-                    </span>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] bg-indigo-100 text-indigo-900 border border-indigo-300 font-bold font-mono">
-                      {dayTasks.length} impegni {completedDayTasksCount > 0 ? `(${completedDayTasksCount} completati)` : ''}
-                    </span>
-                  </div>
+            {/* STRISCIA CON OFFSET 3.5rem (var(--sx-time-axis-width)) PERFETTAMENTE ALLINEATA AI 7 GIORNI CON I POPOVER DROPDOWN */}
+            <div className="mb-2 ml-[var(--sx-time-axis-width,3.5rem)] w-[calc(100%-var(--sx-time-axis-width,3.5rem))]">
+              <div className="grid grid-cols-7 gap-1 bg-[#eaf0f4] border border-slate-300 rounded-xl p-1 shadow-xs">
+                {currentWeekDays.map((day) => {
+                  const dayTasks = allDayTasksByDate[day.dateStr] || [];
+                  const count = dayTasks.length;
+                  const isToday = day.dateStr === todayStr;
+                  const isOpen = activePopoverDate === day.dateStr;
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleAddNewItem(new Date().toISOString().split('T')[0])}
-                      className="text-xs text-white bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-xl border border-indigo-700 transition-all flex items-center gap-1.5 font-bold shadow-md shadow-indigo-700/20 active:scale-95"
-                    >
-                      <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-                      <span>Aggiungi Evento</span>
-                    </button>
-                  </div>
-                </div>
-
-                {dayTasks.length === 0 ? (
-                  <div className="py-2.5 px-3.5 text-slate-600 text-xs flex items-center justify-between bg-[#f4f6f8] border border-slate-300 rounded-xl">
-                    <span>Nessun evento tutto il giorno in programma per oggi.</span>
-                    <button
-                      type="button"
-                      onClick={() => handleAddNewItem(new Date().toISOString().split('T')[0])}
-                      className="text-[11px] text-indigo-700 hover:text-indigo-800 font-bold underline underline-offset-2"
-                    >
-                      + Crea Evento
-                    </button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-[160px] overflow-y-auto pr-1">
-                    {dayTasks.map((task) => {
-                      const cat = getCategoryConfig(task.category);
-                      const dateLabel = getLocalDateString(task.start_time);
-                      const temporalStatus = getTemporalStatus(task.start_time);
-
-                      // Gerarchia Visiva Temporale (Oggi vs Passato vs Futuro)
-                      let taskStyle = `${cat.bg} ${cat.border}`;
-                      if (temporalStatus === 'today') {
-                        taskStyle = `bg-indigo-100/90 border-indigo-400 ring-1 ring-indigo-500/30 shadow-md`;
-                      } else if (temporalStatus === 'past') {
-                        taskStyle = `bg-slate-200/70 border-slate-300 opacity-60`;
-                      }
-
-                      return (
-                        <div
-                          key={task.id}
-                          className={`flex items-center justify-between p-2 px-3 rounded-xl border text-xs transition-all ${taskStyle} ${
-                            task.is_completed ? 'opacity-40' : 'hover:shadow-sm'
+                  return (
+                    <div key={day.dateStr} className="relative flex justify-center">
+                      {count === 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => handleAddNewItem(day.dateStr)}
+                          title={`Aggiungi evento tutto il giorno per ${day.dayName} ${day.dayNum}`}
+                          className="w-full min-h-[32px] py-1 px-1 rounded-lg text-[10px] text-slate-400 hover:text-slate-700 hover:bg-white/60 transition-all flex items-center justify-center gap-1 border border-transparent hover:border-slate-300 active:scale-95"
+                        >
+                          <Plus className="w-3 h-3 text-slate-400 opacity-60" />
+                          <span className="hidden xl:inline text-[9px] font-medium">Aggiungi</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setActivePopoverDate(isOpen ? null : day.dateStr)}
+                          className={`w-full min-h-[32px] py-1 px-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-between gap-1 shadow-xs active:scale-95 touch-manipulation ${
+                            isToday
+                              ? 'bg-indigo-700 text-white shadow-md shadow-indigo-700/25 ring-2 ring-indigo-500/30'
+                              : isOpen
+                              ? 'bg-indigo-100 text-indigo-900 border border-indigo-300'
+                              : 'bg-white text-slate-800 border border-slate-300 hover:border-slate-400 hover:bg-slate-50'
                           }`}
                         >
-                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                            <button
-                              type="button"
-                              onClick={() => onToggleComplete && onToggleComplete(task.id, task.is_completed)}
-                              aria-label="Segna come completato"
-                              className={`min-w-[24px] min-h-[24px] w-6 h-6 rounded-lg border flex items-center justify-center transition-all shrink-0 active:scale-95 touch-manipulation ${
-                                task.is_completed
-                                  ? 'bg-indigo-700 border-indigo-700 text-white'
-                                  : 'border-slate-400 hover:border-slate-600 bg-white'
-                              }`}
-                            >
-                              {task.is_completed && <Check className="w-3 h-3 stroke-[3]" />}
-                            </button>
+                          <div className="flex items-center gap-1 min-w-0 truncate">
+                            <Sparkles className={`w-3 h-3 shrink-0 ${isToday ? 'text-amber-300' : 'text-indigo-700'}`} />
+                            <span className="truncate text-[10px]">
+                              {count} {count === 1 ? 'evento' : 'eventi'}
+                            </span>
+                          </div>
+                          <ChevronDown className={`w-3 h-3 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
 
-                            <div
-                              onClick={() => handleEditItem(task)}
-                              className="cursor-pointer min-w-0 flex-1"
-                            >
-                              <div className="flex items-center gap-1.5">
-                                {temporalStatus === 'today' && (
-                                  <span className="px-1 py-0.2 rounded bg-indigo-700 text-white text-[8px] font-bold uppercase tracking-wider">
-                                    OGGI
-                                  </span>
-                                )}
+            {/* POPOVER DROPDOWN MENU A TENDINA FLUTTUANTE ANCORATO AL GIORNO */}
+            {activePopoverDate && (
+              <>
+                {/* Backdrop di chiusura su click esterno */}
+                <div
+                  className="fixed inset-0 z-30"
+                  onClick={() => setActivePopoverDate(null)}
+                />
+
+                {/* Card Popover Fluttuante Premium */}
+                <div className="absolute top-24 left-1/2 -translate-x-1/2 z-40 w-full max-w-md bg-white border border-slate-300 rounded-2xl shadow-2xl p-4 text-slate-900 space-y-3 animate-fade-in">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900 capitalize">
+                        {activePopoverFormattedDate}
+                      </h4>
+                      <p className="text-[10px] text-slate-500 font-medium">
+                        {activePopoverTasks.length} {activePopoverTasks.length === 1 ? 'evento tutto il giorno' : 'eventi tutto il giorno'}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const dateStr = activePopoverDate;
+                          setActivePopoverDate(null);
+                          handleAddNewItem(dateStr);
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-indigo-700 hover:bg-indigo-800 text-white text-[11px] font-bold transition-all flex items-center gap-1 shadow-sm active:scale-95"
+                      >
+                        <Plus className="w-3 h-3 stroke-[2.5]" />
+                        <span>Aggiungi</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setActivePopoverDate(null)}
+                        className="p-1 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Lista Eventi All-Day del Giorno Selezionato */}
+                  <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                    {activePopoverTasks.length === 0 ? (
+                      <p className="text-xs text-slate-500 italic text-center py-4">
+                        Nessun evento tutto il giorno per questa data.
+                      </p>
+                    ) : (
+                      activePopoverTasks.map((task) => {
+                        const cat = getCategoryConfig(task.category);
+                        return (
+                          <div
+                            key={task.id}
+                            className={`flex items-center justify-between p-2.5 rounded-xl border transition-all ${cat.bg} ${cat.border} ${
+                              task.is_completed ? 'opacity-40' : 'hover:shadow-xs'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                              <button
+                                type="button"
+                                onClick={() => onToggleComplete && onToggleComplete(task.id, task.is_completed)}
+                                aria-label="Segna completato"
+                                className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all shrink-0 active:scale-95 ${
+                                  task.is_completed
+                                    ? 'bg-indigo-700 border-indigo-700 text-white'
+                                    : 'border-slate-400 hover:border-slate-600 bg-white'
+                                }`}
+                              >
+                                {task.is_completed && <Check className="w-3 h-3 stroke-[3]" />}
+                              </button>
+
+                              <div
+                                onClick={() => {
+                                  setActivePopoverDate(null);
+                                  handleEditItem(task);
+                                }}
+                                className="cursor-pointer min-w-0 flex-1"
+                              >
                                 <p
                                   className={`font-bold text-xs truncate ${
                                     task.is_completed ? 'line-through text-slate-500' : 'text-slate-900'
@@ -645,23 +663,31 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
                                 >
                                   {task.title}
                                 </p>
-                              </div>
-                              <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className={`w-1.5 h-1.5 rounded-full ${cat.dot}`}></span>
-                                <span className={`text-[9px] capitalize font-bold ${cat.text}`}>{cat.label}</span>
-                                <span className="text-[9px] text-slate-600 font-mono">· {dateLabel}</span>
+                                <div className="flex items-center gap-1 mt-0.5">
+                                  <span className={`w-1.5 h-1.5 rounded-full ${cat.dot}`}></span>
+                                  <span className={`text-[9px] capitalize font-bold ${cat.text}`}>{cat.label}</span>
+                                </div>
                               </div>
                             </div>
+
+                            <button
+                              type="button"
+                              onClick={() => onDeleteTask && onDeleteTask(task.id)}
+                              className="text-slate-400 hover:text-rose-700 p-1 transition-colors active:scale-95"
+                              title="Elimina"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })
+                    )}
                   </div>
-                )}
-              </div>
+                </div>
+              </>
             )}
 
-            {/* SCHEDULE-X VISUAL CALENDAR DESKTOP (CON SEZIONE ALL-DAY NATIVA ED ALLINEATA A 56px) */}
+            {/* SCHEDULE-X VISUAL CALENDAR DESKTOP */}
             {isClient ? (
               <div className="sx-react-calendar-wrapper min-h-[580px]">
                 <InnerCalendar
