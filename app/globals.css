@@ -87,7 +87,7 @@ body {
   scrollbar-width: none !important;
 }
 
-/* Schedule-X Soft Slate-Sand Theme */
+/* Schedule-X Master Variable Alignment & Soft Slate-Sand Theme */
 .sx-react-calendar-wrapper {
   font-family: inherit !important;
   width: 100%;
@@ -104,6 +104,7 @@ body {
   --sx-color-neutral-variant: #e2e8f0 !important;
   --sx-color-border: #cbd5e1 !important;
   --sx-font-family: inherit !important;
+  --sx-calendar-week-grid-padding-left: 56px !important; /* VARIABILE MASTER DI ALLINEAMENTO STRUTTURALE */
   border-radius: 1rem !important;
   overflow: hidden !important;
   background-color: #f4f6f8 !important;
@@ -234,60 +235,25 @@ body {
   box-shadow: none !important;
 }
 
-/* SEZIONE ALL-DAY NATIVA CON SIMMETRIA FLEXBOX PERFETTA ED ALLINEAMENTO CONTINUO AL 100% */
-.sx__week-grid-all-day {
-  display: flex !important;
+/* SEZIONE ALL-DAY NATIVA RIGOROSAMENTE SINCRONIZZATA TRAMITE LA VARIABILE MASTER --sx-calendar-week-grid-padding-left */
+.sx__date-grid {
   background-color: #eaf0f4 !important;
   border-bottom: 2px solid #cbd5e1 !important;
-  height: auto !important;
-  min-height: 40px !important;
-  max-height: none !important;
-  overflow: visible !important;
-  padding: 3px 0 !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-  visibility: visible !important;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+  margin: 0 !important;
 }
 
-/* CELLA ASSE SINISTRO DELLO STESSO SPESSORE DELL'ASSE ORE BELOW */
-.sx__week-grid-all-day-title,
-.sx__date-grid-title,
-.sx__all-day-title {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: var(--sx-time-axis-width, 3.5rem) !important;
-  min-width: var(--sx-time-axis-width, 3.5rem) !important;
-  max-width: var(--sx-time-axis-width, 3.5rem) !important;
-  flex-shrink: 0 !important;
-  font-size: 0.70rem !important;
-  font-weight: 700 !important;
-  color: #64748b !important;
+.sx__date-grid-day {
   border-right: 1px solid #cbd5e1 !important;
-  box-sizing: border-box !important;
-}
-
-/* LA GRIGLIA DEI 7 GIORNI ESPANSA E CON MARGIN 0 PER COMBACIARE CON LA GRIGLIA ORARIA */
-.sx__all-day-events-wrapper,
-.sx__week-grid-all-day-days,
-.sx__date-grid {
-  display: flex !important;
-  flex: 1 !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  padding: 0 !important;
-  width: 100% !important;
+  padding: 2px 3px !important;
   box-sizing: border-box !important;
 }
 
 .sx__date-grid-cell {
-  border-right: 1px solid #cbd5e1 !important;
-  padding: 3px 2px !important;
+  padding: 2px !important;
   box-sizing: border-box !important;
   overflow: hidden !important;
-  flex: 1 !important;
 }
 
 .sx__all-day-event,
@@ -316,7 +282,8 @@ body {
 }
 
 .sx__all-day-event:hover,
-.sx__week-grid-all-day-event:hover {
+.sx__week-grid-all-day-event:hover,
+.sx__date-grid-event:hover {
   transform: translateY(-1px) !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
