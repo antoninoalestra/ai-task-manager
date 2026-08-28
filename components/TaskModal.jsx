@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { CATEGORIES, getCategoryConfig } from '@/lib/categories';
-import { X, Clock, Calendar as CalendarIcon, ListTodo, ChevronDown, Check, Trash2, Loader2 } from 'lucide-react';
+import { X, Clock, Calendar as CalendarIcon, ListTodo, ChevronDown, Check, Trash2, Loader2, Inbox } from 'lucide-react';
 
 export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialDate = '', onSave, onDelete }) {
   const [title, setTitle] = useState('');
@@ -20,7 +20,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
     if (taskToEdit) {
       setTitle(taskToEdit.title || '');
       setDescription(taskToEdit.description || '');
-      setType(taskToEdit.type || 'day_task');
+      setType(taskToEdit.type || (taskToEdit.start_time ? 'day_task' : 'todo'));
       setCategory(taskToEdit.category || 'generico');
 
       if (taskToEdit.start_time) {
@@ -88,6 +88,9 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
         const baseDateStr = date || new Date().toISOString().split('T')[0];
         finalStartTime = new Date(`${baseDateStr}T00:00:00`).toISOString();
         finalEndTime = null;
+      } else if (type === 'todo') {
+        finalStartTime = null;
+        finalEndTime = null;
       }
 
       const payload = {
@@ -111,7 +114,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
 
   const handleDelete = async () => {
     if (!taskToEdit?.id || !onDelete) return;
-    if (confirm('Sei sicuro di voler eliminare questo elemento?')) {
+    if (confirm('Sei sicuro di voler eliminare questo elemento dal backlog?')) {
       setIsSubmitting(true);
       try {
         await onDelete(taskToEdit.id);
@@ -125,7 +128,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity">
+    <div className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity">
       {/* Overlay click per chiusura */}
       <div className="absolute inset-0" onClick={onClose} />
 
@@ -141,12 +144,12 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-300 bg-[#e1e6eb]">
           <h2 className="text-xs font-bold tracking-wider uppercase text-slate-900 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-indigo-700"></span>
-            {taskToEdit ? 'Modifica Impegno' : 'Nuovo Impegno'}
+            {taskToEdit ? 'Modifica Attività / Backlog' : 'Nuova Attività / Impegno'}
           </h2>
           <button
             onClick={onClose}
             type="button"
-            className="flex items-center justify-center min-w-[36px] min-h-[36px] rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-300/60 transition-all"
+            className="flex items-center justify-center min-w-[36px] min-h-[36px] rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-300/60 transition-all cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -157,7 +160,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
           {/* Titolo */}
           <div>
             <label className="block mb-1 font-bold text-slate-800 uppercase tracking-wider text-[10px]">
-              Titolo *
+              Titolo Attività *
             </label>
             <input
               type="text"
@@ -172,13 +175,13 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
           {/* Tipologia */}
           <div>
             <label className="block mb-1 font-bold text-slate-800 uppercase tracking-wider text-[10px]">
-              Tipologia
+              Destinazione / Tipologia
             </label>
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => setType('event')}
-                className={`min-h-[44px] py-2 px-2.5 rounded-xl border font-semibold text-[11px] transition-all flex items-center justify-center gap-1.5 touch-manipulation active:scale-95 ${
+                className={`min-h-[44px] py-2 px-2.5 rounded-xl border font-semibold text-[11px] transition-all flex items-center justify-center gap-1.5 touch-manipulation active:scale-95 cursor-pointer ${
                   type === 'event'
                     ? 'bg-indigo-700 text-white border-indigo-700 shadow-md shadow-indigo-700/20'
                     : 'bg-[#e5e9ee] text-slate-700 border-slate-300 hover:border-slate-400'
@@ -191,7 +194,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
               <button
                 type="button"
                 onClick={() => setType('day_task')}
-                className={`min-h-[44px] py-2 px-2.5 rounded-xl border font-semibold text-[11px] transition-all flex items-center justify-center gap-1.5 touch-manipulation active:scale-95 ${
+                className={`min-h-[44px] py-2 px-2.5 rounded-xl border font-semibold text-[11px] transition-all flex items-center justify-center gap-1.5 touch-manipulation active:scale-95 cursor-pointer ${
                   type === 'day_task'
                     ? 'bg-indigo-700 text-white border-indigo-700 shadow-md shadow-indigo-700/20'
                     : 'bg-[#e5e9ee] text-slate-700 border-slate-300 hover:border-slate-400'
@@ -204,14 +207,14 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
               <button
                 type="button"
                 onClick={() => setType('todo')}
-                className={`min-h-[44px] py-2 px-2.5 rounded-xl border font-semibold text-[11px] transition-all flex items-center justify-center gap-1.5 touch-manipulation active:scale-95 ${
+                className={`min-h-[44px] py-2 px-2.5 rounded-xl border font-semibold text-[11px] transition-all flex items-center justify-center gap-1.5 touch-manipulation active:scale-95 cursor-pointer ${
                   type === 'todo'
                     ? 'bg-indigo-700 text-white border-indigo-700 shadow-md shadow-indigo-700/20'
                     : 'bg-[#e5e9ee] text-slate-700 border-slate-300 hover:border-slate-400'
                 }`}
               >
-                <ListTodo className="w-3.5 h-3.5 shrink-0" />
-                <span>To-Do Gen.</span>
+                <Inbox className="w-3.5 h-3.5 shrink-0" />
+                <span>Backlog</span>
               </button>
             </div>
           </div>
@@ -251,7 +254,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
                           setCategory(key);
                           setIsCategoryDropdownOpen(false);
                         }}
-                        className={`w-full min-h-[40px] px-3.5 py-2 text-xs font-semibold flex items-center justify-between transition-all ${
+                        className={`w-full min-h-[40px] px-3.5 py-2 text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
                           isSelected
                             ? 'bg-indigo-100 text-indigo-900'
                             : 'text-slate-800 hover:bg-slate-100'
@@ -275,7 +278,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block mb-1 font-bold text-slate-800 uppercase tracking-wider text-[10px]">
-                  Data
+                  Data Programmazione
                 </label>
                 <input
                   type="date"
@@ -337,7 +340,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
                     const endM = totalMins % 60;
                     setEndTime(`${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`);
                   }}
-                  className="min-h-[36px] px-3 py-1.5 rounded-lg bg-[#e5e9ee] hover:bg-indigo-100 text-slate-800 hover:text-indigo-900 border border-slate-300 text-[11px] font-bold transition-all shrink-0 active:scale-95"
+                  className="min-h-[36px] px-3 py-1.5 rounded-lg bg-[#e5e9ee] hover:bg-indigo-100 text-slate-800 hover:text-indigo-900 border border-slate-300 text-[11px] font-bold transition-all shrink-0 active:scale-95 cursor-pointer"
                 >
                   {p.label}
                 </button>
@@ -348,13 +351,13 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
           {/* Descrizione opzionale */}
           <div>
             <label className="block mb-1 font-bold text-slate-800 uppercase tracking-wider text-[10px]">
-              Note (opzionale)
+              Resoconto / Note (opzionale)
             </label>
             <textarea
-              rows={2}
+              rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Dettagli aggiuntivi..."
+              placeholder="Aggiungi dettagli, resoconto o note sull'attività..."
               className="w-full px-3.5 py-2.5 rounded-xl bg-[#e5e9ee] border border-slate-300 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 transition-all text-xs font-medium"
             />
           </div>
@@ -366,7 +369,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
                 type="button"
                 onClick={handleDelete}
                 disabled={isSubmitting}
-                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-rose-100/80 text-rose-900 border border-rose-300 hover:bg-rose-200 text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95"
+                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-rose-100/80 text-rose-900 border border-rose-300 hover:bg-rose-200 text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
               >
                 <Trash2 className="w-4 h-4" />
                 <span>Elimina</span>
@@ -380,14 +383,14 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
                 type="button"
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-[#e5e9ee] text-slate-800 border border-slate-300 hover:bg-slate-300 text-xs font-bold transition-all active:scale-95"
+                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-[#e5e9ee] text-slate-800 border border-slate-300 hover:bg-slate-300 text-xs font-bold transition-all active:scale-95 cursor-pointer"
               >
                 Annulla
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || !title.trim()}
-                className="min-h-[44px] px-5 py-2.5 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white font-bold disabled:opacity-50 text-xs transition-all shadow-md shadow-indigo-700/20 flex items-center gap-1.5 active:scale-95"
+                className="min-h-[44px] px-5 py-2.5 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white font-bold disabled:opacity-50 text-xs transition-all shadow-md shadow-indigo-700/20 flex items-center gap-1.5 active:scale-95 cursor-pointer"
               >
                 {isSubmitting ? (
                   <>
@@ -395,7 +398,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
                     <span>Salvataggio...</span>
                   </>
                 ) : (
-                  <span>{taskToEdit ? 'Salva Modifiche' : 'Crea Impegno'}</span>
+                  <span>{taskToEdit ? 'Salva Modifiche' : 'Salva nel Backlog'}</span>
                 )}
               </button>
             </div>
