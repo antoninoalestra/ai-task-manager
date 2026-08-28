@@ -234,7 +234,7 @@ body {
   box-shadow: none !important;
 }
 
-/* SEZIONE ALL-DAY NATIVA CON EVENTI DIRETTI RIGOROSAMENTE ALLINEATI A 3.35rem (53.5px) */
+/* SEZIONE ALL-DAY NATIVA CON BADGE COMPATTI ED ALLINEATI A 3.4rem (54px) */
 .sx__week-grid-all-day,
 .sx__all-day-events-wrapper,
 .sx__week-grid-all-day-days,
@@ -243,21 +243,22 @@ body {
   background-color: #eaf0f4 !important;
   border-bottom: 2px solid #cbd5e1 !important;
   height: auto !important;
-  min-height: 44px !important;
+  min-height: 40px !important;
   max-height: none !important;
   overflow: visible !important;
-  padding: 4px 0 !important;
-  margin-left: 3.35rem !important; /* OFFSET MILLIMETRICO PERFETTO */
+  padding: 3px 0 !important;
+  margin-left: var(--sx-time-axis-width, 3.4rem) !important;
   margin-right: 0 !important;
-  width: calc(100% - 3.35rem) !important;
+  width: calc(100% - var(--sx-time-axis-width, 3.4rem)) !important;
   box-sizing: border-box !important;
   visibility: visible !important;
 }
 
 .sx__date-grid-cell {
   border-right: 1px solid #cbd5e1 !important;
-  padding: 4px !important;
+  padding: 3px 2px !important;
   box-sizing: border-box !important;
+  overflow: hidden !important;
 }
 
 .sx__all-day-event,
@@ -266,26 +267,29 @@ body {
 .sx__date-grid-event {
   background-color: #ffffff !important;
   color: #0f172a !important;
-  border-radius: 6px !important;
-  padding: 3px 8px !important;
-  font-size: 0.76rem !important;
+  border-radius: 5px !important;
+  padding: 2px 5px !important;
+  font-size: 0.70rem !important;
   font-weight: 700 !important;
-  min-height: 26px !important;
-  margin-bottom: 3px !important;
+  min-height: 22px !important;
+  height: 22px !important;
+  margin-bottom: 2px !important;
   display: flex !important;
   align-items: center !important;
   border: 1px solid #cbd5e1 !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
   white-space: nowrap !important;
   text-overflow: ellipsis !important;
   overflow: hidden !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
   transition: all 0.15s ease !important;
 }
 
 .sx__all-day-event:hover,
 .sx__week-grid-all-day-event:hover {
   transform: translateY(-1px) !important;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
 .sx__time-grid-event, .sx__event {
