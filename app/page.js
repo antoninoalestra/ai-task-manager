@@ -152,6 +152,9 @@ export default function Home() {
       (selectedCategoryFilter === 'all' || i.category === selectedCategoryFilter)
   );
 
+  // Conteggio del numero di impegni ancora DA COMPLETARE nel Backlog (!is_completed)
+  const activeTodosCount = todos.filter((t) => !t.is_completed).length;
+
   const filteredItems = items.filter(
     (i) => i && (selectedCategoryFilter === 'all' || i.category === selectedCategoryFilter)
   );
@@ -259,12 +262,12 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Riepilogo Backlog Sidebar con Clic Diretto di Modifica */}
+          {/* Riepilogo Backlog Sidebar con Clic Diretto di Modifica e Conteggio Attivi */}
           <div className="flex-1 flex flex-col min-h-0 pt-2 border-t border-slate-300">
             <div className="flex items-center justify-between pb-2">
               <h2 className="text-[10px] font-bold text-slate-600 uppercase tracking-widest flex items-center gap-1.5">
                 <Inbox className="w-3.5 h-3.5 text-slate-500" />
-                <span>Backlog ({todos.length})</span>
+                <span>Backlog ({activeTodosCount})</span>
               </h2>
             </div>
 
@@ -324,7 +327,7 @@ export default function Home() {
         {/* AREA CENTRALE MAIN (CALENDARIO, BACKLOG DEDICATO DESKTOP, INPUT VOCALE HERO) */}
         <section className="lg:col-span-9 flex flex-col space-y-5">
           
-          {/* HEADER MOBILE (< 1024px) CON NAVIGAZIONE SCHEDE PULITA */}
+          {/* HEADER MOBILE (< 1024px) CON NAVIGAZIONE SCHEDE PULITA ED INDICATORE IMPEGNI DA COMPLETARE */}
           <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-[#f4f6f8] border border-slate-300 rounded-2xl shadow-xs">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-indigo-700 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-700/20">
@@ -357,7 +360,7 @@ export default function Home() {
                 }`}
               >
                 <Inbox className="w-3.5 h-3.5" />
-                <span>Backlog ({todos.length})</span>
+                <span>Backlog ({activeTodosCount})</span>
               </button>
             </div>
           </header>
@@ -451,7 +454,7 @@ export default function Home() {
           setSelectedTaskToEdit(null);
           setIsMainModalOpen(true);
         }}
-        todoCount={todos.length}
+        todoCount={activeTodosCount}
       />
 
       {/* MODAL / BOTTOM SHEET PRINCIPALE */}
