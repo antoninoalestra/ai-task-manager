@@ -234,7 +234,7 @@ body {
   box-shadow: none !important;
 }
 
-/* SEZIONE ALL-DAY NATIVA CON EVENTI DIRETTI RIGOROSAMENTE ALLINEATI A 3.5rem */
+/* SEZIONE ALL-DAY NATIVA CON EVENTI DIRETTI RIGOROSAMENTE ALLINEATI A 3rem */
 .sx__week-grid-all-day,
 .sx__all-day-events-wrapper,
 .sx__week-grid-all-day-days,
@@ -247,9 +247,9 @@ body {
   max-height: none !important;
   overflow: visible !important;
   padding: 4px 0 !important;
-  margin-left: var(--sx-time-axis-width, 3.5rem) !important;
+  margin-left: var(--sx-time-axis-width, 3rem) !important; /* CORRETTO A 3rem COME RICHIESTO */
   margin-right: 0 !important;
-  width: calc(100% - var(--sx-time-axis-width, 3.5rem)) !important;
+  width: calc(100% - var(--sx-time-axis-width, 3rem)) !important;
   box-sizing: border-box !important;
   visibility: visible !important;
 }
