@@ -45,6 +45,21 @@ function getLocalDateString(input) {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+function toScheduleXPlainDate(input) {
+  const d = parseToDateObject(input);
+  if (!d) return null;
+
+  try {
+    const yyyy = String(d.getFullYear()).padStart(4, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+
+    return Temporal.PlainDate.from(`${yyyy}-${mm}-${dd}`);
+  } catch {
+    return null;
+  }
+}
+
 function toScheduleXDate(input) {
   const d = parseToDateObject(input);
   if (!d) return null;
@@ -417,13 +432,24 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
     return [...todayTasks, ...pastFillers];
   }, [items]);
 
-  // SCHEDULE-X RICEVE SOLTANTO GLI EVENTI CON ORARIO SPECIFICO (type === 'event')
-  // GLI EVENTI ALL-DAY (day_task) VENGONO GESTITI ESCLUSIVAMENTE DALLA QUICK BAR SUPERIORE
+  // SCHEDULE-X RICEVE SIA EVENTI ORARI CHE EVENTI ALL-DAY PER POSIZIONARLI NELLA COLONNA DI OGNI GIORNO!
   const allCalendarEvents = useMemo(() => {
     return items
-      .filter((i) => i && i.type === 'event' && i.start_time)
+      .filter((i) => i && (i.type === 'event' || i.type === 'day_task') && i.start_time)
       .map((item) => {
         const catKey = item.category || 'generico';
+
+        if (item.type === 'day_task') {
+          const plainDate = toScheduleXPlainDate(item.start_time);
+          if (!plainDate) return null;
+          return {
+            id: String(item.id),
+            title: item.title,
+            start: plainDate,
+            end: plainDate,
+            calendarId: catKey,
+          };
+        }
 
         const startTemporal = toScheduleXDate(item.start_time);
         if (!startTemporal) return null;
@@ -507,10 +533,10 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
                 <button
                   type="button"
                   onClick={() => setShowAllDayBar(!showAllDayBar)}
-                  className="text-xs text-slate-800 bg-[#e1e6eb] hover:bg-[#d5dcLines] px-3 py-1.5 rounded-xl border border-slate-300 transition-all flex items-center gap-1.5 font-bold active:scale-95"
+                  className="text-xs text-slate-800 bg-[#e1e6eb] hover:bg-slate-300 px-3 py-1.5 rounded-xl border border-slate-300 transition-all flex items-center gap-1.5 font-bold active:scale-95"
                 >
                   {showAllDayBar ? <EyeOff className="w-3.5 h-3.5 text-slate-600" /> : <Eye className="w-3.5 h-3.5 text-slate-600" />}
-                  <span>{showAllDayBar ? 'Nascondi' : 'Mostra'} All-Day Bar ({dayTasks.length})</span>
+                  <span>{showAllDayBar ? 'Nascondi' : 'Mostra'} Quick Bar ({dayTasks.length})</span>
                 </button>
                 <span className="text-[10px] text-slate-600 bg-[#e1e6eb] px-2.5 py-1 rounded-lg border border-slate-300 font-mono font-bold">
                   Europe/Rome
@@ -518,7 +544,7 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
               </div>
             </div>
 
-            {/* BARRA EVENTI ALL-DAY SUPERIORE (RICCA, PULITA, SENZA TAGLI DI TESTO) */}
+            {/* BARRA EVENTI ALL-DAY SUPERIORE (RICCA, PULITA, CON SPUNTA DIRETTA) */}
             {showAllDayBar && (
               <div className="mb-4 p-3.5 bg-[#e1e6eb] border border-slate-300 rounded-2xl space-y-3 shadow-xs">
                 <div className="flex items-center justify-between border-b border-slate-300 pb-2.5">
@@ -624,7 +650,7 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
               </div>
             )}
 
-            {/* SCHEDULE-X VISUAL CALENDAR DESKTOP (SOLO EVENTI AD ORARIO SPECIFICO) */}
+            {/* SCHEDULE-X VISUAL CALENDAR DESKTOP (MOSTRIAMO SIA EVENTI ALL-DAY CHE ORARI PER CIASCUN GIORNO) */}
             {isClient ? (
               <div className="sx-react-calendar-wrapper min-h-[580px]">
                 <InnerCalendar
