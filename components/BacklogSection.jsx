@@ -26,7 +26,7 @@ export default function BacklogSection({
   onAddNewBacklogTask,
 }) {
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('active'); // 'active' | 'completed' | 'all'
+  const [statusFilter, setStatusFilter] = useState('all'); // MOSTRA TUTTI GLI IMPEGNI (COMPRESI QUELLI COMPLETATI) DI DEFAULT
   const [hoveredTask, setHoveredTask] = useState(null);
   const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 });
 
@@ -46,6 +46,7 @@ export default function BacklogSection({
 
       return true;
     }).sort((a, b) => {
+      // Prima gli impegni da svolgere, poi quelli completati
       if (a.is_completed !== b.is_completed) {
         return Number(a.is_completed) - Number(b.is_completed);
       }
@@ -134,8 +135,19 @@ export default function BacklogSection({
           ))}
         </div>
 
-        {/* Filter per Stato (Da Fare / Completati / Tutti) */}
+        {/* Filter per Stato (Tutti / Da Fare / Completati) */}
         <div className="flex items-center gap-1 bg-[#e1e6eb] p-1 rounded-xl border border-slate-300 shrink-0 self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={() => setStatusFilter('all')}
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              statusFilter === 'all'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Tutti ({totalBacklogCount})
+          </button>
           <button
             type="button"
             onClick={() => setStatusFilter('active')}
@@ -158,21 +170,10 @@ export default function BacklogSection({
           >
             Completati
           </button>
-          <button
-            type="button"
-            onClick={() => setStatusFilter('all')}
-            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              statusFilter === 'all'
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            Tutti
-          </button>
         </div>
       </div>
 
-      {/* GRIGLIA CARTE DEL BACKLOG */}
+      {/* GRIGLIA CARTE DEL BACKLOG (RIMOSTRANDO GLI IMPEGNI COMPLETATI CON EFFETTO BARRATO) */}
       {backlogTasks.length === 0 ? (
         <div className="bg-[#e1e6eb]/60 border border-slate-300 rounded-2xl p-10 text-center text-slate-600 space-y-2">
           <Inbox className="w-9 h-9 mx-auto text-slate-400 stroke-[1.5]" />
@@ -196,7 +197,7 @@ export default function BacklogSection({
                   onEditTask && onEditTask(task);
                 }}
                 className={`p-4 rounded-2xl border transition-all flex flex-col justify-between space-y-3 bg-white border-slate-300 shadow-xs hover:shadow-lg hover:border-indigo-500 cursor-pointer group active:scale-[0.99] ${
-                  task.is_completed ? 'opacity-50 bg-slate-50' : ''
+                  task.is_completed ? 'opacity-65 bg-slate-50 border-slate-200' : ''
                 }`}
               >
                 <div className="space-y-2">
@@ -261,7 +262,9 @@ export default function BacklogSection({
                       {task.title}
                     </h4>
                     {task.description && (
-                      <p className="text-[11px] text-slate-600 mt-1 line-clamp-2 leading-relaxed">
+                      <p className={`text-[11px] mt-1 line-clamp-2 leading-relaxed ${
+                        task.is_completed ? 'line-through text-slate-400' : 'text-slate-600'
+                      }`}>
                         {task.description}
                       </p>
                     )}
@@ -270,7 +273,9 @@ export default function BacklogSection({
 
                 {/* PULSANTE PROGRAMMA NEL CALENDARIO */}
                 <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                  <span className="text-[10px] text-slate-400 font-mono">Non programmato</span>
+                  <span className={`text-[10px] font-mono ${task.is_completed ? 'text-emerald-700 font-bold' : 'text-slate-400'}`}>
+                    {task.is_completed ? '✓ Completato' : 'Non programmato'}
+                  </span>
                   <button
                     type="button"
                     onClick={(e) => {
