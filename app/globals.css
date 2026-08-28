@@ -234,7 +234,7 @@ body {
   box-shadow: none !important;
 }
 
-/* SEZIONE ALL-DAY NATIVA RIGOROSAMENTE ALLINEATA CON PADDING-LEFT 56px */
+/* SEZIONE ALL-DAY NATIVA RIGOROSAMENTE ALLINEATA CON L'UNITÀ NATIVA 3.5rem (OFFSET ASSE ORE SCHEDULE-X) */
 .sx__week-grid-all-day,
 .sx__all-day-events-wrapper,
 .sx__week-grid-all-day-days,
@@ -246,13 +246,10 @@ body {
   min-height: 44px !important;
   max-height: none !important;
   overflow: visible !important;
-  padding-top: 4px !important;
-  padding-bottom: 4px !important;
-  padding-left: 56px !important; /* CORREZIONE MATEMATICA DEFINITIVA DELL'OFFSET DELLE ORE */
-  padding-right: 0 !important;
-  margin-left: 0 !important;
+  padding: 4px 0 !important;
+  margin-left: var(--sx-time-axis-width, 3.5rem) !important; /* CORREZIONE NATIVA IN REM PER COMBACIARE CON ASSE ORE */
   margin-right: 0 !important;
-  width: 100% !important;
+  width: calc(100% - var(--sx-time-axis-width, 3.5rem)) !important; /* LARGHEZZA ESATTA DEL CALENDARIO */
   box-sizing: border-box !important;
   visibility: visible !important;
 }
