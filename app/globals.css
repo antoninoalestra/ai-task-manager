@@ -234,7 +234,7 @@ body {
   box-shadow: none !important;
 }
 
-/* SEZIONE ALL-DAY NATIVA RIGOROSAMENTE ALLINEATA COL MARGINE 56px ED OFFSET COLONNA ASSE ORE */
+/* SEZIONE ALL-DAY NATIVA CON ALLINEAMENTO NATIVO PERFECTED PER SCHEDULE-X */
 .sx__week-grid-all-day,
 .sx__all-day-events-wrapper,
 .sx__week-grid-all-day-days,
@@ -247,14 +247,14 @@ body {
   max-height: none !important;
   overflow: visible !important;
   padding: 4px 0 !important;
-  margin-left: 56px !important; /* CORREZIONE FONDAMENTALE DI ALLINEAMENTO */
-  width: calc(100% - 56px) !important;
+  margin-left: 0 !important;
+  width: 100% !important;
   box-sizing: border-box !important;
   visibility: visible !important;
 }
 
 .sx__date-grid-cell {
-  border-right: 1px solid #cbd5e1 !important;
+  border-right: 1px solid #e2e8f0 !important;
   padding: 4px !important;
 }
 
