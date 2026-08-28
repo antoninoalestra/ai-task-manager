@@ -14,7 +14,7 @@ import '@schedule-x/theme-default/dist/index.css';
 import { useMemo, useState, useEffect } from 'react';
 import { getCategoryConfig } from '@/lib/categories';
 import TaskModal from './TaskModal';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus, Check, Trash2, Clock, Eye, EyeOff } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus, Check, Trash2, Clock, Eye, EyeOff, Sparkles } from 'lucide-react';
 
 const TIMEZONE = 'Europe/Rome';
 
@@ -81,7 +81,19 @@ function toScheduleXDate(input) {
 }
 
 /**
- * Componente Agenda Timeline Ad-Hoc per Smartphone (< 640px)
+ * Determina lo stato temporale di un evento: 'today' | 'past' | 'future'
+ */
+function getTemporalStatus(startInput) {
+  const todayStr = getLocalDateString(new Date());
+  const itemDateStr = getLocalDateString(startInput);
+
+  if (itemDateStr === todayStr) return 'today';
+  if (itemDateStr < todayStr) return 'past';
+  return 'future';
+}
+
+/**
+ * Componente Agenda Timeline Ad-Hoc per Smartphone (< 640px) Light Theme
  */
 function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, onAddNewItem }) {
   const [selectedDate, setSelectedDate] = useState(() => getLocalDateString(new Date()));
@@ -138,23 +150,23 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
   return (
     <div className="space-y-4">
       {/* BARRA NAVIGAZIONE GIORNO MOBILE */}
-      <div className="flex items-center justify-between bg-[#181c24] border border-white/[0.08] rounded-2xl p-2 shadow-lg">
+      <div className="flex items-center justify-between bg-white border border-slate-200 rounded-2xl p-2 shadow-sm">
         <button
           type="button"
           onClick={() => navigateDay(-1)}
           aria-label="Giorno precedente"
-          className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-xl bg-[#12151b] text-slate-300 hover:text-white border border-white/[0.06] active:scale-95 transition-all touch-manipulation"
+          className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-xl bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 active:scale-95 transition-all touch-manipulation"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
 
         <div className="flex flex-col items-center">
-          <span className="text-xs font-bold text-white capitalize">{selectedDateFormatted}</span>
+          <span className="text-xs font-bold text-slate-900 capitalize">{selectedDateFormatted}</span>
           {selectedDate !== getLocalDateString(new Date()) && (
             <button
               type="button"
               onClick={() => setSelectedDate(getLocalDateString(new Date()))}
-              className="text-[10px] text-blue-400 font-semibold mt-0.5 hover:underline active:scale-95"
+              className="text-[10px] text-blue-600 font-bold mt-0.5 hover:underline active:scale-95"
             >
               Torna ad Oggi
             </button>
@@ -165,14 +177,14 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
           type="button"
           onClick={() => navigateDay(1)}
           aria-label="Giorno successivo"
-          className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-xl bg-[#12151b] text-slate-300 hover:text-white border border-white/[0.06] active:scale-95 transition-all touch-manipulation"
+          className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-xl bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 active:scale-95 transition-all touch-manipulation"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
       </div>
 
       {/* STRISCIA SELEZIONE 7 GIORNI */}
-      <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar p-1.5 bg-[#0d0f12] border border-white/[0.06] rounded-2xl">
+      <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar p-1.5 bg-slate-100/80 border border-slate-200 rounded-2xl">
         {daysStrip.map((day) => (
           <button
             key={day.dateStr}
@@ -181,13 +193,15 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
             className={`flex-1 min-w-[44px] min-h-[48px] py-2 px-1 rounded-xl flex flex-col items-center justify-center transition-all touch-manipulation ${
               day.isSelected
                 ? 'bg-blue-600 text-white font-bold shadow-md shadow-blue-600/25 scale-105'
-                : 'text-slate-400 hover:text-white bg-[#181c24]'
+                : day.isToday
+                ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200'
+                : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-100'
             }`}
           >
             <span className="text-[9px] font-bold tracking-wider uppercase">{day.dayName}</span>
             <span className="text-xs font-bold mt-0.5 tabular-nums">{day.dayNum}</span>
             {day.hasEvents && (
-              <span className={`w-1.5 h-1.5 rounded-full mt-1 ${day.isSelected ? 'bg-white' : 'bg-blue-400'}`}></span>
+              <span className={`w-1.5 h-1.5 rounded-full mt-1 ${day.isSelected ? 'bg-white' : 'bg-blue-500'}`}></span>
             )}
           </button>
         ))}
@@ -195,13 +209,13 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
 
       {/* TITOLO ED AGGIUNTA RAPIDA */}
       <div className="flex items-center justify-between px-1">
-        <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+        <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
           Impegni del Giorno ({dayItems.length})
         </h4>
         <button
           type="button"
           onClick={() => onAddNewItem(selectedDate)}
-          className="min-h-[40px] px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-all flex items-center gap-1.5 shadow-md shadow-blue-600/25 active:scale-95 touch-manipulation"
+          className="min-h-[40px] px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-md shadow-blue-600/20 active:scale-95 touch-manipulation"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>Nuovo Evento</span>
@@ -210,9 +224,9 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
 
       {/* STREAM CARD ELEGANTE A TUTTA LARGHEZZA */}
       {dayItems.length === 0 ? (
-        <div className="bg-[#181c24] border border-white/[0.08] rounded-2xl p-8 text-center text-slate-400 text-xs space-y-2">
-          <CalendarIcon className="w-8 h-8 mx-auto text-slate-500 stroke-[1.75]" />
-          <p className="font-semibold text-slate-300">Nessun impegno per questo giorno.</p>
+        <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-500 text-xs space-y-2 shadow-xs">
+          <CalendarIcon className="w-8 h-8 mx-auto text-slate-400 stroke-[1.75]" />
+          <p className="font-semibold text-slate-800">Nessun impegno per questo giorno.</p>
           <p className="text-[11px] text-slate-500">Usa l'input vocale o premi "+ Nuovo Evento".</p>
         </div>
       ) : (
@@ -220,6 +234,7 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
           {dayItems.map((item) => {
             const cat = getCategoryConfig(item.category);
             const isEvent = item.type === 'event' && item.start_time;
+            const temporalStatus = getTemporalStatus(item.start_time);
 
             let timeString = 'Tutto il Giorno';
             if (isEvent) {
@@ -232,11 +247,19 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
               }
             }
 
+            // Gerarchia visiva temporale
+            let containerClasses = `${cat.bg} ${cat.border}`;
+            if (temporalStatus === 'today') {
+              containerClasses = `bg-blue-50/70 border-blue-300 ring-1 ring-blue-500/30 shadow-md`;
+            } else if (temporalStatus === 'past') {
+              containerClasses = `bg-slate-50/60 border-slate-200 opacity-60`;
+            }
+
             return (
               <div
                 key={item.id}
-                className={`p-3.5 rounded-xl border transition-all ${cat.bg} ${cat.border} ${
-                  item.is_completed ? 'opacity-40' : 'hover:bg-[#1f242e] shadow-sm'
+                className={`p-3.5 rounded-xl border transition-all ${containerClasses} ${
+                  item.is_completed ? 'opacity-40' : 'hover:shadow-sm'
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -247,8 +270,8 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
                       aria-label="Segna come completato"
                       className={`min-w-[36px] min-h-[36px] w-9 h-9 rounded-xl border flex items-center justify-center transition-all shrink-0 active:scale-95 touch-manipulation ${
                         item.is_completed
-                          ? 'bg-blue-600 border-blue-500 text-white'
-                          : 'border-slate-500 hover:border-white bg-[#12151b]'
+                          ? 'bg-blue-600 border-blue-600 text-white'
+                          : 'border-slate-300 hover:border-slate-400 bg-white'
                       }`}
                     >
                       {item.is_completed && <Check className="w-4 h-4 stroke-[3]" />}
@@ -259,27 +282,32 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
                       className="cursor-pointer min-w-0 flex-1"
                     >
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        {temporalStatus === 'today' && (
+                          <span className="px-1.5 py-0.5 rounded bg-blue-600 text-white text-[9px] font-bold uppercase tracking-wider">
+                            OGGI
+                          </span>
+                        )}
                         <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider ${
-                          isEvent ? 'bg-blue-950/80 text-blue-300 border border-blue-800/50' : 'bg-[#12151b] text-slate-300 border border-white/[0.06]'
+                          isEvent ? 'bg-blue-100 text-blue-800 border border-blue-200' : 'bg-slate-100 text-slate-700 border border-slate-200'
                         }`}>
                           {timeString}
                         </span>
                         <div className="flex items-center gap-1">
                           <span className={`w-2 h-2 rounded-full ${cat.dot}`}></span>
-                          <span className={`text-[10px] font-semibold capitalize ${cat.text}`}>{cat.label}</span>
+                          <span className={`text-[10px] font-bold capitalize ${cat.text}`}>{cat.label}</span>
                         </div>
                       </div>
 
                       <h3
                         className={`text-xs font-bold truncate leading-snug ${
-                          item.is_completed ? 'line-through text-slate-400' : 'text-slate-100'
+                          item.is_completed ? 'line-through text-slate-400' : 'text-slate-900'
                         }`}
                       >
                         {item.title}
                       </h3>
 
                       {item.description && (
-                        <p className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{item.description}</p>
+                        <p className="text-[11px] text-slate-600 mt-1 line-clamp-2 leading-relaxed">{item.description}</p>
                       )}
                     </div>
                   </div>
@@ -287,7 +315,7 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
                   <button
                     type="button"
                     onClick={() => onDeleteItem && onDeleteItem(item.id)}
-                    className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-400 transition-colors shrink-0 active:scale-95 touch-manipulation"
+                    className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 transition-colors shrink-0 active:scale-95 touch-manipulation"
                     title="Elimina"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -310,38 +338,38 @@ function InnerCalendar({ events, onEventClick }) {
     calendars: {
       casa: {
         colorName: 'casa',
-        lightColors: { main: '#f97316', container: '#331a00', onContainer: '#ffedd5' },
-        darkColors: { main: '#f97316', container: 'rgba(249, 115, 22, 0.25)', onContainer: '#ffffff' },
+        lightColors: { main: '#f97316', container: '#fff7ed', onContainer: '#c2410c' },
+        darkColors: { main: '#f97316', container: '#fff7ed', onContainer: '#c2410c' },
       },
       universita: {
         colorName: 'universita',
-        lightColors: { main: '#f59e0b', container: '#332200', onContainer: '#fef3c7' },
-        darkColors: { main: '#f59e0b', container: 'rgba(245, 158, 11, 0.25)', onContainer: '#ffffff' },
+        lightColors: { main: '#f59e0b', container: '#fffbeb', onContainer: '#b45309' },
+        darkColors: { main: '#f59e0b', container: '#fffbeb', onContainer: '#b45309' },
       },
       lavoro: {
         colorName: 'lavoro',
-        lightColors: { main: '#3b82f6', container: '#001a4d', onContainer: '#dbeafe' },
-        darkColors: { main: '#3b82f6', container: 'rgba(59, 130, 246, 0.25)', onContainer: '#ffffff' },
+        lightColors: { main: '#2563eb', container: '#eff6ff', onContainer: '#1d4ed8' },
+        darkColors: { main: '#2563eb', container: '#eff6ff', onContainer: '#1d4ed8' },
       },
       personale: {
         colorName: 'personale',
-        lightColors: { main: '#10b981', container: '#00261a', onContainer: '#d1fae5' },
-        darkColors: { main: '#10b981', container: 'rgba(16, 185, 129, 0.25)', onContainer: '#ffffff' },
+        lightColors: { main: '#10b981', container: '#ecfdf5', onContainer: '#047857' },
+        darkColors: { main: '#10b981', container: '#ecfdf5', onContainer: '#047857' },
       },
       salute: {
         colorName: 'salute',
-        lightColors: { main: '#f43f5e', container: '#33000d', onContainer: '#ffe4e6' },
-        darkColors: { main: '#f43f5e', container: 'rgba(244, 63, 94, 0.25)', onContainer: '#ffffff' },
+        lightColors: { main: '#f43f5e', container: '#fff1f2', onContainer: '#be123c' },
+        darkColors: { main: '#f43f5e', container: '#fff1f2', onContainer: '#be123c' },
       },
       finanze: {
         colorName: 'finanze',
-        lightColors: { main: '#6366f1', container: '#121340', onContainer: '#e0e7ff' },
-        darkColors: { main: '#6366f1', container: 'rgba(99, 102, 241, 0.25)', onContainer: '#ffffff' },
+        lightColors: { main: '#6366f1', container: '#eef2ff', onContainer: '#4338ca' },
+        darkColors: { main: '#6366f1', container: '#eef2ff', onContainer: '#4338ca' },
       },
       generico: {
         colorName: 'generico',
-        lightColors: { main: '#94a3b8', container: '#1e2430', onContainer: '#f1f5f9' },
-        darkColors: { main: '#94a3b8', container: 'rgba(148, 163, 184, 0.25)', onContainer: '#ffffff' },
+        lightColors: { main: '#64748b', container: '#f8fafc', onContainer: '#334155' },
+        darkColors: { main: '#64748b', container: '#f8fafc', onContainer: '#334155' },
       },
     },
     plugins: [createDragAndDropPlugin()],
@@ -404,6 +432,7 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
     return [...todayTasks, ...pastFillers];
   }, [items]);
 
+  // NORMALIZZAZIONE ESATTA DATE SCHEDULE-X (YYYY-MM-DD per all-day, YYYY-MM-DD HH:mm per timed)
   const allCalendarEvents = useMemo(() => {
     return items
       .filter((i) => i && (i.type === 'event' || i.type === 'day_task') && i.start_time)
@@ -476,8 +505,8 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
 
   return (
     <div className="w-full space-y-4 font-sans">
-      {/* CONTENITORE UNIFICATO CALENDARIO VISIVO */}
-      <div className="bg-[#181c24] border border-white/[0.08] rounded-2xl p-3.5 sm:p-5 shadow-2xl overflow-hidden min-h-[520px]">
+      {/* CONTENITORE UNIFICATO CALENDARIO VISIVO LIGHT THEME */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-3.5 sm:p-5 shadow-sm overflow-hidden min-h-[520px]">
         
         {/* VISTA MOBILE AD-HOC PER SMARTPHONE (< 640px) */}
         {isMobile ? (
@@ -492,10 +521,10 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
           /* VISTA DESKTOP (GRIGLIA INTERATTIVA SCHEDULE-X) */
           <>
             {/* Header Desktop con toggle per Quick-Bar Task del Giorno */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-white/[0.06]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
-                <CalendarIcon className="w-4 h-4 text-blue-400" />
-                <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">
+                <CalendarIcon className="w-4.5 h-4.5 text-blue-600" />
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                   Calendario & Timeline Eventi
                 </h3>
               </div>
@@ -504,26 +533,27 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
                 <button
                   type="button"
                   onClick={() => setShowAllDayBar(!showAllDayBar)}
-                  className="text-xs text-slate-300 bg-[#12151b] hover:bg-white/5 px-3 py-1.5 rounded-xl border border-white/[0.06] transition-all flex items-center gap-1.5 font-medium active:scale-95"
+                  className="text-xs text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl border border-slate-200 transition-all flex items-center gap-1.5 font-semibold active:scale-95"
                 >
-                  {showAllDayBar ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  {showAllDayBar ? <EyeOff className="w-3.5 h-3.5 text-slate-500" /> : <Eye className="w-3.5 h-3.5 text-slate-500" />}
                   <span>{showAllDayBar ? 'Nascondi' : 'Mostra'} Quick Bar ({dayTasks.length})</span>
                 </button>
-                <span className="text-[10px] text-slate-400 bg-[#12151b] px-2.5 py-1 rounded-lg border border-white/[0.06] font-mono">
+                <span className="text-[10px] text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 font-mono font-medium">
                   Europe/Rome
                 </span>
               </div>
             </div>
 
-            {/* BARRA EVENTI DEL GIORNO (TUTTO IL GIORNO) */}
+            {/* BARRA EVENTI DEL GIORNO (TUTTO IL GIORNO) APPLE LIGHT STYLE */}
             {showAllDayBar && (
-              <div className="mb-4 p-3.5 bg-[#12151b] border border-white/[0.06] rounded-2xl space-y-3 shadow-inner">
-                <div className="flex items-center justify-between border-b border-white/[0.06] pb-2.5">
+              <div className="mb-4 p-3.5 bg-slate-50/80 border border-slate-200 rounded-2xl space-y-3 shadow-xs">
+                <div className="flex items-center justify-between border-b border-slate-200/80 pb-2.5">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wider">
+                    <span className="text-[11px] font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-blue-600" />
                       Eventi Tutto il Giorno
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] bg-blue-950/60 text-blue-300 border border-blue-800/40 font-semibold font-mono">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] bg-blue-100 text-blue-800 border border-blue-200 font-bold font-mono">
                       {dayTasks.length} impegni {completedDayTasksCount > 0 ? `(${completedDayTasksCount} completati)` : ''}
                     </span>
                   </div>
@@ -532,7 +562,7 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
                     <button
                       type="button"
                       onClick={() => handleAddNewItem(new Date().toISOString().split('T')[0])}
-                      className="text-xs text-white bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded-xl border border-blue-500/50 transition-all flex items-center gap-1.5 font-bold shadow-md shadow-blue-600/25 active:scale-95"
+                      className="text-xs text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-xl border border-blue-600 transition-all flex items-center gap-1.5 font-bold shadow-md shadow-blue-600/20 active:scale-95"
                     >
                       <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                       <span>Aggiungi Evento</span>
@@ -541,26 +571,36 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
                 </div>
 
                 {dayTasks.length === 0 ? (
-                  <div className="py-2.5 px-3.5 text-slate-400 text-xs flex items-center justify-between bg-[#181c24] border border-white/[0.06] rounded-xl">
+                  <div className="py-2.5 px-3.5 text-slate-500 text-xs flex items-center justify-between bg-white border border-slate-200 rounded-xl">
                     <span>Nessun evento tutto il giorno in programma per oggi.</span>
                     <button
                       type="button"
                       onClick={() => handleAddNewItem(new Date().toISOString().split('T')[0])}
-                      className="text-[11px] text-blue-400 hover:text-blue-300 font-semibold underline underline-offset-2"
+                      className="text-[11px] text-blue-600 hover:text-blue-700 font-bold underline underline-offset-2"
                     >
                       + Crea Evento
                     </button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-[140px] overflow-y-auto pr-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-[160px] overflow-y-auto pr-1">
                     {dayTasks.map((task) => {
                       const cat = getCategoryConfig(task.category);
                       const dateLabel = getLocalDateString(task.start_time);
+                      const temporalStatus = getTemporalStatus(task.start_time);
+
+                      // Gerarchia Visiva Temporale (Oggi vs Passato vs Futuro)
+                      let taskStyle = `${cat.bg} ${cat.border}`;
+                      if (temporalStatus === 'today') {
+                        taskStyle = `bg-blue-50/90 border-blue-300 ring-1 ring-blue-500/30 shadow-md`;
+                      } else if (temporalStatus === 'past') {
+                        taskStyle = `bg-slate-100/70 border-slate-200 opacity-60`;
+                      }
+
                       return (
                         <div
                           key={task.id}
-                          className={`flex items-center justify-between p-2 px-3 rounded-xl border text-xs transition-all ${cat.bg} ${cat.border} ${
-                            task.is_completed ? 'opacity-40' : 'hover:border-slate-400 shadow-sm'
+                          className={`flex items-center justify-between p-2 px-3 rounded-xl border text-xs transition-all ${taskStyle} ${
+                            task.is_completed ? 'opacity-40' : 'hover:shadow-sm'
                           }`}
                         >
                           <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -570,8 +610,8 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
                               aria-label="Segna come completato"
                               className={`min-w-[24px] min-h-[24px] w-6 h-6 rounded-lg border flex items-center justify-center transition-all shrink-0 active:scale-95 touch-manipulation ${
                                 task.is_completed
-                                  ? 'bg-blue-600 border-blue-500 text-white'
-                                  : 'border-slate-400 hover:border-white bg-[#12151b]'
+                                  ? 'bg-blue-600 border-blue-600 text-white'
+                                  : 'border-slate-300 hover:border-slate-400 bg-white'
                               }`}
                             >
                               {task.is_completed && <Check className="w-3 h-3 stroke-[3]" />}
@@ -581,17 +621,24 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
                               onClick={() => handleEditItem(task)}
                               className="cursor-pointer min-w-0 flex-1"
                             >
-                              <p
-                                className={`font-bold text-xs truncate ${
-                                  task.is_completed ? 'line-through text-slate-400' : 'text-slate-100'
-                                }`}
-                              >
-                                {task.title}
-                              </p>
+                              <div className="flex items-center gap-1.5">
+                                {temporalStatus === 'today' && (
+                                  <span className="px-1 py-0.2 rounded bg-blue-600 text-white text-[8px] font-bold uppercase tracking-wider">
+                                    OGGI
+                                  </span>
+                                )}
+                                <p
+                                  className={`font-bold text-xs truncate ${
+                                    task.is_completed ? 'line-through text-slate-400' : 'text-slate-900'
+                                  }`}
+                                >
+                                  {task.title}
+                                </p>
+                              </div>
                               <div className="flex items-center gap-1.5 mt-0.5">
                                 <span className={`w-1.5 h-1.5 rounded-full ${cat.dot}`}></span>
-                                <span className={`text-[9px] capitalize font-semibold ${cat.text}`}>{cat.label}</span>
-                                <span className="text-[9px] text-slate-400 font-mono">· {dateLabel}</span>
+                                <span className={`text-[9px] capitalize font-bold ${cat.text}`}>{cat.label}</span>
+                                <span className="text-[9px] text-slate-500 font-mono">· {dateLabel}</span>
                               </div>
                             </div>
                           </div>
@@ -613,7 +660,7 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
                 />
               </div>
             ) : (
-              <div className="min-h-[580px] flex items-center justify-center text-slate-500 text-xs font-mono">
+              <div className="min-h-[580px] flex items-center justify-center text-slate-400 text-xs font-mono">
                 Caricamento calendario...
               </div>
             )}

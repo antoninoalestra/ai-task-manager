@@ -60,23 +60,23 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/75 backdrop-blur-md transition-opacity">
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity">
       {/* Backdrop overlay clickable */}
       <div className="absolute inset-0" onClick={onClose} />
 
-      {/* Modal / Bottom Sheet Container */}
-      <div className="relative w-full max-w-md bg-[#181c24] border-t sm:border border-white/[0.08] rounded-t-3xl sm:rounded-2xl shadow-2xl shadow-black/50 overflow-hidden text-slate-100 max-h-[85dvh] sm:max-h-[90vh] flex flex-col z-10 animate-slide-up-sheet sm:animate-none">
+      {/* Light Surface Container */}
+      <div className="relative w-full max-w-md bg-white border-t sm:border border-slate-200 rounded-t-3xl sm:rounded-2xl shadow-2xl shadow-slate-900/10 overflow-hidden text-slate-900 max-h-[85dvh] sm:max-h-[90vh] flex flex-col z-10 animate-slide-up-sheet sm:animate-none">
         
         {/* Mobile Drag Handle */}
         <div className="sm:hidden flex items-center justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing">
-          <div className="w-12 h-1 bg-slate-600/60 rounded-full" />
+          <div className="w-12 h-1 bg-slate-300 rounded-full" />
         </div>
 
         {/* Header Modal */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06] bg-[#13161b]">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 bg-slate-50/80">
           <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-blue-400" />
-            <h2 className="text-xs font-bold tracking-wider uppercase text-slate-200">
+            <User className="w-4 h-4 text-blue-600" />
+            <h2 className="text-xs font-bold tracking-wider uppercase text-slate-800">
               {mode === 'login' ? 'Accedi al tuo Profilo' : 'Crea nuovo Profilo'}
             </h2>
           </div>
@@ -84,19 +84,19 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
           <button
             onClick={onClose}
             type="button"
-            className="flex items-center justify-center min-w-[36px] min-h-[36px] rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+            className="flex items-center justify-center min-w-[36px] min-h-[36px] rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-all"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Tab Switcher Accedi / Registrati */}
-        <div className="p-1 mx-5 mt-4 bg-[#12151b] border border-white/[0.06] rounded-xl flex items-center shrink-0">
+        <div className="p-1 mx-5 mt-4 bg-slate-100 border border-slate-200 rounded-xl flex items-center shrink-0">
           <button
             type="button"
             onClick={() => { setMode('login'); setError(''); }}
-            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all min-h-[38px] touch-manipulation active:scale-95 ${
-              mode === 'login' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all min-h-[38px] touch-manipulation active:scale-95 ${
+              mode === 'login' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Accedi
@@ -104,8 +104,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
           <button
             type="button"
             onClick={() => { setMode('register'); setError(''); }}
-            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all min-h-[38px] touch-manipulation active:scale-95 ${
-              mode === 'register' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all min-h-[38px] touch-manipulation active:scale-95 ${
+              mode === 'register' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Registrati
@@ -114,8 +114,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
 
         {/* Error Alert */}
         {error && (
-          <div className="mx-5 mt-3 p-3 bg-rose-950/40 border border-rose-800/40 rounded-xl text-rose-300 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+          <div className="mx-5 mt-3 p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
             <span>{error}</span>
           </div>
         )}
@@ -124,7 +124,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
         <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs overflow-y-auto flex-1">
           {mode === 'register' && (
             <div>
-              <label className="block mb-1 font-semibold text-slate-300 uppercase tracking-wider text-[10px]">
+              <label className="block mb-1 font-bold text-slate-700 uppercase tracking-wider text-[10px]">
                 Username *
               </label>
               <input
@@ -133,13 +133,13 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="es. marco_rossi"
-                className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#12151b] border border-white/[0.08] text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-all text-xs"
+                className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-slate-100/80 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-xs font-medium"
               />
             </div>
           )}
 
           <div>
-            <label className="block mb-1 font-semibold text-slate-300 uppercase tracking-wider text-[10px]">
+            <label className="block mb-1 font-bold text-slate-700 uppercase tracking-wider text-[10px]">
               {mode === 'login' ? 'Email o Username *' : 'Email *'}
             </label>
             <input
@@ -148,12 +148,12 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={mode === 'register' ? 'nome@esempio.it' : 'Username o email...'}
-              className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#12151b] border border-white/[0.08] text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-all text-xs"
+              className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-slate-100/80 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-xs font-medium"
             />
           </div>
 
           <div>
-            <label className="block mb-1 font-semibold text-slate-300 uppercase tracking-wider text-[10px]">
+            <label className="block mb-1 font-bold text-slate-700 uppercase tracking-wider text-[10px]">
               Password *
             </label>
             <input
@@ -162,7 +162,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#12151b] border border-white/[0.08] text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-all text-xs"
+              className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-slate-100/80 border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all text-xs font-medium"
             />
           </div>
 
@@ -170,7 +170,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full min-h-[44px] py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold disabled:opacity-50 text-xs transition-all shadow-md shadow-blue-600/25 flex items-center justify-center gap-2 active:scale-95"
+              className="w-full min-h-[44px] py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold disabled:opacity-50 text-xs transition-all shadow-md shadow-blue-600/20 flex items-center justify-center gap-2 active:scale-95"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               <span>{mode === 'login' ? 'Accedi' : 'Crea Account'}</span>
