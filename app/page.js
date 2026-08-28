@@ -21,6 +21,7 @@ import {
   AlertCircle,
   X,
   Inbox,
+  Edit2,
 } from 'lucide-react';
 
 export default function Home() {
@@ -147,7 +148,7 @@ export default function Home() {
   const todos = items.filter(
     (i) =>
       i &&
-      (i.type === 'todo' || (!i.type && !i.start_time)) &&
+      (i.type === 'todo' || i.type === 'backlog' || i.type === 'task' || (!i.type && !i.start_time)) &&
       (selectedCategoryFilter === 'all' || i.category === selectedCategoryFilter)
   );
 
@@ -155,18 +156,23 @@ export default function Home() {
     (i) => i && (selectedCategoryFilter === 'all' || i.category === selectedCategoryFilter)
   );
 
+  const handleOpenEditModal = (task) => {
+    setSelectedTaskToEdit(task);
+    setIsMainModalOpen(true);
+  };
+
   return (
     <main className="min-h-screen bg-[#e8ecef] text-slate-900 p-2 sm:p-4 lg:p-6 pb-24 lg:pb-6 font-sans selection:bg-indigo-100 selection:text-indigo-900">
       {/* TOAST SYSTEM NON-BLOCCANTE SOFT LIGHT SLATE-SAND */}
       {toast && (
-        <div className="fixed top-4 right-4 z-[10000] flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-[#f4f6f8] border border-slate-300 shadow-xl shadow-slate-900/10 text-xs font-bold animate-slide-up-sheet text-slate-900">
+        <div className="fixed top-4 right-4 z-[100000] flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-[#f4f6f8] border border-slate-300 shadow-xl shadow-slate-900/10 text-xs font-bold animate-slide-up-sheet text-slate-900">
           {toast.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />}
           {toast.type === 'error' && <AlertCircle className="w-4 h-4 text-rose-700 shrink-0" />}
           {toast.type === 'info' && <Sparkles className="w-4 h-4 text-indigo-700 shrink-0" />}
           <span>{toast.message}</span>
           <button
             onClick={() => setToast(null)}
-            className="ml-2 text-slate-500 hover:text-slate-900"
+            className="ml-2 text-slate-500 hover:text-slate-900 cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -198,7 +204,7 @@ export default function Home() {
               setSelectedTaskToEdit(null);
               setIsMainModalOpen(true);
             }}
-            className="w-full min-h-[44px] px-4 py-2.5 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs transition-all shadow-md shadow-indigo-700/20 flex items-center justify-center gap-2 active:scale-95 touch-manipulation"
+            className="w-full min-h-[44px] px-4 py-2.5 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs transition-all shadow-md shadow-indigo-700/20 flex items-center justify-center gap-2 active:scale-95 touch-manipulation cursor-pointer"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>Nuovo Impegno</span>
@@ -214,7 +220,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setSelectedCategoryFilter('all')}
-                className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-all ${
+                className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
                   selectedCategoryFilter === 'all'
                     ? 'bg-indigo-100 text-indigo-900 border border-indigo-300 shadow-xs'
                     : 'text-slate-700 hover:bg-white/70 hover:text-slate-950'
@@ -234,7 +240,7 @@ export default function Home() {
                     key={key}
                     type="button"
                     onClick={() => setSelectedCategoryFilter(key)}
-                    className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-all ${
+                    className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-indigo-100 text-indigo-900 border border-indigo-300 shadow-xs'
                         : 'text-slate-700 hover:bg-white/70 hover:text-slate-950'
@@ -253,7 +259,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Riepilogo Backlog Sidebar */}
+          {/* Riepilogo Backlog Sidebar con Clic Diretto di Modifica */}
           <div className="flex-1 flex flex-col min-h-0 pt-2 border-t border-slate-300">
             <div className="flex items-center justify-between pb-2">
               <h2 className="text-[10px] font-bold text-slate-600 uppercase tracking-widest flex items-center gap-1.5">
@@ -268,21 +274,25 @@ export default function Home() {
                   Nessuna attività nel backlog.
                 </div>
               ) : (
-                todos.slice(0, 5).map((todo) => {
+                todos.slice(0, 6).map((todo) => {
                   const cat = getCategoryConfig(todo.category);
                   return (
                     <div
                       key={todo.id}
-                      className={`group flex items-center justify-between p-2.5 rounded-xl border transition-all ${cat.bg} ${cat.border} ${
-                        todo.is_completed ? 'opacity-40' : 'hover:shadow-xs'
+                      onClick={() => handleOpenEditModal(todo)}
+                      className={`group flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer ${cat.bg} ${cat.border} ${
+                        todo.is_completed ? 'opacity-40' : 'hover:shadow-xs hover:border-indigo-400 bg-white'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         <button
                           type="button"
-                          onClick={() => toggleComplete(todo.id, todo.is_completed)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleComplete(todo.id, todo.is_completed);
+                          }}
                           aria-label="Segna completato"
-                          className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all shrink-0 ${
+                          className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all shrink-0 cursor-pointer ${
                             todo.is_completed
                               ? 'bg-indigo-700 border-indigo-700 text-white'
                               : 'border-slate-400 hover:border-slate-600 bg-white'
@@ -293,7 +303,7 @@ export default function Home() {
 
                         <div className="min-w-0 flex-1">
                           <p
-                            className={`font-semibold text-xs truncate ${
+                            className={`font-semibold text-xs truncate group-hover:text-indigo-700 transition-colors ${
                               todo.is_completed ? 'line-through text-slate-500' : 'text-slate-900'
                             }`}
                           >
@@ -301,6 +311,8 @@ export default function Home() {
                           </p>
                         </div>
                       </div>
+
+                      <Edit2 className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-700 transition-colors shrink-0" />
                     </div>
                   );
                 })
@@ -326,7 +338,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setActiveTab('calendar')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'calendar'
                     ? 'bg-indigo-700 text-white shadow-sm'
                     : 'text-slate-700 hover:text-slate-950'
@@ -338,7 +350,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setActiveTab('todos')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   activeTab === 'todos'
                     ? 'bg-indigo-700 text-white shadow-sm'
                     : 'text-slate-700 hover:text-slate-950'
@@ -360,7 +372,7 @@ export default function Home() {
             <button
               type="button"
               onClick={() => setSelectedCategoryFilter('all')}
-              className={`px-2.5 py-1 rounded-xl text-[10px] font-bold border whitespace-nowrap shrink-0 transition-all ${
+              className={`px-2.5 py-1 rounded-xl text-[10px] font-bold border whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 selectedCategoryFilter === 'all'
                   ? 'bg-indigo-700 text-white border-indigo-700 shadow-sm'
                   : 'bg-[#f4f6f8] border-slate-300 text-slate-700'
@@ -373,7 +385,7 @@ export default function Home() {
                 key={key}
                 type="button"
                 onClick={() => setSelectedCategoryFilter(key)}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-bold border whitespace-nowrap shrink-0 transition-all ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-bold border whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                   selectedCategoryFilter === key
                     ? 'bg-indigo-700 text-white border-indigo-700 shadow-sm'
                     : `bg-[#f4f6f8] border-slate-300 ${cat.text}`
@@ -400,10 +412,7 @@ export default function Home() {
               <BacklogSection
                 items={items}
                 onToggleComplete={toggleComplete}
-                onEditTask={(task) => {
-                  setSelectedTaskToEdit(task);
-                  setIsMainModalOpen(true);
-                }}
+                onEditTask={handleOpenEditModal}
                 onDeleteTask={handleDeleteTask}
                 onAddNewBacklogTask={() => {
                   setSelectedTaskToEdit(null);
@@ -416,10 +425,7 @@ export default function Home() {
               <BacklogSection
                 items={items}
                 onToggleComplete={toggleComplete}
-                onEditTask={(task) => {
-                  setSelectedTaskToEdit(task);
-                  setIsMainModalOpen(true);
-                }}
+                onEditTask={handleOpenEditModal}
                 onDeleteTask={handleDeleteTask}
                 onAddNewBacklogTask={() => {
                   setSelectedTaskToEdit(null);
