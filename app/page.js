@@ -369,35 +369,37 @@ export default function Home() {
             </div>
           )}
 
-          {/* LEGENDA CATEGORIE MOBILE */}
-          <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 px-1">
-            <button
-              type="button"
-              onClick={() => setSelectedCategoryFilter('all')}
-              className={`px-2.5 py-1 rounded-xl text-[10px] font-bold border whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                selectedCategoryFilter === 'all'
-                  ? 'bg-indigo-700 text-white border-indigo-700 shadow-sm'
-                  : 'bg-[#f4f6f8] border-slate-300 text-slate-700'
-              }`}
-            >
-              Tutte ({items.length})
-            </button>
-            {Object.entries(CATEGORIES).map(([key, cat]) => (
+          {/* LEGENDA CATEGORIE MOBILE (VISIBILE SOLO IN AGENDA) */}
+          {activeTab === 'calendar' && (
+            <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 px-1">
               <button
-                key={key}
                 type="button"
-                onClick={() => setSelectedCategoryFilter(key)}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-bold border whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                  selectedCategoryFilter === key
+                onClick={() => setSelectedCategoryFilter('all')}
+                className={`px-2.5 py-1 rounded-xl text-[10px] font-bold border whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+                  selectedCategoryFilter === 'all'
                     ? 'bg-indigo-700 text-white border-indigo-700 shadow-sm'
-                    : `bg-[#f4f6f8] border-slate-300 ${cat.text}`
+                    : 'bg-[#f4f6f8] border-slate-300 text-slate-700'
                 }`}
               >
-                <span className={`w-1.5 h-1.5 rounded-full ${cat.dot} shrink-0`}></span>
-                <span>{cat.label}</span>
+                Tutte ({items.length})
               </button>
-            ))}
-          </div>
+              {Object.entries(CATEGORIES).map(([key, cat]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setSelectedCategoryFilter(key)}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-bold border whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+                    selectedCategoryFilter === key
+                      ? 'bg-indigo-700 text-white border-indigo-700 shadow-sm'
+                      : `bg-[#f4f6f8] border-slate-300 ${cat.text}`
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${cat.dot} shrink-0`}></span>
+                  <span>{cat.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* VISTE PRINCIPALI SEPARATE NETTAMENTE PER MOBILE */}
           {activeTab === 'calendar' ? (
