@@ -234,7 +234,7 @@ body {
   box-shadow: none !important;
 }
 
-/* SEZIONE ALL-DAY INTEGRATA PERFETTAMENTE NELLA COLONNA DI CIASCUN GIORNO (STYLE APPLE / NOTION CALENDAR) */
+/* SEZIONE ALL-DAY INTEGRATA PERFETTAMENTE E ALLINEATA CON OFFSET COLONNA ORE (MARGIN-LEFT 56px / OFFSET ASSE ORE) */
 .sx__week-grid-all-day,
 .sx__all-day-events-wrapper,
 .sx__week-grid-all-day-days,
@@ -246,6 +246,7 @@ body {
   max-height: none !important;
   overflow: visible !important;
   padding: 4px 0 !important;
+  margin-left: 56px !important; /* CORREZIONE CRITICA ALINEAMENTO: OFFSET PER ASSE ORE SULLA SINISTRA */
 }
 
 .sx__date-grid-cell {
