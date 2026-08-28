@@ -58,11 +58,10 @@ REGOLE PER 'category':
 `;
 
     const CANDIDATE_MODELS = [
-      'gemini-2.5-flash',
-      'gemini-2.0-flash-lite',
       'gemini-2.0-flash',
-      'gemini-2.0-flash-exp',
-      'gemini-1.5-flash'
+      'gemini-2.0-flash-lite',
+      'gemini-1.5-flash',
+      'gemini-1.5-pro',
     ];
 
     let result = null;
@@ -110,8 +109,8 @@ REGOLE PER 'category':
     }
 
     let rawText = result.response.text();
-
-    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+    const cleanText = rawText.replace(/```json\s*|\s*```/g, '').trim();
+    const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error('JSON non valido da AI: ' + rawText);
     }
