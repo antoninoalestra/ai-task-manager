@@ -11,7 +11,7 @@ import {
 } from '@schedule-x/calendar';
 import { createDragAndDropPlugin } from '@schedule-x/drag-and-drop';
 import '@schedule-x/theme-default/dist/index.css';
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { getCategoryConfig } from '@/lib/categories';
 import TaskModal from './TaskModal';
 import {
@@ -56,6 +56,21 @@ function getLocalDateString(input) {
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   const dd = String(d.getDate()).padStart(2, '0');
   return `${yyyy}-${mm}-${dd}`;
+}
+
+function toScheduleXPlainDate(input) {
+  const d = parseToDateObject(input);
+  if (!d) return null;
+
+  try {
+    const yyyy = String(d.getFullYear()).padStart(4, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+
+    return Temporal.PlainDate.from(`${yyyy}-${mm}-${dd}`);
+  } catch {
+    return null;
+  }
 }
 
 function toScheduleXDate(input) {
@@ -323,7 +338,7 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
   );
 }
 
-function InnerCalendar({ events, onEventClick }) {
+function InnerCalendar({ events, onEventClick, customDateGridPill }) {
   const calendar = useCalendarApp({
     views: [createViewDay(), createViewWeek(), createViewMonthGrid()],
     defaultView: createViewWeek().name,
@@ -375,7 +390,14 @@ function InnerCalendar({ events, onEventClick }) {
     },
   });
 
-  return <ScheduleXCalendar calendarApp={calendar} />;
+  return (
+    <ScheduleXCalendar
+      calendarApp={calendar}
+      customComponents={{
+        dateGridEvent: customDateGridPill,
+      }}
+    />
+  );
 }
 
 export default function CalendarView({ items = [], onToggleComplete, onSaveTask, onDeleteTask }) {
@@ -385,7 +407,6 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
   const [initialDate, setInitialDate] = useState('');
   const [isMobile, setIsMobile] = useState(false);
   const [activePopoverDate, setActivePopoverDate] = useState(null);
-  const pillsRowRef = useRef(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -397,33 +418,12 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Riposizionamento dinamico della riga All-Day INSIDE la griglia di Schedule-X subito sotto l'header date!
-  useEffect(() => {
-    if (!isClient || isMobile) return;
-
-    const timer = setTimeout(() => {
-      const weekGrid = document.querySelector('.sx__week-grid');
-      const timeGrid = document.querySelector('.sx__time-grid');
-      const pillsRow = pillsRowRef.current;
-
-      if (weekGrid && timeGrid && pillsRow) {
-        if (pillsRow.parentElement !== weekGrid) {
-          weekGrid.insertBefore(pillsRow, timeGrid);
-        }
-      }
-    }, 50);
-
-    return () => clearTimeout(timer);
-  }, [isClient, isMobile]);
-
-  // I 7 giorni della settimana corrente (Lunedì-Domenica)
   const currentWeekDays = useMemo(() => {
     return getWeekDays(new Date());
   }, []);
 
   const todayStr = getLocalDateString(new Date());
 
-  // Raggruppamento impegni day_task per data YYYY-MM-DD
   const allDayTasksByDate = useMemo(() => {
     const map = {};
     items.forEach((item) => {
@@ -436,9 +436,9 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
     return map;
   }, [items]);
 
-  // Inviamo a Schedule-X SOLTANTO gli eventi ad orario specifico (type === 'event')
+  // Eventi per Schedule-X: sia eventi orari (type === 'event') sia eventi riassuntivi All-Day per ciascun giorno della settimana
   const allCalendarEvents = useMemo(() => {
-    return items
+    const timedEvents = items
       .filter((i) => i && i.type === 'event' && i.start_time)
       .map((item) => {
         const catKey = item.category || 'generico';
@@ -470,7 +470,26 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
         };
       })
       .filter(Boolean);
-  }, [items]);
+
+    // Generiamo 1 evento di riepilogo all-day per ciascun giorno della settimana corrente
+    const allDaySummaryEvents = currentWeekDays.map((day) => {
+      const dayTasks = allDayTasksByDate[day.dateStr] || [];
+      const plainDate = toScheduleXPlainDate(day.dateStr);
+      if (!plainDate) return null;
+
+      return {
+        id: `allday-summary-${day.dateStr}`,
+        title: `${dayTasks.length} impegni`,
+        start: plainDate,
+        end: plainDate,
+        calendarId: 'generico',
+        _taskCount: dayTasks.length,
+        _dateStr: day.dateStr,
+      };
+    }).filter(Boolean);
+
+    return [...timedEvents, ...allDaySummaryEvents];
+  }, [items, currentWeekDays, allDayTasksByDate]);
 
   const calendarKey = useMemo(() => {
     return allCalendarEvents.map((e) => `${e.id}-${e.title}`).join('|');
@@ -506,6 +525,58 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
     return d.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
   }, [activePopoverDate]);
 
+  // Componente Nativo React passato a Schedule-X per ciascuna cella All-Day
+  const customDateGridPill = ({ calendarEvent }) => {
+    const dateStr = calendarEvent._dateStr || (calendarEvent.start ? String(calendarEvent.start) : '');
+    if (!dateStr) return null;
+
+    const count = calendarEvent._taskCount !== undefined ? calendarEvent._taskCount : (allDayTasksByDate[dateStr] || []).length;
+    const isToday = dateStr === todayStr;
+    const isOpen = activePopoverDate === dateStr;
+
+    if (count === 0) {
+      return (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAddNewItem(dateStr);
+          }}
+          title={`Aggiungi evento tutto il giorno`}
+          className="w-full min-h-[28px] py-0.5 px-1 rounded-lg text-[10px] text-slate-400 hover:text-slate-700 hover:bg-white/60 transition-all flex items-center justify-center gap-1 border border-transparent hover:border-slate-300 active:scale-95 cursor-pointer"
+        >
+          <Plus className="w-3 h-3 text-slate-400 opacity-60" />
+          <span className="hidden xl:inline text-[9px] font-medium">Aggiungi</span>
+        </button>
+      );
+    }
+
+    return (
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setActivePopoverDate(isOpen ? null : dateStr);
+        }}
+        className={`w-full min-h-[28px] py-0.5 px-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-between gap-1 shadow-xs active:scale-95 touch-manipulation cursor-pointer ${
+          isToday
+            ? 'bg-indigo-700 text-white shadow-md shadow-indigo-700/25 ring-2 ring-indigo-500/30'
+            : isOpen
+            ? 'bg-indigo-100 text-indigo-900 border border-indigo-300'
+            : 'bg-white text-slate-800 border border-slate-300 hover:border-slate-400 hover:bg-slate-50'
+        }`}
+      >
+        <div className="flex items-center gap-1 min-w-0 truncate">
+          <Sparkles className={`w-3 h-3 shrink-0 ${isToday ? 'text-amber-300' : 'text-indigo-700'}`} />
+          <span className="truncate text-[10px]">
+            {count} {count === 1 ? 'evento' : 'eventi'}
+          </span>
+        </div>
+        <ChevronDown className={`w-3 h-3 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+    );
+  };
+
   return (
     <div className="w-full space-y-4 font-sans">
       {/* CONTENITORE UNIFICATO CALENDARIO VISIVO SOFT SLATE-SAND */}
@@ -521,57 +592,29 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
             onAddNewItem={handleAddNewItem}
           />
         ) : (
-          /* VISTA DESKTOP (GRIGLIA INTERATTIVA SCHEDULE-X + POPOVER DROPDOWNS PER CIASCUN GIORNO) */
+          /* VISTA DESKTOP (GRIGLIA INTERATTIVA SCHEDULE-X CON POPOVER DROPDOWNS NATIVAMENTE INSERITI NELLE CELLE DEL GIORNO) */
           <>
-            {/* RIGA ALL-DAY DROPDOWNS INTEGRATA DIRECTAMENTE SOTTO L'HEADER DELLE DATE DEL GIORNO */}
-            <div
-              ref={pillsRowRef}
-              id="custom-all-day-pills-row"
-              className="ml-[var(--sx-time-axis-width,3.5rem)] w-[calc(100%-var(--sx-time-axis-width,3.5rem))] bg-[#eaf0f4] border-b-2 border-slate-300 py-1 px-0.5"
-            >
-              <div className="grid grid-cols-7 gap-1">
-                {currentWeekDays.map((day) => {
-                  const dayTasks = allDayTasksByDate[day.dateStr] || [];
-                  const count = dayTasks.length;
-                  const isToday = day.dateStr === todayStr;
-                  const isOpen = activePopoverDate === day.dateStr;
+            {/* Header Desktop con info Timezone e Pulsante aggiunta rapida */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 pb-3 border-b border-slate-300/80">
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="w-4.5 h-4.5 text-indigo-700" />
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  Calendario & Timeline Eventi
+                </h3>
+              </div>
 
-                  return (
-                    <div key={day.dateStr} className="relative flex justify-center px-0.5">
-                      {count === 0 ? (
-                        <button
-                          type="button"
-                          onClick={() => handleAddNewItem(day.dateStr)}
-                          title={`Aggiungi evento tutto il giorno per ${day.dayName} ${day.dayNum}`}
-                          className="w-full min-h-[30px] py-0.5 px-1 rounded-lg text-[10px] text-slate-400 hover:text-slate-700 hover:bg-white/60 transition-all flex items-center justify-center gap-1 border border-transparent hover:border-slate-300 active:scale-95"
-                        >
-                          <Plus className="w-3 h-3 text-slate-400 opacity-60" />
-                          <span className="hidden xl:inline text-[9px] font-medium">Aggiungi</span>
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => setActivePopoverDate(isOpen ? null : day.dateStr)}
-                          className={`w-full min-h-[30px] py-0.5 px-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-between gap-1 shadow-xs active:scale-95 touch-manipulation ${
-                            isToday
-                              ? 'bg-indigo-700 text-white shadow-md shadow-indigo-700/25 ring-2 ring-indigo-500/30'
-                              : isOpen
-                              ? 'bg-indigo-100 text-indigo-900 border border-indigo-300'
-                              : 'bg-white text-slate-800 border border-slate-300 hover:border-slate-400 hover:bg-slate-50'
-                          }`}
-                        >
-                          <div className="flex items-center gap-1 min-w-0 truncate">
-                            <Sparkles className={`w-3 h-3 shrink-0 ${isToday ? 'text-amber-300' : 'text-indigo-700'}`} />
-                            <span className="truncate text-[10px]">
-                              {count} {count === 1 ? 'evento' : 'eventi'}
-                            </span>
-                          </div>
-                          <ChevronDown className={`w-3 h-3 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] text-slate-600 bg-[#e1e6eb] px-2.5 py-1 rounded-lg border border-slate-300 font-mono font-bold">
+                  Europe/Rome
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleAddNewItem(new Date().toISOString().split('T')[0])}
+                  className="text-xs text-white bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-xl border border-indigo-700 transition-all flex items-center gap-1.5 font-bold shadow-md shadow-indigo-700/20 active:scale-95"
+                >
+                  <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                  <span>Nuovo Impegno</span>
+                </button>
               </div>
             </div>
 
@@ -585,7 +628,7 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
                 />
 
                 {/* Card Popover Fluttuante Premium */}
-                <div className="absolute top-36 left-1/2 -translate-x-1/2 z-40 w-full max-w-md bg-white border border-slate-300 rounded-2xl shadow-2xl p-4 text-slate-900 space-y-3 animate-fade-in">
+                <div className="absolute top-28 left-1/2 -translate-x-1/2 z-40 w-full max-w-md bg-white border border-slate-300 rounded-2xl shadow-2xl p-4 text-slate-900 space-y-3 animate-fade-in">
                   <div className="flex items-center justify-between border-b border-slate-200 pb-2.5">
                     <div>
                       <h4 className="text-xs font-bold text-slate-900 capitalize">
@@ -688,13 +731,14 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
               </>
             )}
 
-            {/* SCHEDULE-X VISUAL CALENDAR DESKTOP */}
+            {/* SCHEDULE-X VISUAL CALENDAR DESKTOP CON DATE-GRID CUSTOM COMPONENT */}
             {isClient ? (
               <div className="sx-react-calendar-wrapper min-h-[580px]">
                 <InnerCalendar
                   key={calendarKey}
                   events={allCalendarEvents}
                   onEventClick={handleScheduleXEventClick}
+                  customDateGridPill={customDateGridPill}
                 />
               </div>
             ) : (

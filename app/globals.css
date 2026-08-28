@@ -234,20 +234,38 @@ body {
   box-shadow: none !important;
 }
 
-/* DISATTIVIAMO LA STRISCIA GREZZA INTERNA DI SCHEDULE-X IN FAVORE DEL NOSTRO SISTEMA POPOVER DROPDOWN */
+/* SEZIONE ALL-DAY NATIVA RIGOROSAMENTE INSERITA SOTTO L'HEADER IN SCHEDULE-X */
 .sx__week-grid-all-day,
 .sx__all-day-events-wrapper,
 .sx__week-grid-all-day-days,
-.sx__date-grid,
-.sx__date-grid-cell,
-.sx__date-grid-events {
-  display: none !important;
-  height: 0 !important;
-  max-height: 0 !important;
+.sx__date-grid {
+  display: flex !important;
+  background-color: #eaf0f4 !important;
+  border-bottom: 2px solid #cbd5e1 !important;
+  height: auto !important;
+  min-height: 38px !important;
+  max-height: none !important;
+  overflow: visible !important;
+  padding: 3px 0 !important;
+  visibility: visible !important;
+}
+
+.sx__date-grid-cell {
+  border-right: 1px solid #cbd5e1 !important;
+  padding: 2px 4px !important;
+  box-sizing: border-box !important;
+}
+
+.sx__all-day-event,
+.sx__week-grid-all-day-event,
+.sx__event.sx__all-day-event,
+.sx__date-grid-event {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
   padding: 0 !important;
   margin: 0 !important;
-  border: none !important;
-  visibility: hidden !important;
+  width: 100% !important;
 }
 
 .sx__time-grid-event, .sx__event {
