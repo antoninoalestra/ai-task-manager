@@ -25,6 +25,7 @@ import {
   Eye,
   EyeOff,
   Sparkles,
+  Info,
 } from 'lucide-react';
 
 const TIMEZONE = 'Europe/Rome';
@@ -152,7 +153,7 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
           type="button"
           onClick={() => navigateDay(-1)}
           aria-label="Giorno precedente"
-          className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-xl bg-white text-slate-800 hover:text-slate-950 border border-slate-300 active:scale-95 transition-all touch-manipulation"
+          className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-xl bg-white text-slate-800 hover:text-slate-950 border border-slate-300 active:scale-95 transition-all touch-manipulation cursor-pointer"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -163,7 +164,7 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
             <button
               type="button"
               onClick={() => setSelectedDate(getLocalDateString(new Date()))}
-              className="text-[10px] text-indigo-700 font-bold mt-0.5 hover:underline active:scale-95"
+              className="text-[10px] text-indigo-700 font-bold mt-0.5 hover:underline active:scale-95 cursor-pointer"
             >
               Torna ad Oggi
             </button>
@@ -174,7 +175,7 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
           type="button"
           onClick={() => navigateDay(1)}
           aria-label="Giorno successivo"
-          className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-xl bg-white text-slate-800 hover:text-slate-950 border border-slate-300 active:scale-95 transition-all touch-manipulation"
+          className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-xl bg-white text-slate-800 hover:text-slate-950 border border-slate-300 active:scale-95 transition-all touch-manipulation cursor-pointer"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
@@ -187,7 +188,7 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
             key={day.dateStr}
             type="button"
             onClick={() => setSelectedDate(day.dateStr)}
-            className={`flex-1 min-w-[44px] min-h-[48px] py-2 px-1 rounded-xl flex flex-col items-center justify-center transition-all touch-manipulation ${
+            className={`flex-1 min-w-[44px] min-h-[48px] py-2 px-1 rounded-xl flex flex-col items-center justify-center transition-all touch-manipulation cursor-pointer ${
               day.isSelected
                 ? 'bg-indigo-700 text-white font-bold shadow-md shadow-indigo-700/20 scale-105'
                 : day.isToday
@@ -212,7 +213,7 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
         <button
           type="button"
           onClick={() => onAddNewItem(selectedDate)}
-          className="min-h-[40px] px-3.5 py-1.5 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-md shadow-indigo-700/20 active:scale-95 touch-manipulation"
+          className="min-h-[40px] px-3.5 py-1.5 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-md shadow-indigo-700/20 active:scale-95 touch-manipulation cursor-pointer"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>Nuovo Evento</span>
@@ -256,7 +257,7 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
                       type="button"
                       onClick={() => onToggleComplete && onToggleComplete(item.id, item.is_completed)}
                       aria-label="Segna come completato"
-                      className={`min-w-[36px] min-h-[36px] w-9 h-9 rounded-xl border flex items-center justify-center transition-all shrink-0 active:scale-95 touch-manipulation ${
+                      className={`min-w-[36px] min-h-[36px] w-9 h-9 rounded-xl border flex items-center justify-center transition-all shrink-0 active:scale-95 touch-manipulation cursor-pointer ${
                         item.is_completed
                           ? 'bg-indigo-700 border-indigo-700 text-white'
                           : 'border-slate-400 hover:border-slate-600 bg-white'
@@ -298,7 +299,7 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
                   <button
                     type="button"
                     onClick={() => onDeleteItem && onDeleteItem(item.id)}
-                    className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-slate-500 hover:text-rose-700 transition-colors shrink-0 active:scale-95 touch-manipulation"
+                    className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-slate-500 hover:text-rose-700 transition-colors shrink-0 active:scale-95 touch-manipulation cursor-pointer"
                     title="Elimina"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -374,6 +375,8 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
   const [taskToEdit, setTaskToEdit] = useState(null);
   const [initialDate, setInitialDate] = useState('');
   const [isMobile, setIsMobile] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState(null);
+  const [hoverPos, setHoverPos] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     setIsClient(true);
@@ -456,8 +459,27 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
     setModalOpen(true);
   };
 
+  const handleCalendarMouseOver = (e) => {
+    const eventElem = e.target.closest('.sx__event, .sx__all-day-event, .sx__date-grid-event, .sx__time-grid-event');
+    if (eventElem) {
+      const textContent = eventElem.textContent || '';
+      const matched = items.find((i) => i.title && textContent.toLowerCase().includes(i.title.toLowerCase()));
+      if (matched) {
+        setHoveredItem(matched);
+        setHoverPos({ x: e.clientX, y: e.clientY });
+      }
+    }
+  };
+
+  const handleCalendarMouseOut = (e) => {
+    const eventElem = e.target.closest('.sx__event, .sx__all-day-event, .sx__date-grid-event, .sx__time-grid-event');
+    if (eventElem && !e.relatedTarget?.closest('.sx__event, .sx__all-day-event, .sx__date-grid-event, .sx__time-grid-event')) {
+      setHoveredItem(null);
+    }
+  };
+
   return (
-    <div className="w-full space-y-4 font-sans">
+    <div className="w-full space-y-4 font-sans relative">
       {/* CONTENITORE UNIFICATO CALENDARIO VISIVO SOFT SLATE-SAND */}
       <div className="bg-[#f4f6f8] border border-slate-300 rounded-2xl p-3.5 sm:p-5 shadow-sm overflow-hidden min-h-[520px] relative">
         
@@ -471,7 +493,7 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
             onAddNewItem={handleAddNewItem}
           />
         ) : (
-          /* VISTA DESKTOP (GRIGLIA INTERATTIVA SCHEDULE-X CON EVENTI ALL-DAY DIRETTI ED ALLINEATI A 3.5rem) */
+          /* VISTA DESKTOP (GRIGLIA INTERATTIVA SCHEDULE-X CON HOVER TOOLTIP RESOCONTO EVENTO) */
           <>
             {/* Header Desktop con info Timezone e Pulsante aggiunta rapida */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3 pb-3 border-b border-slate-300/80">
@@ -489,7 +511,7 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
                 <button
                   type="button"
                   onClick={() => handleAddNewItem(new Date().toISOString().split('T')[0])}
-                  className="text-xs text-white bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-xl border border-indigo-700 transition-all flex items-center gap-1.5 font-bold shadow-md shadow-indigo-700/20 active:scale-95"
+                  className="text-xs text-white bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-xl border border-indigo-700 transition-all flex items-center gap-1.5 font-bold shadow-md shadow-indigo-700/20 active:scale-95 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                   <span>Nuovo Impegno</span>
@@ -499,7 +521,11 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
 
             {/* SCHEDULE-X VISUAL CALENDAR DESKTOP */}
             {isClient ? (
-              <div className="sx-react-calendar-wrapper min-h-[580px]">
+              <div
+                className="sx-react-calendar-wrapper min-h-[580px]"
+                onMouseOver={handleCalendarMouseOver}
+                onMouseOut={handleCalendarMouseOut}
+              >
                 <InnerCalendar
                   key={calendarKey}
                   events={allCalendarEvents}
@@ -514,6 +540,68 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
           </>
         )}
       </div>
+
+      {/* FLOATING HOVER TOOLTIP CARD PER EVENTI DEL CALENDARIO */}
+      {hoveredItem && (
+        <div
+          style={{
+            top: Math.min(hoverPos.y + 14, typeof window !== 'undefined' ? window.innerHeight - 240 : hoverPos.y),
+            left: Math.min(hoverPos.x + 14, typeof window !== 'undefined' ? window.innerWidth - 340 : hoverPos.x),
+          }}
+          className="fixed z-[99999] w-80 bg-white border border-slate-300 rounded-2xl shadow-2xl p-4 space-y-2.5 text-slate-900 animate-fade-in pointer-events-none"
+        >
+          {(() => {
+            const cat = getCategoryConfig(hoveredItem.category);
+            const dStart = parseToDateObject(hoveredItem.start_time);
+            const dateFormatted = dStart
+              ? dStart.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'long' })
+              : 'Data da definire';
+            const timeFormatted = dStart && hoveredItem.type === 'event'
+              ? dStart.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
+              : 'Tutto il Giorno';
+
+            return (
+              <>
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className={`w-2 h-2 rounded-full ${cat.dot}`}></span>
+                    <span className={`text-[10px] font-bold uppercase tracking-wider ${cat.text}`}>
+                      {cat.label}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                    {dateFormatted} · {timeFormatted}
+                  </span>
+                </div>
+
+                <div>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">
+                    Titolo Impegno
+                  </span>
+                  <h4 className="text-xs font-bold leading-snug text-slate-900">{hoveredItem.title}</h4>
+                </div>
+
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1">
+                  <div className="flex items-center gap-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    <Info className="w-3 h-3 text-indigo-600" />
+                    <span>Resoconto & Dettagli</span>
+                  </div>
+                  <p className="text-[11px] text-slate-700 leading-relaxed whitespace-pre-wrap max-h-36 overflow-y-auto">
+                    {hoveredItem.description || 'Nessuna descrizione o resoconto aggiuntivo per questo evento.'}
+                  </p>
+                </div>
+
+                <div className="text-[10px] text-indigo-700 font-bold flex items-center justify-between pt-1 border-t border-slate-100">
+                  <span className="flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-indigo-600" />
+                    <span>Clicca sull'evento per modificarne i dettagli</span>
+                  </span>
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      )}
 
       {/* Modal Inserimento e Modifica Manuale */}
       <TaskModal
