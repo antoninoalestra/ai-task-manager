@@ -138,12 +138,12 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
   return (
     <div className="space-y-4">
       {/* BARRA NAVIGAZIONE GIORNO MOBILE */}
-      <div className="flex items-center justify-between bg-[#131722] border border-white/10 rounded-2xl p-2 shadow-lg">
+      <div className="flex items-center justify-between bg-[#181c24] border border-white/[0.08] rounded-2xl p-2 shadow-lg">
         <button
           type="button"
           onClick={() => navigateDay(-1)}
           aria-label="Giorno precedente"
-          className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-xl bg-[#1b2130] text-slate-300 hover:text-white border border-white/10 active:scale-95 transition-all touch-manipulation"
+          className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-xl bg-[#12151b] text-slate-300 hover:text-white border border-white/[0.06] active:scale-95 transition-all touch-manipulation"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -154,7 +154,7 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
             <button
               type="button"
               onClick={() => setSelectedDate(getLocalDateString(new Date()))}
-              className="text-[10px] text-indigo-400 font-semibold mt-0.5 hover:underline active:scale-95"
+              className="text-[10px] text-blue-400 font-semibold mt-0.5 hover:underline active:scale-95"
             >
               Torna ad Oggi
             </button>
@@ -165,14 +165,14 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
           type="button"
           onClick={() => navigateDay(1)}
           aria-label="Giorno successivo"
-          className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-xl bg-[#1b2130] text-slate-300 hover:text-white border border-white/10 active:scale-95 transition-all touch-manipulation"
+          className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-xl bg-[#12151b] text-slate-300 hover:text-white border border-white/[0.06] active:scale-95 transition-all touch-manipulation"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
       </div>
 
       {/* STRISCIA SELEZIONE 7 GIORNI */}
-      <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar p-1.5 bg-[#090a0f] border border-white/10 rounded-2xl">
+      <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar p-1.5 bg-[#0d0f12] border border-white/[0.06] rounded-2xl">
         {daysStrip.map((day) => (
           <button
             key={day.dateStr}
@@ -180,14 +180,14 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
             onClick={() => setSelectedDate(day.dateStr)}
             className={`flex-1 min-w-[44px] min-h-[48px] py-2 px-1 rounded-xl flex flex-col items-center justify-center transition-all touch-manipulation ${
               day.isSelected
-                ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30 scale-105'
-                : 'text-slate-400 hover:text-white bg-[#131722]'
+                ? 'bg-blue-600 text-white font-bold shadow-md shadow-blue-600/25 scale-105'
+                : 'text-slate-400 hover:text-white bg-[#181c24]'
             }`}
           >
             <span className="text-[9px] font-bold tracking-wider uppercase">{day.dayName}</span>
             <span className="text-xs font-bold mt-0.5 tabular-nums">{day.dayNum}</span>
             {day.hasEvents && (
-              <span className={`w-1.5 h-1.5 rounded-full mt-1 ${day.isSelected ? 'bg-white' : 'bg-indigo-400'}`}></span>
+              <span className={`w-1.5 h-1.5 rounded-full mt-1 ${day.isSelected ? 'bg-white' : 'bg-blue-400'}`}></span>
             )}
           </button>
         ))}
@@ -201,7 +201,7 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
         <button
           type="button"
           onClick={() => onAddNewItem(selectedDate)}
-          className="min-h-[40px] px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-md shadow-indigo-600/30 active:scale-95 touch-manipulation"
+          className="min-h-[40px] px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-all flex items-center gap-1.5 shadow-md shadow-blue-600/25 active:scale-95 touch-manipulation"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>Nuovo Evento</span>
@@ -210,13 +210,13 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
 
       {/* STREAM CARD ELEGANTE A TUTTA LARGHEZZA */}
       {dayItems.length === 0 ? (
-        <div className="bg-[#131722] border border-white/10 rounded-2xl p-8 text-center text-slate-400 text-xs space-y-2">
+        <div className="bg-[#181c24] border border-white/[0.08] rounded-2xl p-8 text-center text-slate-400 text-xs space-y-2">
           <CalendarIcon className="w-8 h-8 mx-auto text-slate-500 stroke-[1.75]" />
           <p className="font-semibold text-slate-300">Nessun impegno per questo giorno.</p>
           <p className="text-[11px] text-slate-500">Usa l'input vocale o premi "+ Nuovo Evento".</p>
         </div>
       ) : (
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           {dayItems.map((item) => {
             const cat = getCategoryConfig(item.category);
             const isEvent = item.type === 'event' && item.start_time;
@@ -235,8 +235,8 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
             return (
               <div
                 key={item.id}
-                className={`p-3.5 rounded-2xl border transition-all ${cat.bg} ${cat.border} ${
-                  item.is_completed ? 'opacity-40' : 'shadow-md hover:border-slate-400'
+                className={`p-3.5 rounded-xl border transition-all ${cat.bg} ${cat.border} ${
+                  item.is_completed ? 'opacity-40' : 'hover:bg-[#1f242e] shadow-sm'
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -247,8 +247,8 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
                       aria-label="Segna come completato"
                       className={`min-w-[36px] min-h-[36px] w-9 h-9 rounded-xl border flex items-center justify-center transition-all shrink-0 active:scale-95 touch-manipulation ${
                         item.is_completed
-                          ? 'bg-indigo-600 border-indigo-500 text-white'
-                          : 'border-slate-400 hover:border-white bg-slate-950/60'
+                          ? 'bg-blue-600 border-blue-500 text-white'
+                          : 'border-slate-500 hover:border-white bg-[#12151b]'
                       }`}
                     >
                       {item.is_completed && <Check className="w-4 h-4 stroke-[3]" />}
@@ -259,8 +259,8 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
                       className="cursor-pointer min-w-0 flex-1"
                     >
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold uppercase tracking-wider ${
-                          isEvent ? 'bg-indigo-950/80 text-indigo-300 border border-indigo-800/60' : 'bg-slate-900 text-slate-300 border border-slate-700'
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider ${
+                          isEvent ? 'bg-blue-950/80 text-blue-300 border border-blue-800/50' : 'bg-[#12151b] text-slate-300 border border-white/[0.06]'
                         }`}>
                           {timeString}
                         </span>
@@ -272,14 +272,14 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
 
                       <h3
                         className={`text-xs font-bold truncate leading-snug ${
-                          item.is_completed ? 'line-through text-slate-400' : 'text-white'
+                          item.is_completed ? 'line-through text-slate-400' : 'text-slate-100'
                         }`}
                       >
                         {item.title}
                       </h3>
 
                       {item.description && (
-                        <p className="text-[11px] text-slate-300 mt-1 line-clamp-2 leading-relaxed">{item.description}</p>
+                        <p className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{item.description}</p>
                       )}
                     </div>
                   </div>
@@ -287,7 +287,7 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
                   <button
                     type="button"
                     onClick={() => onDeleteItem && onDeleteItem(item.id)}
-                    className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-slate-400 hover:text-red-400 transition-colors shrink-0 active:scale-95 touch-manipulation"
+                    className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-400 transition-colors shrink-0 active:scale-95 touch-manipulation"
                     title="Elimina"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -310,38 +310,38 @@ function InnerCalendar({ events, onEventClick }) {
     calendars: {
       casa: {
         colorName: 'casa',
-        lightColors: { main: '#ff9500', container: '#382100', onContainer: '#ffe6cc' },
-        darkColors: { main: '#ff9500', container: 'rgba(255, 149, 0, 0.45)', onContainer: '#ffffff' },
+        lightColors: { main: '#f97316', container: '#331a00', onContainer: '#ffedd5' },
+        darkColors: { main: '#f97316', container: 'rgba(249, 115, 22, 0.25)', onContainer: '#ffffff' },
       },
       universita: {
         colorName: 'universita',
-        lightColors: { main: '#af52de', container: '#2c0740', onContainer: '#f5e6ff' },
-        darkColors: { main: '#c084fc', container: 'rgba(192, 132, 252, 0.45)', onContainer: '#ffffff' },
+        lightColors: { main: '#f59e0b', container: '#332200', onContainer: '#fef3c7' },
+        darkColors: { main: '#f59e0b', container: 'rgba(245, 158, 11, 0.25)', onContainer: '#ffffff' },
       },
       lavoro: {
         colorName: 'lavoro',
-        lightColors: { main: '#007aff', container: '#002047', onContainer: '#cce5ff' },
-        darkColors: { main: '#60a5fa', container: 'rgba(96, 165, 250, 0.45)', onContainer: '#ffffff' },
+        lightColors: { main: '#3b82f6', container: '#001a4d', onContainer: '#dbeafe' },
+        darkColors: { main: '#3b82f6', container: 'rgba(59, 130, 246, 0.25)', onContainer: '#ffffff' },
       },
       personale: {
         colorName: 'personale',
-        lightColors: { main: '#34c759', container: '#053310', onContainer: '#d4f5dd' },
-        darkColors: { main: '#4ade80', container: 'rgba(74, 222, 128, 0.45)', onContainer: '#ffffff' },
+        lightColors: { main: '#10b981', container: '#00261a', onContainer: '#d1fae5' },
+        darkColors: { main: '#10b981', container: 'rgba(16, 185, 129, 0.25)', onContainer: '#ffffff' },
       },
       salute: {
         colorName: 'salute',
-        lightColors: { main: '#ff2d55', container: '#3d000b', onContainer: '#ffe0e6' },
-        darkColors: { main: '#fb7185', container: 'rgba(251, 113, 133, 0.45)', onContainer: '#ffffff' },
+        lightColors: { main: '#f43f5e', container: '#33000d', onContainer: '#ffe4e6' },
+        darkColors: { main: '#f43f5e', container: 'rgba(244, 63, 94, 0.25)', onContainer: '#ffffff' },
       },
       finanze: {
         colorName: 'finanze',
-        lightColors: { main: '#5856d6', container: '#1a194d', onContainer: '#e0e0ff' },
-        darkColors: { main: '#818cf8', container: 'rgba(129, 140, 248, 0.45)', onContainer: '#ffffff' },
+        lightColors: { main: '#6366f1', container: '#121340', onContainer: '#e0e7ff' },
+        darkColors: { main: '#6366f1', container: 'rgba(99, 102, 241, 0.25)', onContainer: '#ffffff' },
       },
       generico: {
         colorName: 'generico',
-        lightColors: { main: '#8e8e93', container: '#242429', onContainer: '#e5e5ea' },
-        darkColors: { main: '#94a3b8', container: 'rgba(148, 163, 184, 0.45)', onContainer: '#ffffff' },
+        lightColors: { main: '#94a3b8', container: '#1e2430', onContainer: '#f1f5f9' },
+        darkColors: { main: '#94a3b8', container: 'rgba(148, 163, 184, 0.25)', onContainer: '#ffffff' },
       },
     },
     plugins: [createDragAndDropPlugin()],
@@ -477,7 +477,7 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
   return (
     <div className="w-full space-y-4 font-sans">
       {/* CONTENITORE UNIFICATO CALENDARIO VISIVO */}
-      <div className="bg-[#131722] border border-white/10 rounded-2xl p-3.5 sm:p-5 shadow-2xl overflow-hidden min-h-[520px]">
+      <div className="bg-[#181c24] border border-white/[0.08] rounded-2xl p-3.5 sm:p-5 shadow-2xl overflow-hidden min-h-[520px]">
         
         {/* VISTA MOBILE AD-HOC PER SMARTPHONE (< 640px) */}
         {isMobile ? (
@@ -492,9 +492,9 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
           /* VISTA DESKTOP (GRIGLIA INTERATTIVA SCHEDULE-X) */
           <>
             {/* Header Desktop con toggle per Quick-Bar Task del Giorno */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-white/10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-white/[0.06]">
               <div className="flex items-center gap-2">
-                <CalendarIcon className="w-4 h-4 text-indigo-400" />
+                <CalendarIcon className="w-4 h-4 text-blue-400" />
                 <h3 className="text-xs font-bold text-slate-200 uppercase tracking-wider">
                   Calendario & Timeline Eventi
                 </h3>
@@ -504,12 +504,12 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
                 <button
                   type="button"
                   onClick={() => setShowAllDayBar(!showAllDayBar)}
-                  className="text-xs text-slate-300 bg-[#1b2130] hover:bg-white/10 px-3 py-1.5 rounded-xl border border-white/10 transition-all flex items-center gap-1.5 font-medium active:scale-95"
+                  className="text-xs text-slate-300 bg-[#12151b] hover:bg-white/5 px-3 py-1.5 rounded-xl border border-white/[0.06] transition-all flex items-center gap-1.5 font-medium active:scale-95"
                 >
                   {showAllDayBar ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   <span>{showAllDayBar ? 'Nascondi' : 'Mostra'} Quick Bar ({dayTasks.length})</span>
                 </button>
-                <span className="text-[10px] text-slate-400 bg-[#1b2130] px-2.5 py-1 rounded-lg border border-white/10 font-mono">
+                <span className="text-[10px] text-slate-400 bg-[#12151b] px-2.5 py-1 rounded-lg border border-white/[0.06] font-mono">
                   Europe/Rome
                 </span>
               </div>
@@ -517,13 +517,13 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
 
             {/* BARRA EVENTI DEL GIORNO (TUTTO IL GIORNO) */}
             {showAllDayBar && (
-              <div className="mb-4 p-3.5 bg-[#090a0f] border border-white/10 rounded-2xl space-y-3 shadow-inner">
-                <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+              <div className="mb-4 p-3.5 bg-[#12151b] border border-white/[0.06] rounded-2xl space-y-3 shadow-inner">
+                <div className="flex items-center justify-between border-b border-white/[0.06] pb-2.5">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[11px] font-bold text-slate-200 uppercase tracking-wider">
                       Eventi Tutto il Giorno
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] bg-indigo-950/80 text-indigo-300 border border-indigo-800/60 font-semibold font-mono">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] bg-blue-950/60 text-blue-300 border border-blue-800/40 font-semibold font-mono">
                       {dayTasks.length} impegni {completedDayTasksCount > 0 ? `(${completedDayTasksCount} completati)` : ''}
                     </span>
                   </div>
@@ -532,7 +532,7 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
                     <button
                       type="button"
                       onClick={() => handleAddNewItem(new Date().toISOString().split('T')[0])}
-                      className="text-xs text-white bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-xl border border-indigo-500/50 transition-all flex items-center gap-1.5 font-bold shadow-md shadow-indigo-600/30 active:scale-95"
+                      className="text-xs text-white bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded-xl border border-blue-500/50 transition-all flex items-center gap-1.5 font-bold shadow-md shadow-blue-600/25 active:scale-95"
                     >
                       <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                       <span>Aggiungi Evento</span>
@@ -541,12 +541,12 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
                 </div>
 
                 {dayTasks.length === 0 ? (
-                  <div className="py-2.5 px-3.5 text-slate-400 text-xs flex items-center justify-between bg-[#131722] border border-white/10 rounded-xl">
+                  <div className="py-2.5 px-3.5 text-slate-400 text-xs flex items-center justify-between bg-[#181c24] border border-white/[0.06] rounded-xl">
                     <span>Nessun evento tutto il giorno in programma per oggi.</span>
                     <button
                       type="button"
                       onClick={() => handleAddNewItem(new Date().toISOString().split('T')[0])}
-                      className="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold underline underline-offset-2"
+                      className="text-[11px] text-blue-400 hover:text-blue-300 font-semibold underline underline-offset-2"
                     >
                       + Crea Evento
                     </button>
@@ -560,7 +560,7 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
                         <div
                           key={task.id}
                           className={`flex items-center justify-between p-2 px-3 rounded-xl border text-xs transition-all ${cat.bg} ${cat.border} ${
-                            task.is_completed ? 'opacity-40' : 'hover:border-slate-300 shadow-md'
+                            task.is_completed ? 'opacity-40' : 'hover:border-slate-400 shadow-sm'
                           }`}
                         >
                           <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -570,8 +570,8 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
                               aria-label="Segna come completato"
                               className={`min-w-[24px] min-h-[24px] w-6 h-6 rounded-lg border flex items-center justify-center transition-all shrink-0 active:scale-95 touch-manipulation ${
                                 task.is_completed
-                                  ? 'bg-indigo-600 border-indigo-500 text-white'
-                                  : 'border-slate-400 hover:border-white bg-slate-950/60'
+                                  ? 'bg-blue-600 border-blue-500 text-white'
+                                  : 'border-slate-400 hover:border-white bg-[#12151b]'
                               }`}
                             >
                               {task.is_completed && <Check className="w-3 h-3 stroke-[3]" />}
@@ -583,7 +583,7 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
                             >
                               <p
                                 className={`font-bold text-xs truncate ${
-                                  task.is_completed ? 'line-through text-slate-400' : 'text-white'
+                                  task.is_completed ? 'line-through text-slate-400' : 'text-slate-100'
                                 }`}
                               >
                                 {task.title}

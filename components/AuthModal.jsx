@@ -60,22 +60,22 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-md transition-opacity">
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/75 backdrop-blur-md transition-opacity">
       {/* Backdrop overlay clickable */}
       <div className="absolute inset-0" onClick={onClose} />
 
       {/* Modal / Bottom Sheet Container */}
-      <div className="relative w-full max-w-md bg-[#131722] border-t sm:border border-white/10 rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden text-slate-100 max-h-[85dvh] sm:max-h-[90vh] flex flex-col z-10 animate-slide-up-sheet sm:animate-none">
+      <div className="relative w-full max-w-md bg-[#181c24] border-t sm:border border-white/[0.08] rounded-t-3xl sm:rounded-2xl shadow-2xl shadow-black/50 overflow-hidden text-slate-100 max-h-[85dvh] sm:max-h-[90vh] flex flex-col z-10 animate-slide-up-sheet sm:animate-none">
         
         {/* Mobile Drag Handle */}
         <div className="sm:hidden flex items-center justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing">
-          <div className="w-12 h-1.5 bg-slate-600/80 rounded-full" />
+          <div className="w-12 h-1 bg-slate-600/60 rounded-full" />
         </div>
 
         {/* Header Modal */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/10 bg-[#090a0f]/80">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06] bg-[#13161b]">
           <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-indigo-400" />
+            <User className="w-4 h-4 text-blue-400" />
             <h2 className="text-xs font-bold tracking-wider uppercase text-slate-200">
               {mode === 'login' ? 'Accedi al tuo Profilo' : 'Crea nuovo Profilo'}
             </h2>
@@ -91,12 +91,12 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
         </div>
 
         {/* Tab Switcher Accedi / Registrati */}
-        <div className="p-1 mx-5 mt-4 bg-[#1b2130] border border-white/10 rounded-xl flex items-center shrink-0">
+        <div className="p-1 mx-5 mt-4 bg-[#12151b] border border-white/[0.06] rounded-xl flex items-center shrink-0">
           <button
             type="button"
             onClick={() => { setMode('login'); setError(''); }}
-            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all min-h-[38px] touch-manipulation active:scale-95 ${
-              mode === 'login' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all min-h-[38px] touch-manipulation active:scale-95 ${
+              mode === 'login' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
             }`}
           >
             Accedi
@@ -104,8 +104,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
           <button
             type="button"
             onClick={() => { setMode('register'); setError(''); }}
-            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all min-h-[38px] touch-manipulation active:scale-95 ${
-              mode === 'register' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all min-h-[38px] touch-manipulation active:scale-95 ${
+              mode === 'register' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
             }`}
           >
             Registrati
@@ -114,8 +114,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
 
         {/* Error Alert */}
         {error && (
-          <div className="mx-5 mt-3 p-3 bg-red-950/50 border border-red-800/50 rounded-xl text-red-300 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+          <div className="mx-5 mt-3 p-3 bg-rose-950/40 border border-rose-800/40 rounded-xl text-rose-300 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
             <span>{error}</span>
           </div>
         )}
@@ -133,7 +133,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="es. marco_rossi"
-                className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#1b2130] border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all text-xs"
+                className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#12151b] border border-white/[0.08] text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-all text-xs"
               />
             </div>
           )}
@@ -148,7 +148,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={mode === 'register' ? 'nome@esempio.it' : 'Username o email...'}
-              className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#1b2130] border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all text-xs"
+              className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#12151b] border border-white/[0.08] text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-all text-xs"
             />
           </div>
 
@@ -162,7 +162,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#1b2130] border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all text-xs"
+              className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#12151b] border border-white/[0.08] text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-all text-xs"
             />
           </div>
 
@@ -170,7 +170,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full min-h-[44px] py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold disabled:opacity-50 text-xs transition-all shadow-md shadow-indigo-600/30 flex items-center justify-center gap-2 active:scale-95"
+              className="w-full min-h-[44px] py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold disabled:opacity-50 text-xs transition-all shadow-md shadow-blue-600/25 flex items-center justify-center gap-2 active:scale-95"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               <span>{mode === 'login' ? 'Accedi' : 'Crea Account'}</span>

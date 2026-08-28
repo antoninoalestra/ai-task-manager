@@ -154,13 +154,13 @@ export default function Home() {
   );
 
   return (
-    <main className="min-h-screen bg-[#090a0f] text-slate-100 p-2 sm:p-4 lg:p-6 pb-24 lg:pb-6 font-sans selection:bg-indigo-900 selection:text-white">
+    <main className="min-h-screen bg-[#0d0f12] text-[#f1f5f9] p-2 sm:p-4 lg:p-6 pb-24 lg:pb-6 font-sans selection:bg-blue-900 selection:text-white">
       {/* TOAST SYSTEM NON-BLOCCANTE */}
       {toast && (
-        <div className="fixed top-4 right-4 z-[10000] flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-[#131722] border border-white/15 shadow-2xl text-xs font-semibold animate-slide-up-sheet text-white">
+        <div className="fixed top-4 right-4 z-[10000] flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-[#181c24] border border-white/[0.08] shadow-2xl text-xs font-semibold animate-slide-up-sheet text-[#f1f5f9]">
           {toast.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
-          {toast.type === 'error' && <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />}
-          {toast.type === 'info' && <Sparkles className="w-4 h-4 text-indigo-400 shrink-0" />}
+          {toast.type === 'error' && <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />}
+          {toast.type === 'info' && <Sparkles className="w-4 h-4 text-blue-400 shrink-0" />}
           <span>{toast.message}</span>
           <button
             onClick={() => setToast(null)}
@@ -174,16 +174,16 @@ export default function Home() {
       {/* WORKSPACE PRINCIPALE CON SPLIT-PANE DESKTOP */}
       <div className="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 min-h-[92vh]">
         
-        {/* SIDEBAR SINISTRA DESKTOP (PANNELLO INBOX / TO-DO & CATEGORIE) */}
-        <aside className="hidden lg:flex lg:col-span-3 flex-col bg-[#131722] border border-white/10 rounded-2xl p-5 shadow-2xl space-y-6">
+        {/* SIDEBAR SINISTRA DESKTOP (SURFACE SUBTLE #13161b) */}
+        <aside className="hidden lg:flex lg:col-span-3 flex-col bg-[#13161b] border border-white/[0.06] rounded-2xl p-5 shadow-xl space-y-6">
           {/* Header Brand */}
-          <div className="flex items-center justify-between border-b border-white/10 pb-4">
+          <div className="flex items-center justify-between border-b border-white/[0.06] pb-4">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-lg shadow-indigo-600/30">
+              <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-md shadow-blue-600/25">
                 <CalendarCheck2 className="w-5 h-5 stroke-[2]" />
               </div>
               <div>
-                <h1 className="text-sm font-bold tracking-tight text-white">AI Task Manager</h1>
+                <h1 className="text-sm font-bold tracking-tight text-[#f1f5f9]">AI Task Manager</h1>
                 <p className="text-[10px] text-slate-400 font-mono">Personal Workspace</p>
               </div>
             </div>
@@ -196,7 +196,7 @@ export default function Home() {
               setSelectedTaskToEdit(null);
               setIsMainModalOpen(true);
             }}
-            className="w-full min-h-[44px] px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 active:scale-95 touch-manipulation"
+            className="w-full min-h-[44px] px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition-all shadow-md shadow-blue-600/25 flex items-center justify-center gap-2 active:scale-95 touch-manipulation"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
             <span>Nuovo Impegno</span>
@@ -214,7 +214,7 @@ export default function Home() {
                 onClick={() => setSelectedCategoryFilter('all')}
                 className={`w-full px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-all ${
                   selectedCategoryFilter === 'all'
-                    ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/40'
+                    ? 'bg-blue-600/20 text-blue-300 border border-blue-500/30'
                     : 'text-slate-400 hover:bg-white/5 hover:text-white'
                 }`}
               >
@@ -234,7 +234,7 @@ export default function Home() {
                     onClick={() => setSelectedCategoryFilter(key)}
                     className={`w-full px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-between transition-all ${
                       isSelected
-                        ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/40'
+                        ? 'bg-blue-600/20 text-blue-300 border border-blue-500/30'
                         : 'text-slate-400 hover:bg-white/5 hover:text-white'
                     }`}
                   >
@@ -252,7 +252,7 @@ export default function Home() {
           </div>
 
           {/* Lista To-Do Generici nella Sidebar */}
-          <div className="flex-1 flex flex-col min-h-0 pt-2 border-t border-white/10">
+          <div className="flex-1 flex flex-col min-h-0 pt-2 border-t border-white/[0.06]">
             <div className="flex items-center justify-between pb-2">
               <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
                 <CheckSquare className="w-3.5 h-3.5 text-slate-500" />
@@ -272,7 +272,7 @@ export default function Home() {
                     <div
                       key={todo.id}
                       className={`group flex items-center justify-between p-2.5 rounded-xl border transition-all ${cat.bg} ${cat.border} ${
-                        todo.is_completed ? 'opacity-40' : 'hover:border-slate-400 shadow-sm'
+                        todo.is_completed ? 'opacity-40' : 'hover:bg-[#181c24] shadow-sm'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -282,8 +282,8 @@ export default function Home() {
                           aria-label="Segna completato"
                           className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all shrink-0 ${
                             todo.is_completed
-                              ? 'bg-indigo-600 border-indigo-500 text-white'
-                              : 'border-slate-400 hover:border-white bg-slate-950/60'
+                              ? 'bg-blue-600 border-blue-500 text-white'
+                              : 'border-slate-500 hover:border-white bg-[#12151b]'
                           }`}
                         >
                           {todo.is_completed && <Check className="w-2.5 h-2.5 stroke-[3]" />}
@@ -292,7 +292,7 @@ export default function Home() {
                         <div className="min-w-0 flex-1">
                           <p
                             className={`font-semibold text-xs truncate ${
-                              todo.is_completed ? 'line-through text-slate-400' : 'text-white'
+                              todo.is_completed ? 'line-through text-slate-400' : 'text-[#f1f5f9]'
                             }`}
                           >
                             {todo.title}
@@ -309,7 +309,7 @@ export default function Home() {
                       <button
                         type="button"
                         onClick={() => handleDeleteTask(todo.id)}
-                        className="text-slate-500 hover:text-red-400 p-1 transition-colors opacity-0 group-hover:opacity-100"
+                        className="text-slate-500 hover:text-rose-400 p-1 transition-colors opacity-0 group-hover:opacity-100"
                         title="Elimina"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -326,22 +326,22 @@ export default function Home() {
         <section className="lg:col-span-9 flex flex-col space-y-5">
           
           {/* HEADER MOBILE (< 1024px) */}
-          <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-[#131722] border border-white/10 rounded-2xl shadow-xl">
+          <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-[#13161b] border border-white/[0.06] rounded-2xl shadow-xl">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-600/30">
+              <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-md shadow-blue-600/25">
                 <CalendarCheck2 className="w-4 h-4 stroke-[2]" />
               </div>
-              <span className="text-xs font-bold text-white tracking-tight">AI Task Manager</span>
+              <span className="text-xs font-bold text-[#f1f5f9] tracking-tight">AI Task Manager</span>
             </div>
 
             {/* Selector Viste Mobile (Agenda / To-Do) */}
-            <div className="flex items-center p-1 rounded-xl bg-[#090a0f] border border-white/10">
+            <div className="flex items-center p-1 rounded-xl bg-[#12151b] border border-white/[0.06]">
               <button
                 type="button"
                 onClick={() => setActiveTab('calendar')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
                   activeTab === 'calendar'
-                    ? 'bg-indigo-600 text-white shadow-sm'
+                    ? 'bg-blue-600 text-white shadow-sm'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -353,7 +353,7 @@ export default function Home() {
                 onClick={() => setActiveTab('todos')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
                   activeTab === 'todos'
-                    ? 'bg-indigo-600 text-white shadow-sm'
+                    ? 'bg-blue-600 text-white shadow-sm'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -375,8 +375,8 @@ export default function Home() {
               onClick={() => setSelectedCategoryFilter('all')}
               className={`px-2.5 py-1 rounded-xl text-[10px] font-bold border whitespace-nowrap shrink-0 transition-all ${
                 selectedCategoryFilter === 'all'
-                  ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm'
-                  : 'bg-[#131722] border-white/10 text-slate-400'
+                  ? 'bg-blue-600 text-white border-blue-500 shadow-sm'
+                  : 'bg-[#181c24] border-white/[0.08] text-slate-400'
               }`}
             >
               Tutte ({items.length})
@@ -388,8 +388,8 @@ export default function Home() {
                 onClick={() => setSelectedCategoryFilter(key)}
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-medium border whitespace-nowrap shrink-0 transition-all ${
                   selectedCategoryFilter === key
-                    ? 'bg-indigo-600 text-white border-indigo-500 font-bold shadow-sm'
-                    : `bg-[#131722] border-white/10 ${cat.text}`
+                    ? 'bg-blue-600 text-white border-blue-500 font-bold shadow-sm'
+                    : `bg-[#181c24] border-white/[0.08] ${cat.text}`
                 }`}
               >
                 <span className={`w-1.5 h-1.5 rounded-full ${cat.dot} shrink-0`}></span>
@@ -409,10 +409,10 @@ export default function Home() {
               />
             </section>
           ) : (
-            <section className="bg-[#131722] border border-white/10 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4 max-w-4xl mx-auto flex-1 w-full">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <section className="bg-[#181c24] border border-white/[0.08] rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4 max-w-4xl mx-auto flex-1 w-full">
+              <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
                 <div className="flex items-center gap-2">
-                  <CheckSquare className="w-4 h-4 text-indigo-400" />
+                  <CheckSquare className="w-4 h-4 text-blue-400" />
                   <h3 className="text-xs font-bold text-white uppercase tracking-wider">
                     Attività Generiche / To-Do ({todos.length})
                   </h3>
@@ -423,7 +423,7 @@ export default function Home() {
                     setSelectedTaskToEdit(null);
                     setIsMainModalOpen(true);
                   }}
-                  className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all flex items-center gap-1 shadow-md shadow-indigo-600/30 active:scale-95 touch-manipulation"
+                  className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-all flex items-center gap-1 shadow-md shadow-blue-600/25 active:scale-95 touch-manipulation"
                 >
                   <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                   <span>Nuova Attività</span>
@@ -443,7 +443,7 @@ export default function Home() {
                       <div
                         key={todo.id}
                         className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all ${cat.bg} ${cat.border} ${
-                          todo.is_completed ? 'opacity-40' : 'hover:border-slate-300 shadow-md'
+                          todo.is_completed ? 'opacity-40' : 'hover:bg-[#1f242e] shadow-md'
                         }`}
                       >
                         <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -453,8 +453,8 @@ export default function Home() {
                             aria-label="Segna completato"
                             className={`min-w-[36px] min-h-[36px] w-9 h-9 rounded-xl border flex items-center justify-center transition-all shrink-0 active:scale-95 touch-manipulation ${
                               todo.is_completed
-                                ? 'bg-indigo-600 border-indigo-500 text-white'
-                                : 'border-slate-400 hover:border-white bg-slate-950/60'
+                                ? 'bg-blue-600 border-blue-500 text-white'
+                                : 'border-slate-500 hover:border-white bg-[#12151b]'
                             }`}
                           >
                             {todo.is_completed && <Check className="w-4 h-4 stroke-[3]" />}
@@ -462,15 +462,15 @@ export default function Home() {
 
                           <div className="min-w-0 flex-1">
                             <p
-                              className={`font-bold text-xs truncate ${
-                                todo.is_completed ? 'line-through text-slate-400' : 'text-white'
+                              className={`font-semibold text-xs truncate ${
+                                todo.is_completed ? 'line-through text-slate-400' : 'text-[#f1f5f9]'
                               }`}
                             >
                               {todo.title}
                             </p>
                             <div className="flex items-center gap-1.5 mt-0.5">
                               <span className={`w-1.5 h-1.5 rounded-full ${cat.dot}`}></span>
-                              <span className={`text-[9px] capitalize font-semibold ${cat.text}`}>
+                              <span className={`text-[10px] capitalize font-semibold ${cat.text}`}>
                                 {cat.label}
                               </span>
                             </div>
@@ -480,7 +480,7 @@ export default function Home() {
                         <button
                           type="button"
                           onClick={() => handleDeleteTask(todo.id)}
-                          className="min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-red-400 transition-colors active:scale-95 touch-manipulation"
+                          className="min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-rose-400 transition-colors active:scale-95 touch-manipulation"
                           title="Elimina attività"
                         >
                           <Trash2 className="w-4 h-4" />
