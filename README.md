@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS events_and_tasks (
   start_time TIMESTAMPTZ,
   end_time TIMESTAMPTZ,
   is_completed BOOLEAN DEFAULT FALSE,
+  reminder_sent BOOLEAN DEFAULT FALSE,
   urgency_band TEXT DEFAULT 'oggi',
   category TEXT DEFAULT 'generico',
   type TEXT DEFAULT 'todo',
@@ -91,6 +92,9 @@ CREATE TABLE IF NOT EXISTS events_and_tasks (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Migration for existing databases:
+-- ALTER TABLE events_and_tasks ADD COLUMN IF NOT EXISTS reminder_sent BOOLEAN DEFAULT FALSE;
 
 -- 4. Table for voice transcription memory logs
 CREATE TABLE IF NOT EXISTS memoria (
