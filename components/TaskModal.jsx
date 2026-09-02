@@ -191,7 +191,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Cosa devi fare o programmare?"
-              className="w-full px-3.5 py-3 rounded-xl bg-[#e5e9ee] border border-slate-300 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 transition-all text-xs min-h-[44px] font-medium"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-[#e5e9ee] border border-slate-300 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 transition-all text-xs h-11 font-medium"
             />
           </div>
 
@@ -204,10 +204,10 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
               <button
                 type="button"
                 onClick={() => setType('event')}
-                className={`min-h-[44px] py-2 px-2.5 rounded-xl border font-semibold text-[11px] transition-all flex items-center justify-center gap-1.5 touch-manipulation active:scale-95 cursor-pointer ${
+                className={`h-11 px-2.5 rounded-xl border font-bold text-[11px] transition-all flex items-center justify-center gap-1.5 touch-manipulation active:scale-95 cursor-pointer whitespace-nowrap ${
                   type === 'event'
-                    ? 'bg-indigo-700 text-white border-indigo-700 shadow-md shadow-indigo-700/20'
-                    : 'bg-[#e5e9ee] text-slate-700 border-slate-300 hover:border-slate-400'
+                    ? 'bg-indigo-700 text-white border-indigo-700 shadow-sm shadow-indigo-700/20'
+                    : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400 hover:bg-slate-50'
                 }`}
               >
                 <Clock className="w-3.5 h-3.5 shrink-0" />
@@ -217,10 +217,10 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
               <button
                 type="button"
                 onClick={() => setType('day_task')}
-                className={`min-h-[44px] py-2 px-2.5 rounded-xl border font-semibold text-[11px] transition-all flex items-center justify-center gap-1.5 touch-manipulation active:scale-95 cursor-pointer ${
+                className={`h-11 px-2.5 rounded-xl border font-bold text-[11px] transition-all flex items-center justify-center gap-1.5 touch-manipulation active:scale-95 cursor-pointer whitespace-nowrap ${
                   type === 'day_task'
-                    ? 'bg-indigo-700 text-white border-indigo-700 shadow-md shadow-indigo-700/20'
-                    : 'bg-[#e5e9ee] text-slate-700 border-slate-300 hover:border-slate-400'
+                    ? 'bg-indigo-700 text-white border-indigo-700 shadow-sm shadow-indigo-700/20'
+                    : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400 hover:bg-slate-50'
                 }`}
               >
                 <CalendarIcon className="w-3.5 h-3.5 shrink-0" />
@@ -230,10 +230,10 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
               <button
                 type="button"
                 onClick={() => setType('todo')}
-                className={`min-h-[44px] py-2 px-2.5 rounded-xl border font-semibold text-[11px] transition-all flex items-center justify-center gap-1.5 touch-manipulation active:scale-95 cursor-pointer ${
+                className={`h-11 px-2.5 rounded-xl border font-bold text-[11px] transition-all flex items-center justify-center gap-1.5 touch-manipulation active:scale-95 cursor-pointer whitespace-nowrap ${
                   type === 'todo'
-                    ? 'bg-indigo-700 text-white border-indigo-700 shadow-md shadow-indigo-700/20'
-                    : 'bg-[#e5e9ee] text-slate-700 border-slate-300 hover:border-slate-400'
+                    ? 'bg-indigo-700 text-white border-indigo-700 shadow-sm shadow-indigo-700/20'
+                    : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400 hover:bg-slate-50'
                 }`}
               >
                 <Inbox className="w-3.5 h-3.5 shrink-0" />
@@ -250,7 +250,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
             <button
               type="button"
               onClick={() => setIsCategoryDropdownOpen((prev) => !prev)}
-              className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#e5e9ee] border border-slate-300 hover:border-slate-400 text-slate-900 transition-all text-xs flex items-center justify-between cursor-pointer"
+              className="w-full h-11 px-3.5 rounded-xl bg-white border border-slate-300 hover:border-slate-400 text-slate-900 transition-all text-xs flex items-center justify-between cursor-pointer shadow-2xs"
             >
               <div className="flex items-center gap-2.5">
                 <span className={`w-2.5 h-2.5 rounded-full ${getCategoryConfig(category).dot} shrink-0`}></span>
@@ -279,7 +279,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
                         }}
                         className={`w-full min-h-[40px] px-3.5 py-2 text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-indigo-100 text-indigo-900'
+                            ? 'bg-indigo-100 text-indigo-900 font-bold'
                             : 'text-slate-800 hover:bg-slate-100'
                         }`}
                       >
@@ -308,7 +308,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
                   required
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#e5e9ee] border border-slate-300 text-slate-900 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 transition-all text-xs font-mono font-medium"
+                  className="w-full h-11 px-3.5 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 transition-all text-xs font-mono font-medium"
                 />
               </div>
 
@@ -323,7 +323,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
                       step="900"
                       value={startTime}
                       onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#e5e9ee] border border-slate-300 text-slate-900 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 transition-all text-xs font-mono font-medium"
+                      className="w-full h-11 px-3.5 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 transition-all text-xs font-mono font-medium"
                     />
                   </div>
                   <div>
@@ -335,7 +335,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
                       step="900"
                       value={endTime}
                       onChange={(e) => setEndTime(e.target.value)}
-                      className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-[#e5e9ee] border border-slate-300 text-slate-900 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 transition-all text-xs font-mono font-medium"
+                      className="w-full h-11 px-3.5 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 transition-all text-xs font-mono font-medium"
                     />
                   </div>
                 </>
@@ -344,8 +344,8 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
           )}
 
           {type === 'event' && (
-            <div className="flex items-center gap-1.5 pt-1 overflow-x-auto no-scrollbar">
-              <span className="text-[10px] text-slate-600 font-bold uppercase shrink-0">Preset:</span>
+            <div className="flex items-center gap-1.5 pt-0.5 overflow-x-auto no-scrollbar">
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider shrink-0 mr-1">Durata:</span>
               {[
                 { label: '15m', min: 15 },
                 { label: '30m', min: 30 },
@@ -363,7 +363,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
                     const endM = totalMins % 60;
                     setEndTime(`${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`);
                   }}
-                  className="min-h-[36px] px-3 py-1.5 rounded-lg bg-[#e5e9ee] hover:bg-indigo-100 text-slate-800 hover:text-indigo-900 border border-slate-300 text-[11px] font-bold transition-all shrink-0 active:scale-95 cursor-pointer"
+                  className="h-8 px-3 rounded-lg bg-white hover:bg-indigo-50 text-slate-700 hover:text-indigo-900 border border-slate-300 hover:border-indigo-300 text-[11px] font-bold transition-all shrink-0 active:scale-95 cursor-pointer shadow-2xs"
                 >
                   {p.label}
                 </button>
@@ -385,72 +385,71 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
             />
           </div>
 
-          {/* Pulsanti Azione */}
-          <div className="flex items-center justify-between pt-4 border-t border-slate-300 mt-4 pb-safe">
-            {taskToEdit ? (
-              <div className="flex items-center gap-2">
+          {/* Footer Pulsanti Azione Minimal, Ordinati & Allineati */}
+          <div className="flex items-center justify-between gap-3 pt-3.5 border-t border-slate-300/80 mt-4 pb-safe">
+            {/* Azioni Sinistra: Elimina (icona ghost) + Toggle Stato (Pill minimal) */}
+            <div className="flex items-center gap-2">
+              {taskToEdit && (
                 <button
                   type="button"
                   onClick={handleDelete}
                   disabled={isSubmitting}
-                  className="min-h-[44px] px-3.5 py-2.5 rounded-xl bg-rose-100/80 text-rose-900 border border-rose-300 hover:bg-rose-200 text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
-                  title="Elimina definitivo"
+                  className="h-10 w-10 flex items-center justify-center rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-100/70 border border-slate-300 hover:border-rose-300 transition-all active:scale-95 cursor-pointer shrink-0 bg-white"
+                  title="Elimina definitivamente"
                 >
                   <Trash2 className="w-4 h-4" />
-                  <span className="hidden sm:inline">Elimina</span>
                 </button>
+              )}
 
-                {onToggleComplete && (
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      setIsSubmitting(true);
-                      try {
-                        await onToggleComplete(taskToEdit.id, taskToEdit.is_completed);
-                        onClose();
-                      } catch (err) {
-                        console.error('Errore aggiornamento stato:', err);
-                      } finally {
-                        setIsSubmitting(false);
-                      }
-                    }}
-                    disabled={isSubmitting}
-                    className={`min-h-[44px] px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer ${
-                      taskToEdit.is_completed
-                        ? 'bg-emerald-100 text-emerald-900 border-emerald-300 hover:bg-emerald-200'
-                        : 'bg-indigo-100 text-indigo-900 border-indigo-300 hover:bg-indigo-200'
-                    }`}
-                  >
-                    <Check className="w-4 h-4 stroke-[2.5]" />
-                    <span>{taskToEdit.is_completed ? 'Riapri Impegno' : 'Segna come fatto'}</span>
-                  </button>
-                )}
-              </div>
-            ) : (
-              <div />
-            )}
+              {taskToEdit && onToggleComplete && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setIsSubmitting(true);
+                    try {
+                      await onToggleComplete(taskToEdit.id, taskToEdit.is_completed);
+                      onClose();
+                    } catch (err) {
+                      console.error('Errore aggiornamento stato:', err);
+                    } finally {
+                      setIsSubmitting(false);
+                    }
+                  }}
+                  disabled={isSubmitting}
+                  className={`h-10 px-3.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap active:scale-95 cursor-pointer ${
+                    taskToEdit.is_completed
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
+                      : 'bg-white text-slate-700 border-slate-300 hover:border-indigo-400 hover:text-indigo-700 hover:bg-indigo-50/60'
+                  }`}
+                >
+                  <Check className={`w-3.5 h-3.5 stroke-[2.5] ${taskToEdit.is_completed ? 'text-emerald-700' : 'text-slate-400'}`} />
+                  <span>{taskToEdit.is_completed ? 'Riapri' : 'Segna fatto'}</span>
+                </button>
+              )}
+            </div>
 
-            <div className="flex items-center gap-2">
+            {/* Azioni Destra: Annulla + Salva */}
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-[#e5e9ee] text-slate-800 border border-slate-300 hover:bg-slate-300 text-xs font-bold transition-all active:scale-95 cursor-pointer"
+                className="h-10 px-4 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-950 hover:bg-slate-200/80 transition-all whitespace-nowrap active:scale-95 cursor-pointer"
               >
                 Annulla
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || !title.trim()}
-                className="min-h-[44px] px-5 py-2.5 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white font-bold disabled:opacity-50 text-xs transition-all shadow-md shadow-indigo-700/20 flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                className="h-10 px-5 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs transition-all shadow-sm shadow-indigo-700/25 flex items-center gap-1.5 whitespace-nowrap active:scale-95 disabled:opacity-50 cursor-pointer"
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     <span>Salvataggio...</span>
                   </>
                 ) : (
-                  <span>{taskToEdit ? 'Salva Modifiche' : 'Salva nel Backlog'}</span>
+                  <span>Salva</span>
                 )}
               </button>
             </div>

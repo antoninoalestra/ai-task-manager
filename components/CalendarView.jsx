@@ -653,14 +653,14 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
                       onToggleComplete(currentHovered.id, currentHovered.is_completed);
                     }
                   }}
-                  className={`w-full min-h-[40px] py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 touch-manipulation ${
+                  className={`w-full h-10 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 touch-manipulation whitespace-nowrap ${
                     currentHovered.is_completed
-                      ? 'bg-emerald-100 text-emerald-900 border-emerald-300 hover:bg-emerald-200'
-                      : 'bg-indigo-700 text-white border-indigo-700 hover:bg-indigo-800 shadow-md shadow-indigo-700/20'
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100'
+                      : 'bg-indigo-700 text-white border-indigo-700 hover:bg-indigo-800 shadow-sm shadow-indigo-700/25'
                   }`}
                 >
-                  <Check className="w-4 h-4 stroke-[2.5]" />
-                  <span>{currentHovered.is_completed ? 'Riapri Impegno' : 'Segna come fatto'}</span>
+                  <Check className={`w-3.5 h-3.5 stroke-[2.5] ${currentHovered.is_completed ? 'text-emerald-700' : 'text-white'}`} />
+                  <span>{currentHovered.is_completed ? 'Riapri' : 'Segna fatto'}</span>
                 </button>
 
                 <div className="text-[10px] text-slate-500 font-medium flex items-center justify-between pt-1 border-t border-slate-100">
