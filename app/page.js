@@ -31,8 +31,10 @@ export default function Home() {
   const [isMainModalOpen, setIsMainModalOpen] = useState(false);
   const [selectedTaskToEdit, setSelectedTaskToEdit] = useState(null);
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('all');
+  const [hoveredCategory, setHoveredCategory] = useState(null); // { key, label, dot, text, bg, border, top, left }
   const [toast, setToast] = useState(null); // { message, type: 'success'|'error'|'info' }
   const voiceCaptureRef = useRef(null);
+  const hoverCategoryTimeoutRef = useRef(null);
 
   const showToast = (message, type = 'info') => {
     setToast({ message, type });
@@ -166,6 +168,34 @@ export default function Home() {
     setIsMainModalOpen(true);
   };
 
+  const handleCategoryMouseEnter = (catKey, catConfig, e) => {
+    if (typeof window !== 'undefined' && !window.matchMedia('(pointer: fine)').matches) return;
+    if (hoverCategoryTimeoutRef.current) {
+      clearTimeout(hoverCategoryTimeoutRef.current);
+    }
+    const rect = e.currentTarget.getBoundingClientRect();
+    setHoveredCategory({
+      key: catKey,
+      label: catKey === 'all' ? 'Tutte le Categorie' : (catConfig?.label || catKey),
+      dot: catConfig?.dot || 'bg-indigo-600',
+      text: catConfig?.text || 'text-slate-900',
+      bg: catConfig?.bg || 'bg-slate-100',
+      border: catConfig?.border || 'border-slate-300',
+      top: rect.top,
+      left: rect.right + 12,
+    });
+  };
+
+  const handleCategoryMouseLeave = (e) => {
+    const toElem = e.relatedTarget;
+    if (toElem && toElem.closest && toElem.closest('.category-hover-popover')) {
+      return;
+    }
+    hoverCategoryTimeoutRef.current = setTimeout(() => {
+      setHoveredCategory(null);
+    }, 150);
+  };
+
   return (
     <main className="min-h-screen bg-[#e8ecef] text-slate-900 p-2 sm:p-4 lg:p-6 pb-24 lg:pb-6 font-sans selection:bg-indigo-100 selection:text-indigo-900">
       {/* TOAST SYSTEM NON-BLOCCANTE SOFT LIGHT SLATE-SAND */}
@@ -215,7 +245,7 @@ export default function Home() {
             <span>Nuovo Impegno</span>
           </button>
 
-          {/* Filtro Categorie */}
+          {/* Filtro Categorie con Hover Flyout Popover */}
           <div className="space-y-2">
             <h2 className="text-[10px] font-bold text-slate-600 uppercase tracking-widest flex items-center gap-1.5">
               <Layers className="w-3.5 h-3.5 text-slate-500" />
@@ -225,6 +255,8 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setSelectedCategoryFilter('all')}
+                onMouseEnter={(e) => handleCategoryMouseEnter('all', { label: 'Tutte le Categorie', dot: 'bg-indigo-700', text: 'text-indigo-900', bg: 'bg-indigo-50', border: 'border-indigo-200' }, e)}
+                onMouseLeave={handleCategoryMouseLeave}
                 className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
                   selectedCategoryFilter === 'all'
                     ? 'bg-indigo-100 text-indigo-900 border border-indigo-300 shadow-xs'
@@ -245,6 +277,8 @@ export default function Home() {
                     key={key}
                     type="button"
                     onClick={() => setSelectedCategoryFilter(key)}
+                    onMouseEnter={(e) => handleCategoryMouseEnter(key, cat, e)}
+                    onMouseLeave={handleCategoryMouseLeave}
                     className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-indigo-100 text-indigo-900 border border-indigo-300 shadow-xs'
@@ -470,6 +504,130 @@ export default function Home() {
         onDelete={handleDeleteTask}
         onToggleComplete={toggleComplete}
       />
+
+      {/* FLYOUT POPOVER SU HOVER CATEGORIE (SOLO TASK DA FARE / ATTIVI) */}
+      {hoveredCategory && (
+        <div
+          onMouseEnter={() => {
+            if (hoverCategoryTimeoutRef.current) {
+              clearTimeout(hoverCategoryTimeoutRef.current);
+            }
+          }}
+          onMouseLeave={() => setHoveredCategory(null)}
+          style={{
+            top: Math.max(16, Math.min(hoveredCategory.top, typeof window !== 'undefined' ? window.innerHeight - 380 : hoveredCategory.top)),
+            left: hoveredCategory.left,
+          }}
+          className="category-hover-popover hidden lg:block fixed z-[99999] w-84 bg-white border border-slate-300 rounded-2xl shadow-2xl p-4 space-y-3 animate-fade-in text-slate-900 pointer-events-auto select-none"
+        >
+          {(() => {
+            const activeTasks = items.filter(
+              (i) => i && (hoveredCategory.key === 'all' || i.category === hoveredCategory.key) && !i.is_completed
+            ).sort((a, b) => {
+              if (!a.start_time) return 1;
+              if (!b.start_time) return -1;
+              return new Date(a.start_time) - new Date(b.start_time);
+            });
+
+            return (
+              <>
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2.5 h-2.5 rounded-full ${hoveredCategory.dot}`}></span>
+                    <h3 className="text-xs font-bold text-slate-900 capitalize tracking-tight">
+                      {hoveredCategory.label}
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-full border border-indigo-200">
+                    {activeTasks.length} {activeTasks.length === 1 ? 'task da fare' : 'task da fare'}
+                  </span>
+                </div>
+
+                <div className="max-h-64 overflow-y-auto space-y-2 pr-0.5">
+                  {activeTasks.length === 0 ? (
+                    <div className="py-6 text-center text-slate-500 text-xs italic font-medium">
+                      Nessuna attività in sospeso per questa categoria 🎉
+                    </div>
+                  ) : (
+                    activeTasks.map((task) => {
+                      const taskCat = getCategoryConfig(task.category);
+                      let timeBadge = 'Backlog';
+                      if (task.type === 'event' && task.start_time) {
+                        const d = new Date(task.start_time);
+                        const datePart = d.toLocaleDateString('it-IT', { timeZone: 'Europe/Rome', day: 'numeric', month: 'short' });
+                        const timePart = d.toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit' });
+                        timeBadge = `${datePart} · ${timePart}`;
+                      } else if (task.type === 'day_task' && task.start_time) {
+                        const d = new Date(task.start_time);
+                        const datePart = d.toLocaleDateString('it-IT', { timeZone: 'Europe/Rome', day: 'numeric', month: 'short' });
+                        timeBadge = `${datePart} · Tutto il Giorno`;
+                      }
+
+                      return (
+                        <div
+                          key={task.id}
+                          onClick={() => {
+                            setHoveredCategory(null);
+                            handleOpenEditModal(task);
+                          }}
+                          className={`group p-2.5 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${taskCat.bg} ${taskCat.border} hover:shadow-xs hover:border-indigo-400 bg-white`}
+                        >
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleComplete(task.id, task.is_completed);
+                            }}
+                            aria-label="Segna completato"
+                            className="w-4 h-4 rounded-md border border-slate-400 hover:border-slate-600 bg-white flex items-center justify-center transition-all shrink-0 mt-0.5 cursor-pointer"
+                          >
+                            {task.is_completed && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                          </button>
+
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase bg-slate-200/80 text-slate-800">
+                                {timeBadge}
+                              </span>
+                              {hoveredCategory.key === 'all' && (
+                                <span className={`text-[9px] font-bold capitalize ${taskCat.text}`}>
+                                  {taskCat.label}
+                                </span>
+                              )}
+                            </div>
+                            <p className="font-bold text-xs text-slate-900 group-hover:text-indigo-700 transition-colors line-clamp-2 leading-snug">
+                              {task.title}
+                            </p>
+                            {task.description && (
+                              <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
+                                {task.description}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+                  <span>Clicca un task per aprirlo</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategoryFilter(hoveredCategory.key);
+                      setHoveredCategory(null);
+                    }}
+                    className="text-indigo-700 font-bold hover:underline cursor-pointer"
+                  >
+                    Filtra Vista
+                  </button>
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      )}
     </main>
   );
 }
