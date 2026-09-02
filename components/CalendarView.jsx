@@ -10,6 +10,7 @@ import {
   createViewMonthGrid,
 } from '@schedule-x/calendar';
 import { createDragAndDropPlugin } from '@schedule-x/drag-and-drop';
+import { createCurrentTimePlugin } from '@schedule-x/current-time';
 import '@schedule-x/theme-default/dist/index.css';
 import { useMemo, useState, useEffect } from 'react';
 import { getCategoryConfig } from '@/lib/categories';
@@ -336,6 +337,9 @@ function MobileAgendaView({ items, onToggleComplete, onEditItem, onDeleteItem, o
 }
 
 function InnerCalendar({ events, onEventClick }) {
+  const dragAndDropPlugin = useMemo(() => createDragAndDropPlugin(), []);
+  const currentTimePlugin = useMemo(() => createCurrentTimePlugin({ fullWeekWidth: false }), []);
+
   const calendar = useCalendarApp({
     views: [createViewDay(), createViewWeek(), createViewMonthGrid()],
     defaultView: createViewWeek().name,
@@ -379,7 +383,7 @@ function InnerCalendar({ events, onEventClick }) {
         darkColors: { main: '#475569', container: '#e2e8f0', onContainer: '#1e293b' },
       },
     },
-    plugins: [createDragAndDropPlugin()],
+    plugins: [dragAndDropPlugin, currentTimePlugin],
     callbacks: {
       onEventClick(calendarEvent) {
         if (onEventClick) {

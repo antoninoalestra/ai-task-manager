@@ -11,6 +11,7 @@
     "@google/generative-ai": "^0.24.1",
     "@preact/signals": "^2.0.2",
     "@schedule-x/calendar": "^4.6.1",
+    "@schedule-x/current-time": "^4.7.0",
     "@schedule-x/drag-and-drop": "^3.7.3",
     "@schedule-x/events-service": "^4.6.1",
     "@schedule-x/react": "^4.1.0",
