@@ -2,8 +2,53 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import 'temporal-polyfill/global';
 import { CATEGORIES, getCategoryConfig } from '@/lib/categories';
 import { X, Clock, Calendar as CalendarIcon, ListTodo, ChevronDown, Check, Trash2, Loader2, Inbox } from 'lucide-react';
+
+const TIMEZONE = 'Europe/Rome';
+
+function formatToRomeTime(dateInput, fallback = '09:00') {
+  if (!dateInput) return fallback;
+  try {
+    const d = new Date(dateInput);
+    if (isNaN(d.getTime())) return fallback;
+    const str = d.toLocaleTimeString('it-IT', {
+      timeZone: TIMEZONE,
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+    const parts = str.split(':');
+    if (parts.length >= 2) {
+      return `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
+    }
+    return fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function formatToRomeDate(dateInput) {
+  try {
+    const d = dateInput ? new Date(dateInput) : new Date();
+    if (isNaN(d.getTime())) {
+      return new Date().toLocaleDateString('en-CA', { timeZone: TIMEZONE });
+    }
+    return d.toLocaleDateString('en-CA', { timeZone: TIMEZONE });
+  } catch {
+    return new Date().toISOString().split('T')[0];
+  }
+}
+
+function sanitizeTimeStr(timeStr, defaultTime = '09:00') {
+  if (!timeStr || typeof timeStr !== 'string') return defaultTime;
+  const parts = timeStr.trim().split(':');
+  if (parts.length < 2) return defaultTime;
+  const h = parts[0].padStart(2, '0');
+  const m = parts[1].padStart(2, '0');
+  return `${h}:${m}`;
+}
 
 export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialDate = '', onSave, onDelete, onToggleComplete }) {
   const [title, setTitle] = useState('');
@@ -24,33 +69,27 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
       setCategory(taskToEdit.category || 'generico');
 
       if (taskToEdit.start_time) {
-        const d = new Date(taskToEdit.start_time);
-        if (!isNaN(d.getTime())) {
-          const dateStr = d.toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' });
-          setDate(dateStr);
-
-          const hh = d.toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome', hour: '2-digit' });
-          const min = d.toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome', minute: '2-digit' });
-          setStartTime(`${hh}:${min}`);
-        }
+        setDate(formatToRomeDate(taskToEdit.start_time));
+        setStartTime(formatToRomeTime(taskToEdit.start_time, '09:00'));
       } else if (initialDate) {
         setDate(initialDate);
+        setStartTime('09:00');
+      } else {
+        setDate(formatToRomeDate(new Date()));
+        setStartTime('09:00');
       }
 
       if (taskToEdit.end_time) {
-        const d = new Date(taskToEdit.end_time);
-        if (!isNaN(d.getTime())) {
-          const hh = d.toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome', hour: '2-digit' });
-          const min = d.toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome', minute: '2-digit' });
-          setEndTime(`${hh}:${min}`);
-        }
+        setEndTime(formatToRomeTime(taskToEdit.end_time, '10:00'));
+      } else {
+        setEndTime('10:00');
       }
     } else {
       setTitle('');
       setDescription('');
       setType('day_task');
       setCategory('generico');
-      setDate(initialDate || new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' }));
+      setDate(initialDate || formatToRomeDate(new Date()));
       setStartTime('09:00');
       setEndTime('10:00');
     }
@@ -78,24 +117,28 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
       let finalStartTime = null;
       let finalEndTime = null;
 
+      const baseDateStr = date || formatToRomeDate(new Date());
+
       if (type === 'event') {
-        const baseDateStr = date || new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' });
+        const cleanStart = sanitizeTimeStr(startTime, '09:00');
+        const cleanEnd = sanitizeTimeStr(endTime, '10:00');
+
         try {
           if (typeof Temporal !== 'undefined' && Temporal.ZonedDateTime) {
-            const zdtStart = Temporal.ZonedDateTime.from(`${baseDateStr}T${startTime}:00[Europe/Rome]`);
+            const zdtStart = Temporal.ZonedDateTime.from(`${baseDateStr}T${cleanStart}:00[${TIMEZONE}]`);
             finalStartTime = zdtStart.toInstant().toString();
-            const zdtEnd = Temporal.ZonedDateTime.from(`${baseDateStr}T${endTime}:00[Europe/Rome]`);
+            const zdtEnd = Temporal.ZonedDateTime.from(`${baseDateStr}T${cleanEnd}:00[${TIMEZONE}]`);
             finalEndTime = zdtEnd.toInstant().toString();
           } else {
-            finalStartTime = new Date(`${baseDateStr}T${startTime}:00`).toISOString();
-            finalEndTime = new Date(`${baseDateStr}T${endTime}:00`).toISOString();
+            finalStartTime = new Date(`${baseDateStr}T${cleanStart}:00`).toISOString();
+            finalEndTime = new Date(`${baseDateStr}T${cleanEnd}:00`).toISOString();
           }
-        } catch {
-          finalStartTime = new Date(`${baseDateStr}T${startTime}:00`).toISOString();
-          finalEndTime = new Date(`${baseDateStr}T${endTime}:00`).toISOString();
+        } catch (timeErr) {
+          console.warn('Fallback timestamp parsing:', timeErr);
+          finalStartTime = new Date(`${baseDateStr}T${cleanStart}:00`).toISOString();
+          finalEndTime = new Date(`${baseDateStr}T${cleanEnd}:00`).toISOString();
         }
       } else if (type === 'day_task') {
-        const baseDateStr = date || new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' });
         finalStartTime = `${baseDateStr}T00:00:00Z`;
         finalEndTime = null;
       } else if (type === 'todo') {
@@ -113,7 +156,9 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
         end_time: finalEndTime,
       };
 
-      await onSave(payload);
+      if (onSave) {
+        await onSave(payload);
+      }
       onClose();
     } catch (err) {
       console.error('Errore salvataggio:', err);
