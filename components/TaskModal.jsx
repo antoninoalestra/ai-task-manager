@@ -188,7 +188,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
       <div className="absolute inset-0" onClick={onClose} />
 
       {/* Light Surface Container */}
-      <div className="relative w-full max-w-lg bg-[#f4f6f8] border-t sm:border border-slate-300 rounded-t-3xl sm:rounded-2xl shadow-2xl shadow-slate-900/10 overflow-hidden text-slate-900 max-h-[85dvh] sm:max-h-[90vh] flex flex-col z-10 animate-slide-up-sheet sm:animate-none">
+      <div className="relative w-full max-w-lg bg-[#f4f6f8] border-t sm:border border-slate-300 rounded-t-3xl sm:rounded-2xl shadow-2xl shadow-slate-900/10 text-slate-900 max-h-[90dvh] sm:max-h-[88vh] flex flex-col z-10 animate-slide-up-sheet sm:animate-none overflow-hidden">
         
         {/* Drag Handle Mobile */}
         <div className="sm:hidden flex items-center justify-center pt-3 pb-1 cursor-grab active:cursor-grabbing">
@@ -196,7 +196,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
         </div>
 
         {/* Header Modal */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-300 bg-[#e1e6eb]">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-300 bg-[#e1e6eb] rounded-t-2xl">
           <div className="flex items-center gap-2 min-w-0">
             <span className={`w-2 h-2 rounded-full ${taskToEdit?.is_completed ? 'bg-emerald-600' : 'bg-indigo-700'}`}></span>
             <h2 className="text-xs font-bold tracking-wider uppercase text-slate-900 truncate">
@@ -224,7 +224,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs overflow-y-auto flex-1">
+        <form onSubmit={handleSubmit} className="p-5 pb-8 space-y-4 text-xs overflow-y-auto flex-1">
           {/* Titolo */}
           <div>
             <label className="block mb-1 font-bold text-slate-800 uppercase tracking-wider text-[10px]">
@@ -287,8 +287,8 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
             </div>
           </div>
 
-          {/* Categoria */}
-          <div className="relative">
+          {/* Categoria Dropdown */}
+          <div className="relative z-30">
             <label className="block mb-1 font-bold text-slate-800 uppercase tracking-wider text-[10px]">
               Categoria
             </label>
@@ -311,7 +311,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
                   className="fixed inset-0 z-40"
                   onClick={() => setIsCategoryDropdownOpen(false)}
                 />
-                <div className="absolute z-50 left-0 right-0 mt-1 py-1.5 bg-[#ffffff] border border-slate-300 rounded-xl shadow-xl space-y-0.5 max-h-56 overflow-y-auto animate-fade-in">
+                <div className="absolute z-50 left-0 right-0 mt-1.5 p-1.5 bg-white border border-slate-300 rounded-xl shadow-2xl space-y-0.5 max-h-48 overflow-y-auto animate-fade-in">
                   {Object.entries(CATEGORIES).map(([key, cat]) => {
                     const isSelected = category === key;
                     return (
@@ -322,17 +322,17 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
                           setCategory(key);
                           setIsCategoryDropdownOpen(false);
                         }}
-                        className={`w-full min-h-[40px] px-3.5 py-2 text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
+                        className={`w-full h-9 px-3 rounded-lg text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-indigo-100 text-indigo-900 font-bold'
-                            : 'text-slate-800 hover:bg-slate-100'
+                            ? 'bg-indigo-50 text-indigo-900 font-bold'
+                            : 'text-slate-700 hover:bg-slate-100'
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
                           <span className={`w-2.5 h-2.5 rounded-full ${cat.dot} shrink-0`}></span>
                           <span>{cat.label}</span>
                         </div>
-                        {isSelected && <Check className="w-4 h-4 text-indigo-700 shrink-0" />}
+                        {isSelected && <Check className="w-3.5 h-3.5 text-indigo-700 stroke-[2.5] shrink-0" />}
                       </button>
                     );
                   })}
