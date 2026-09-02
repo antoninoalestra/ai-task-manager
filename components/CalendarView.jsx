@@ -544,9 +544,6 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
               </div>
 
               <div className="flex items-center gap-3">
-                <span className="text-[10px] text-slate-600 bg-[#e1e6eb] px-2.5 py-1 rounded-lg border border-slate-300 font-mono font-bold">
-                  Europe/Rome
-                </span>
                 <button
                   type="button"
                   onClick={() => handleAddNewItem(new Date().toISOString().split('T')[0])}
