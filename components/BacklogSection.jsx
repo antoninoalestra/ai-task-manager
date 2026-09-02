@@ -102,10 +102,10 @@ export default function BacklogSection({
         </button>
       </div>
 
-      {/* STRISCIA FILTRI ARMONIOSA PER CATEGORIA E STATO */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+      {/* STRISCIA FILTRI ARMONIOSA PER CATEGORIA E STATO (NO SOVRAPPOSIZIONI) */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         {/* Filtri Categoria Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+        <div className="flex-1 min-w-0 flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
           <button
             type="button"
             onClick={() => setSelectedCategory('all')}
@@ -115,28 +115,33 @@ export default function BacklogSection({
                 : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-100'
             }`}
           >
-            Tutti ({totalBacklogCount})
+            Tutti ({activeBacklogCount})
           </button>
 
-          {Object.entries(CATEGORIES).map(([key, config]) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setSelectedCategory(key)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
-                selectedCategory === key
-                  ? 'bg-indigo-700 text-white shadow-xs'
-                  : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-100'
-              }`}
-            >
-              <span className={`w-2 h-2 rounded-full ${config.dot}`}></span>
-              <span>{config.label}</span>
-            </button>
-          ))}
+          {Object.entries(CATEGORIES).map(([key, config]) => {
+            const catCount = items.filter(
+              (i) => (!i.start_time || i.type === 'task' || i.type === 'backlog' || i.type === 'todo') && i.category === key && !i.is_completed
+            ).length;
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setSelectedCategory(key)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                  selectedCategory === key
+                    ? 'bg-indigo-700 text-white shadow-xs'
+                    : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-100'
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${config.dot}`}></span>
+                <span>{config.label} ({catCount})</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Filter per Stato (Tutti / Da Fare / Completati) */}
-        <div className="flex items-center gap-1 bg-[#e1e6eb] p-1 rounded-xl border border-slate-300 shrink-0 self-start sm:self-auto">
+        <div className="flex items-center gap-1 bg-[#e1e6eb] p-1 rounded-xl border border-slate-300 shrink-0 self-start lg:self-auto">
           <button
             type="button"
             onClick={() => setStatusFilter('all')}

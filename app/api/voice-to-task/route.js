@@ -24,9 +24,10 @@ export async function POST(request) {
 
     const now = new Date();
     const currentISO = now.toISOString();
+    const nowRomeStr = now.toLocaleString('it-IT', { timeZone: 'Europe/Rome', dateStyle: 'full', timeStyle: 'medium' });
     const prompt = `
 Sei un assistente intelligente per la gestione di impegni, università, casa e lavoro.
-Data e ora attuali: ${currentISO}.
+Data e ora correnti (Fuso Orario Europe/Rome): ${nowRomeStr} (UTC: ${currentISO}).
 Fuso orario dell'utente: ${process.env.USER_TIMEZONE || 'Europe/Rome'}.
 
 Analizza la seguente frase dell'utente: "${text}"
@@ -43,8 +44,8 @@ Estrai le informazioni e rispondi ESCLUSIVAMENTE con un oggetto JSON con questa 
 }
 
 REGOLE TASSATIVE PER 'type':
-1. 'event': usa questo tipo SOLO SE l'utente indica un GIORNO E UN ORARIO SPECIFICO (es. "Lunedì alle 15:00", "Domani alle 18:30", "Call di 15 minuti alle 10:15", "Riunione di mezz'ora"). Calcola start_time ed end_time rispettando accuratamente la durata richiesta (es. 15 min, 30 min, 45 min, 1 ora). Se non specificata, usa 30 minuti come durata predefinita.
-2. 'day_task': usa questo tipo SE l'utente indica un GIORNO MA SENZA ORARIO (es. "Giovedì devo studiare", "Domani devo fare la spesa", "Venerdì consegnare progetto"). Imposta start_time all'inizio di quel giorno (es. 2026-08-14T00:00:00Z) e lascia end_time null.
+1. 'event': usa questo tipo SOLO SE l'utente indica un GIORNO E UN ORARIO SPECIFICO (es. "Lunedì alle 15:00", "Domani alle 18:30", "Call di 15 minuti alle 10:15", "Riunione di mezz'ora"). Calcola start_time ed end_time rispettando accuratamente la durata richiesta (es. 15 min, 30 min, 45 min, 1 ora). Se non specificata, usa 30 minuti come durata predefinita. L'orario indicato dall'utente è sempre nel fuso orario Europe/Rome.
+2. 'day_task': usa questo tipo SE l'utente indica un GIORNO MA SENZA ORARIO (es. "Giovedì devo studiare", "Domani devo fare la spesa", "Venerdì consegnare progetto"). Imposta start_time all'inizio di quel giorno (es. 2026-09-01T00:00:00Z) e lascia end_time null.
 3. 'todo': usa questo tipo SE NON c'è né giorno né orario (es. "Ricordami di comprare una pianta").
 
 REGOLE PER 'category':

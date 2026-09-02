@@ -155,6 +155,8 @@ export default function Home() {
   // Conteggio del numero di impegni ancora DA COMPLETARE nel Backlog (!is_completed) per l'header in alto a destra
   const activeTodosCount = todos.filter((t) => !t.is_completed).length;
 
+  const activeTotalCount = items.filter((i) => i && !i.is_completed).length;
+
   const filteredItems = items.filter(
     (i) => i && (selectedCategoryFilter === 'all' || i.category === selectedCategoryFilter)
   );
@@ -231,12 +233,12 @@ export default function Home() {
               >
                 <span>Tutte le Categorie</span>
                 <span className="text-[10px] font-mono bg-slate-300/80 px-2 py-0.5 rounded-full font-bold text-slate-800">
-                  {items.length}
+                  {activeTotalCount}
                 </span>
               </button>
 
               {Object.entries(CATEGORIES).map(([key, cat]) => {
-                const count = items.filter((i) => i && i.category === key).length;
+                const count = items.filter((i) => i && i.category === key && !i.is_completed).length;
                 const isSelected = selectedCategoryFilter === key;
                 return (
                   <button
@@ -246,7 +248,7 @@ export default function Home() {
                     className={`w-full px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
                       isSelected
                         ? 'bg-indigo-100 text-indigo-900 border border-indigo-300 shadow-xs'
-                        : 'text-slate-700 hover:bg-white/70 hover:text-slate-950'
+                        : 'text-slate-700 hover:bg-[#f4f6f8] hover:text-slate-950'
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -384,23 +386,26 @@ export default function Home() {
                     : 'bg-[#f4f6f8] border-slate-300 text-slate-700'
                 }`}
               >
-                Tutte ({items.length})
+                Tutte ({activeTotalCount})
               </button>
-              {Object.entries(CATEGORIES).map(([key, cat]) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setSelectedCategoryFilter(key)}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-bold border whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                    selectedCategoryFilter === key
-                      ? 'bg-indigo-700 text-white border-indigo-700 shadow-sm'
-                      : `bg-[#f4f6f8] border-slate-300 ${cat.text}`
-                  }`}
-                >
-                  <span className={`w-1.5 h-1.5 rounded-full ${cat.dot} shrink-0`}></span>
-                  <span>{cat.label}</span>
-                </button>
-              ))}
+              {Object.entries(CATEGORIES).map(([key, cat]) => {
+                const count = items.filter((i) => i && i.category === key && !i.is_completed).length;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setSelectedCategoryFilter(key)}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-bold border whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+                      selectedCategoryFilter === key
+                        ? 'bg-indigo-700 text-white border-indigo-700 shadow-sm'
+                        : `bg-[#f4f6f8] border-slate-300 ${cat.text}`
+                    }`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${cat.dot} shrink-0`}></span>
+                    <span>{cat.label} ({count})</span>
+                  </button>
+                );
+              })}
             </div>
           )}
 
@@ -463,6 +468,7 @@ export default function Home() {
         taskToEdit={selectedTaskToEdit}
         onSave={handleSaveTask}
         onDelete={handleDeleteTask}
+        onToggleComplete={toggleComplete}
       />
     </main>
   );

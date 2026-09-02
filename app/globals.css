@@ -295,3 +295,20 @@ body {
   border: 1px solid #cbd5e1 !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
 }
+
+/* Eventi Calendario Schedule-X Completati */
+.sx__event.is-completed,
+.sx__date-grid-event.is-completed,
+.sx__time-grid-event.is-completed,
+.sx__all-day-event.is-completed {
+  opacity: 0.55 !important;
+  text-decoration: line-through !important;
+  filter: grayscale(0.25) !important;
+}
+
+.sx__event.is-completed *,
+.sx__date-grid-event.is-completed *,
+.sx__time-grid-event.is-completed *,
+.sx__all-day-event.is-completed * {
+  text-decoration: line-through !important;
+}

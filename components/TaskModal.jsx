@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { CATEGORIES, getCategoryConfig } from '@/lib/categories';
 import { X, Clock, Calendar as CalendarIcon, ListTodo, ChevronDown, Check, Trash2, Loader2, Inbox } from 'lucide-react';
 
-export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialDate = '', onSave, onDelete }) {
+export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialDate = '', onSave, onDelete, onToggleComplete }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState('day_task'); // 'event' | 'day_task' | 'todo'
@@ -26,13 +26,11 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
       if (taskToEdit.start_time) {
         const d = new Date(taskToEdit.start_time);
         if (!isNaN(d.getTime())) {
-          const yyyy = d.getFullYear();
-          const mm = String(d.getMonth() + 1).padStart(2, '0');
-          const dd = String(d.getDate()).padStart(2, '0');
-          setDate(`${yyyy}-${mm}-${dd}`);
+          const dateStr = d.toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' });
+          setDate(dateStr);
 
-          const hh = String(d.getHours()).padStart(2, '0');
-          const min = String(d.getMinutes()).padStart(2, '0');
+          const hh = d.toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome', hour: '2-digit' });
+          const min = d.toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome', minute: '2-digit' });
           setStartTime(`${hh}:${min}`);
         }
       } else if (initialDate) {
@@ -42,8 +40,8 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
       if (taskToEdit.end_time) {
         const d = new Date(taskToEdit.end_time);
         if (!isNaN(d.getTime())) {
-          const hh = String(d.getHours()).padStart(2, '0');
-          const min = String(d.getMinutes()).padStart(2, '0');
+          const hh = d.toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome', hour: '2-digit' });
+          const min = d.toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome', minute: '2-digit' });
           setEndTime(`${hh}:${min}`);
         }
       }
@@ -52,7 +50,7 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
       setDescription('');
       setType('day_task');
       setCategory('generico');
-      setDate(initialDate || new Date().toISOString().split('T')[0]);
+      setDate(initialDate || new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' }));
       setStartTime('09:00');
       setEndTime('10:00');
     }
@@ -81,12 +79,24 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
       let finalEndTime = null;
 
       if (type === 'event') {
-        const baseDateStr = date || new Date().toISOString().split('T')[0];
-        finalStartTime = new Date(`${baseDateStr}T${startTime}:00`).toISOString();
-        finalEndTime = new Date(`${baseDateStr}T${endTime}:00`).toISOString();
+        const baseDateStr = date || new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' });
+        try {
+          if (typeof Temporal !== 'undefined' && Temporal.ZonedDateTime) {
+            const zdtStart = Temporal.ZonedDateTime.from(`${baseDateStr}T${startTime}:00[Europe/Rome]`);
+            finalStartTime = zdtStart.toInstant().toString();
+            const zdtEnd = Temporal.ZonedDateTime.from(`${baseDateStr}T${endTime}:00[Europe/Rome]`);
+            finalEndTime = zdtEnd.toInstant().toString();
+          } else {
+            finalStartTime = new Date(`${baseDateStr}T${startTime}:00`).toISOString();
+            finalEndTime = new Date(`${baseDateStr}T${endTime}:00`).toISOString();
+          }
+        } catch {
+          finalStartTime = new Date(`${baseDateStr}T${startTime}:00`).toISOString();
+          finalEndTime = new Date(`${baseDateStr}T${endTime}:00`).toISOString();
+        }
       } else if (type === 'day_task') {
-        const baseDateStr = date || new Date().toISOString().split('T')[0];
-        finalStartTime = new Date(`${baseDateStr}T00:00:00`).toISOString();
+        const baseDateStr = date || new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Rome' });
+        finalStartTime = `${baseDateStr}T00:00:00Z`;
         finalEndTime = null;
       } else if (type === 'todo') {
         finalStartTime = null;
@@ -142,14 +152,27 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
 
         {/* Header Modal */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-300 bg-[#e1e6eb]">
-          <h2 className="text-xs font-bold tracking-wider uppercase text-slate-900 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-indigo-700"></span>
-            {taskToEdit ? 'Modifica Attività / Backlog' : 'Nuova Attività / Impegno'}
-          </h2>
+          <div className="flex items-center gap-2 min-w-0">
+            <span className={`w-2 h-2 rounded-full ${taskToEdit?.is_completed ? 'bg-emerald-600' : 'bg-indigo-700'}`}></span>
+            <h2 className="text-xs font-bold tracking-wider uppercase text-slate-900 truncate">
+              {taskToEdit ? 'Modifica Attività / Impegno' : 'Nuova Attività / Impegno'}
+            </h2>
+            {taskToEdit && (
+              <span
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                  taskToEdit.is_completed
+                    ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                    : 'bg-indigo-100 text-indigo-900 border-indigo-300'
+                }`}
+              >
+                {taskToEdit.is_completed ? '✓ Completato' : 'Da fare'}
+              </span>
+            )}
+          </div>
           <button
             onClick={onClose}
             type="button"
-            className="flex items-center justify-center min-w-[36px] min-h-[36px] rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-300/60 transition-all cursor-pointer"
+            className="flex items-center justify-center min-w-[36px] min-h-[36px] rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-300/60 transition-all cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" />
           </button>
@@ -365,15 +388,44 @@ export default function TaskModal({ isOpen, onClose, taskToEdit = null, initialD
           {/* Pulsanti Azione */}
           <div className="flex items-center justify-between pt-4 border-t border-slate-300 mt-4 pb-safe">
             {taskToEdit ? (
-              <button
-                type="button"
-                onClick={handleDelete}
-                disabled={isSubmitting}
-                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-rose-100/80 text-rose-900 border border-rose-300 hover:bg-rose-200 text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
-              >
-                <Trash2 className="w-4 h-4" />
-                <span>Elimina</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={isSubmitting}
+                  className="min-h-[44px] px-3.5 py-2.5 rounded-xl bg-rose-100/80 text-rose-900 border border-rose-300 hover:bg-rose-200 text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                  title="Elimina definitivo"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span className="hidden sm:inline">Elimina</span>
+                </button>
+
+                {onToggleComplete && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setIsSubmitting(true);
+                      try {
+                        await onToggleComplete(taskToEdit.id, taskToEdit.is_completed);
+                        onClose();
+                      } catch (err) {
+                        console.error('Errore aggiornamento stato:', err);
+                      } finally {
+                        setIsSubmitting(false);
+                      }
+                    }}
+                    disabled={isSubmitting}
+                    className={`min-h-[44px] px-3.5 py-2.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer ${
+                      taskToEdit.is_completed
+                        ? 'bg-emerald-100 text-emerald-900 border-emerald-300 hover:bg-emerald-200'
+                        : 'bg-indigo-100 text-indigo-900 border-indigo-300 hover:bg-indigo-200'
+                    }`}
+                  >
+                    <Check className="w-4 h-4 stroke-[2.5]" />
+                    <span>{taskToEdit.is_completed ? 'Riapri Impegno' : 'Segna come fatto'}</span>
+                  </button>
+                )}
+              </div>
             ) : (
               <div />
             )}

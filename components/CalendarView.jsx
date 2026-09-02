@@ -39,8 +39,6 @@ function parseToDateObject(input) {
     if (str.includes(' ') && !str.includes('T')) {
       str = str.replace(' ', 'T');
     }
-    str = str.replace(/\+00:?00?$/, 'Z');
-
     const d = new Date(str);
     return isNaN(d.getTime()) ? null : d;
   } catch {
@@ -51,43 +49,50 @@ function parseToDateObject(input) {
 function getLocalDateString(input) {
   const d = parseToDateObject(input);
   if (!d) return '';
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
+  return d.toLocaleDateString('en-CA', { timeZone: TIMEZONE });
 }
 
 function toScheduleXPlainDate(input) {
-  const d = parseToDateObject(input);
-  if (!d) return null;
-
+  if (!input) return null;
   try {
-    const yyyy = String(d.getFullYear()).padStart(4, '0');
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-
-    return Temporal.PlainDate.from(`${yyyy}-${mm}-${dd}`);
+    if (typeof input === 'string') {
+      const match = input.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (match) {
+        return Temporal.PlainDate.from(`${match[1]}-${match[2]}-${match[3]}`);
+      }
+    }
+    const d = parseToDateObject(input);
+    if (!d) return null;
+    const dateStr = d.toLocaleDateString('en-CA', { timeZone: TIMEZONE });
+    return Temporal.PlainDate.from(dateStr);
   } catch {
     return null;
   }
 }
 
 function toScheduleXDate(input) {
-  const d = parseToDateObject(input);
-  if (!d) return null;
-
+  if (!input) return null;
   try {
-    const yyyy = String(d.getFullYear()).padStart(4, '0');
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    const hh = String(d.getHours()).padStart(2, '0');
-    const min = String(d.getMinutes()).padStart(2, '0');
-    const ss = String(d.getSeconds()).padStart(2, '0');
-
-    return Temporal.ZonedDateTime.from(
-      `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}[${TIMEZONE}]`
-    );
-  } catch {
+    if (typeof input === 'string') {
+      let str = input.trim();
+      if (str.includes(' ') && !str.includes('T')) {
+        str = str.replace(' ', 'T');
+      }
+      if (str.endsWith('Z') || str.includes('+') || (str.lastIndexOf('-') > 7 && str.length > 10)) {
+        try {
+          return Temporal.Instant.from(str).toZonedDateTimeISO(TIMEZONE);
+        } catch {}
+      }
+      if (str.length === 16) str += ':00';
+      if (str.length === 19) {
+        return Temporal.ZonedDateTime.from(`${str}[${TIMEZONE}]`);
+      }
+    }
+    const d = parseToDateObject(input);
+    if (!d) return null;
+    return Temporal.Instant.fromEpochMilliseconds(d.getTime()).toZonedDateTimeISO(TIMEZONE);
+  } catch (err) {
+    console.error('Error in toScheduleXDate:', err, input);
     return null;
   }
 }
@@ -319,6 +324,8 @@ function InnerCalendar({ events, onEventClick }) {
     views: [createViewDay(), createViewWeek(), createViewMonthGrid()],
     defaultView: createViewWeek().name,
     events: events,
+    locale: 'it-IT',
+    timezone: TIMEZONE,
     calendars: {
       casa: {
         colorName: 'casa',
@@ -394,16 +401,20 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
       .filter((i) => i && (i.type === 'event' || i.type === 'day_task') && i.start_time)
       .map((item) => {
         const catKey = item.category || 'generico';
+        const displayTitle = item.is_completed ? `✓ ${item.title}` : item.title;
+        const eventOptions = item.is_completed ? { additionalClasses: ['is-completed'] } : undefined;
 
         if (item.type === 'day_task') {
           const plainDate = toScheduleXPlainDate(item.start_time);
           if (!plainDate) return null;
           return {
             id: String(item.id),
-            title: item.title,
+            title: displayTitle,
             start: plainDate,
             end: plainDate,
             calendarId: catKey,
+            is_completed: item.is_completed,
+            _options: eventOptions,
           };
         }
 
@@ -427,17 +438,19 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
 
         return {
           id: String(item.id),
-          title: item.title,
+          title: displayTitle,
           start: startTemporal,
           end: endTemporal,
           calendarId: catKey,
+          is_completed: item.is_completed,
+          _options: eventOptions,
         };
       })
       .filter(Boolean);
   }, [items]);
 
   const calendarKey = useMemo(() => {
-    return allCalendarEvents.map((e) => `${e.id}-${e.title}`).join('|');
+    return allCalendarEvents.map((e) => `${e.id}-${e.title}-${e.is_completed}`).join('|');
   }, [allCalendarEvents]);
 
   const handleEditItem = (item) => {
@@ -480,7 +493,10 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
     if (!isDesktopMouse) return;
 
     const eventElem = e.target.closest('.sx__event, .sx__all-day-event, .sx__date-grid-event, .sx__time-grid-event');
-    if (eventElem && !e.relatedTarget?.closest('.sx__event, .sx__all-day-event, .sx__date-grid-event, .sx__time-grid-event')) {
+    if (
+      eventElem &&
+      !e.relatedTarget?.closest('.sx__event, .sx__all-day-event, .sx__date-grid-event, .sx__time-grid-event, .sx-hover-tooltip')
+    ) {
       setHoveredItem(null);
     }
   };
@@ -551,58 +567,102 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
       {/* FLOATING HOVER TOOLTIP CARD PER EVENTI DEL CALENDARIO - SOLO DESKTOP MOUSE */}
       {hoveredItem && (
         <div
+          onMouseLeave={(e) => {
+            const toElem = e.relatedTarget;
+            if (
+              toElem &&
+              toElem.closest &&
+              toElem.closest('.sx__event, .sx__all-day-event, .sx__date-grid-event, .sx__time-grid-event, .sx-hover-tooltip')
+            ) {
+              return;
+            }
+            setHoveredItem(null);
+          }}
           style={{
-            top: Math.min(hoverPos.y + 14, typeof window !== 'undefined' ? window.innerHeight - 240 : hoverPos.y),
+            top: Math.min(hoverPos.y + 14, typeof window !== 'undefined' ? window.innerHeight - 300 : hoverPos.y),
             left: Math.min(hoverPos.x + 14, typeof window !== 'undefined' ? window.innerWidth - 340 : hoverPos.x),
           }}
-          className="hidden sm:block fixed z-[99999] w-80 bg-white border border-slate-300 rounded-2xl shadow-2xl p-4 space-y-2.5 text-slate-900 animate-fade-in pointer-events-none select-none"
+          className="hidden sm:block fixed z-[99999] w-80 bg-white border border-slate-300 rounded-2xl shadow-2xl p-4 space-y-3 text-slate-900 animate-fade-in pointer-events-auto select-none sx-hover-tooltip"
         >
           {(() => {
-            const cat = getCategoryConfig(hoveredItem.category);
-            const dStart = parseToDateObject(hoveredItem.start_time);
+            const currentHovered = items.find((i) => i && String(i.id) === String(hoveredItem.id)) || hoveredItem;
+            const cat = getCategoryConfig(currentHovered.category);
+            const dStart = parseToDateObject(currentHovered.start_time);
             const dateFormatted = dStart
               ? dStart.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'long' })
               : 'Data da definire';
-            const timeFormatted = dStart && hoveredItem.type === 'event'
+            const timeFormatted = dStart && currentHovered.type === 'event'
               ? dStart.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
               : 'Tutto il Giorno';
 
             return (
               <>
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2 pointer-events-none">
-                  <div className="flex items-center gap-1.5 pointer-events-none">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <div className="flex items-center gap-1.5">
                     <span className={`w-2 h-2 rounded-full ${cat.dot}`}></span>
                     <span className={`text-[10px] font-bold uppercase tracking-wider ${cat.text}`}>
                       {cat.label}
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 pointer-events-none">
+                  <span className="text-[10px] font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                     {dateFormatted} · {timeFormatted}
                   </span>
                 </div>
 
-                <div className="pointer-events-none">
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5 pointer-events-none">
+                <div>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-0.5">
                     Titolo Impegno
                   </span>
-                  <h4 className="text-xs font-bold leading-snug text-slate-900 pointer-events-none">{hoveredItem.title}</h4>
+                  <h4 className={`text-xs font-bold leading-snug ${currentHovered.is_completed ? 'line-through text-slate-500' : 'text-slate-900'}`}>
+                    {currentHovered.title}
+                  </h4>
                 </div>
 
-                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1 pointer-events-none">
-                  <div className="flex items-center gap-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider pointer-events-none">
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1">
+                  <div className="flex items-center gap-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                     <Info className="w-3 h-3 text-indigo-600" />
                     <span>Resoconto & Dettagli</span>
                   </div>
-                  <p className="text-[11px] text-slate-700 leading-relaxed whitespace-pre-wrap max-h-36 overflow-y-auto pointer-events-none">
-                    {hoveredItem.description || 'Nessuna descrizione o resoconto aggiuntivo per questo evento.'}
+                  <p className="text-[11px] text-slate-700 leading-relaxed whitespace-pre-wrap max-h-36 overflow-y-auto">
+                    {currentHovered.description || 'Nessuna descrizione o resoconto aggiuntivo per questo evento.'}
                   </p>
                 </div>
 
-                <div className="text-[10px] text-indigo-700 font-bold flex items-center justify-between pt-1 border-t border-slate-100 pointer-events-none">
-                  <span className="flex items-center gap-1 pointer-events-none">
+                {/* PULSANTE RAPIDO DI SPUNTA EVENTO DA DESKTOP */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onToggleComplete && currentHovered) {
+                      onToggleComplete(currentHovered.id, currentHovered.is_completed);
+                    }
+                  }}
+                  className={`w-full min-h-[40px] py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 touch-manipulation ${
+                    currentHovered.is_completed
+                      ? 'bg-emerald-100 text-emerald-900 border-emerald-300 hover:bg-emerald-200'
+                      : 'bg-indigo-700 text-white border-indigo-700 hover:bg-indigo-800 shadow-md shadow-indigo-700/20'
+                  }`}
+                >
+                  <Check className="w-4 h-4 stroke-[2.5]" />
+                  <span>{currentHovered.is_completed ? 'Riapri Impegno' : 'Segna come fatto'}</span>
+                </button>
+
+                <div className="text-[10px] text-slate-500 font-medium flex items-center justify-between pt-1 border-t border-slate-100">
+                  <span className="flex items-center gap-1">
                     <Sparkles className="w-3 h-3 text-indigo-600" />
-                    <span>Clicca sull'evento per modificarne i dettagli</span>
+                    <span>Modifica dettagli</span>
                   </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditItem(currentHovered);
+                      setHoveredItem(null);
+                    }}
+                    className="text-indigo-700 font-bold hover:underline cursor-pointer"
+                  >
+                    Apri Scheda
+                  </button>
                 </div>
               </>
             );
@@ -618,6 +678,7 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
         initialDate={initialDate}
         onSave={onSaveTask}
         onDelete={onDeleteTask}
+        onToggleComplete={onToggleComplete}
       />
     </div>
   );
