@@ -47,18 +47,34 @@ function parseToDateObject(input) {
 }
 
 function getLocalDateString(input) {
-  const d = parseToDateObject(input);
-  if (!d) return '';
-  return d.toLocaleDateString('en-CA', { timeZone: TIMEZONE });
+  if (!input) return '';
+  try {
+    if (typeof input === 'string') {
+      const str = input.trim();
+      if (str.length === 10 && /^\d{4}-\d{2}-\d{2}$/.test(str)) {
+        return str;
+      }
+    }
+    const d = parseToDateObject(input);
+    if (!d) return '';
+    return d.toLocaleDateString('en-CA', { timeZone: TIMEZONE });
+  } catch {
+    return '';
+  }
 }
 
 function toScheduleXPlainDate(input) {
   if (!input) return null;
   try {
     if (typeof input === 'string') {
-      const match = input.match(/^(\d{4})-(\d{2})-(\d{2})/);
-      if (match) {
-        return Temporal.PlainDate.from(`${match[1]}-${match[2]}-${match[3]}`);
+      const str = input.trim();
+      if (str.length === 10 && /^\d{4}-\d{2}-\d{2}$/.test(str)) {
+        return Temporal.PlainDate.from(str);
+      }
+      if (str.endsWith('Z') || str.includes('+') || (str.lastIndexOf('-') > 7 && str.length > 10)) {
+        try {
+          return Temporal.Instant.from(str).toZonedDateTimeISO(TIMEZONE).toPlainDate();
+        } catch {}
       }
     }
     const d = parseToDateObject(input);
@@ -589,10 +605,10 @@ export default function CalendarView({ items = [], onToggleComplete, onSaveTask,
             const cat = getCategoryConfig(currentHovered.category);
             const dStart = parseToDateObject(currentHovered.start_time);
             const dateFormatted = dStart
-              ? dStart.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'long' })
+              ? dStart.toLocaleDateString('it-IT', { timeZone: TIMEZONE, weekday: 'short', day: 'numeric', month: 'long' })
               : 'Data da definire';
             const timeFormatted = dStart && currentHovered.type === 'event'
-              ? dStart.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
+              ? dStart.toLocaleTimeString('it-IT', { timeZone: TIMEZONE, hour: '2-digit', minute: '2-digit' })
               : 'Tutto il Giorno';
 
             return (
